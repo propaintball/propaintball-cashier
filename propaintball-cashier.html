@@ -1302,10 +1302,8 @@ function selectCustomer(email,name){
 function hideSuggestions(){const el=$('email-suggestions');if(el)el.style.display='none';}
 document.addEventListener('click',function(e){if(!e.target.closest('#email-row'))hideSuggestions();});
 function genRegLink(){
-  const base=window.location.href.replace(/[^\/]*$/,'')+'propaintball-register.html';
-  const params=sbUrl&&sbKey?'?s='+btoa(sbUrl)+'&k='+btoa(sbKey):'';
-  $('reg-link').value=base+params;
-  $('reg-link-info').textContent=sbUrl?'Link obsahuje Supabase pripojenie':'Bez Supabase — registracia len na tomto zariadeni';
+  $('reg-link').value='propaintball-register.html';
+  $('reg-link-info').textContent='Statický link — umiestni na rovnaký server ako pokladňu';
 }
 function copyRegLink(){
   const link=$('reg-link').value;
@@ -2789,7 +2787,14 @@ function grpCheckout(){
 }
 function showGrpModal(){
   const wbs=getWbs();const sel=wbs.filter(w=>pendGrp.includes(w.id));const tot=sel.reduce((s,w)=>s+totalAmt(w),0);
-  $('grp-prev').innerHTML=sel.map((w,i)=>`<div class="rr"><span>#${wbs.indexOf(w)+1} ${w.name}</span><span>${fp(billAmt(w))}</span></div>`).join('')+`<div class="rr tot"><span>${t("total")} (${sel.length} ${currentLang==="en"?"players":"hráčov"})</span><span>${fp(tot)}</span></div>`;
+  // Calculate deposit for this session
+  const sess=getSess();let grpDep=0;
+  if(sess&&sess.deposit){grpDep=sess.deposit.amount;}
+  else{const deps=lDeposits();if(deps[actKey()])grpDep=deps[actKey()].amount;}
+  const depProd=sel.reduce((s,w)=>s+depositItemAmt(w),0);
+  const totalDep=grpDep+depProd;
+  const naInkaso=tot-totalDep;
+  $('grp-prev').innerHTML=sel.map((w,i)=>`<div class="rr"><span>#${wbs.indexOf(w)+1} ${w.name}</span><span>${fp(billAmt(w))}</span></div>`).join('')+`<div class="rr tot"><span>${t("total")} (${sel.length} ${currentLang==="en"?"players":"hráčov"})</span><span>${fp(tot)}</span></div>`+(totalDep>0?`<div class="rr" style="color:var(--grn);"><span>💰 Záloha (zaplatená vopred)</span><span>-${fp(totalDep)}</span></div><div class="rr tot" style="color:var(--amb);"><span>Na inkaso teraz</span><span>${fp(naInkaso)}</span></div>`:'');
   gPayM=null;$('gpo-c').className='po';$('gpo-k').className='po';$('gpo-f').className='po';const b=$('grp-btn');b.disabled=true;b.style.opacity='.4';om('m-grp');
 }
 // ══ BILL ══
@@ -2942,16 +2947,22 @@ let _depositIsGroupPay=false;
 function checkDepositBeforeClose(wbId){
   const sess=getSess();if(!sess)return false;
   const depositProd=prods.find(p=>p.isDeposit);
-  // If deposit was confirmed via popup, it's settled
-  if(sess.deposit)return false;
+  // Check if popup deposit is still valid (assigned player must still exist or be closed)
+  if(sess.deposit){
+    const allWbs=getWbs();
+    const depPlayer=allWbs.find(w=>w.id===sess.deposit.wbId);
+    if(depPlayer)return false; // deposit player still active — settled
+    const closedDep=closed.find(w=>w.id===sess.deposit.wbId&&w.sKey===sess.key);
+    if(closedDep)return false; // deposit player closed — settled
+    // Popup deposit is orphaned (player reopened & removed?) — clear and re-ask
+    delete sess.deposit;save();
+  }
   // Check if any active player has the deposit product on their bill
   if(depositProd){
     const allWbs=getWbs();
-    const anyHasDepositProduct=allWbs.some(w=>w.items.some(i=>i.id===depositProd.id));
-    if(anyHasDepositProduct)return false;
+    if(allWbs.some(w=>w.items.some(i=>i.id===depositProd.id)))return false;
     // Also check already-closed bills for this session
-    const closedWithDeposit=closed.filter(w=>w.sKey===sess.key&&w.items.some(i=>i.id===depositProd.id));
-    if(closedWithDeposit.length>0)return false;
+    if(closed.some(w=>w.sKey===sess.key&&w.items.some(i=>i.id===depositProd.id)))return false;
   }
   // Also check persistent deposits
   const deps=lDeposits();
@@ -4188,7 +4199,7 @@ function rSpravca(){
   const sDepProd=bills.reduce((s,w)=>s+depositItemAmt(w),0);
   const sTotalDep=sPopupDep+sDepProd;
   const srevEl=$('srev-s');
-  if(srevEl)srevEl.innerHTML=`<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(tot)}</div><div class="rbl">Celkom</div></div>${sTotalDep>0?`<div class="rb" style="background:var(--gbg);border:.5px solid var(--gbd);"><div class="rbv" style="color:var(--grn);">${fp(sTotalDep)}</div><div class="rbl">💰 Zálohy</div></div>`:''}<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(cash)}</div><div class="rbl">💵 Hotovosť</div></div><div class="rb"><div class="rbv" style="color:var(--blu);">${fp(card)}</div><div class="rbl">💳 Karta</div></div>${invPaid>0?`<div class="rb" style="background:var(--pbg);border:.5px solid var(--pbd);"><div class="rbv" style="color:var(--pur);">${fp(invPaid)}</div><div class="rbl">🧾 Faktúra uhradená</div></div>`:''} ${invUnpaid>0?`<div class="rb" style="background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(invUnpaid)}</div><div class="rbl">🧾 Faktúra neuhradená</div></div>`:''} ${(totPay+totCosts)>0?`<div class="rb" style="grid-column:1/-1;background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(cash-totPay-totCosts)}</div><div class="rbl">💵 Čistá hotovosť</div></div>`:''}  `;
+  if(srevEl)srevEl.innerHTML=`<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(tot)}</div><div class="rbl">Celkom</div></div>${sTotalDep>0?`<div class="rb" style="background:var(--gbg);border:.5px solid var(--gbd);"><div class="rbv" style="color:var(--grn);">${fp(sTotalDep)}</div><div class="rbl">💰 Zálohy</div></div><div class="rb" style="background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(cash-sTotalDep)}</div><div class="rbl">💵 Hotovosť po odpočítaní záloh</div></div>`:''}<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(cash)}</div><div class="rbl">💵 Hotovosť</div></div><div class="rb"><div class="rbv" style="color:var(--blu);">${fp(card)}</div><div class="rbl">💳 Karta</div></div>${invPaid>0?`<div class="rb" style="background:var(--pbg);border:.5px solid var(--pbd);"><div class="rbv" style="color:var(--pur);">${fp(invPaid)}</div><div class="rbl">🧾 Faktúra uhradená</div></div>`:''} ${invUnpaid>0?`<div class="rb" style="background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(invUnpaid)}</div><div class="rbl">🧾 Faktúra neuhradená</div></div>`:''} ${(totPay+totCosts)>0?`<div class="rb" style="grid-column:1/-1;background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(cash-totPay-totCosts)}</div><div class="rbl">💵 Čistá hotovosť</div></div>`:''}  `;
 
   if(!bills.length){el.innerHTML='<div class="empty" style="padding:2rem;">Žiadne akcie za vybrané obdobie</div>';return;}
 
