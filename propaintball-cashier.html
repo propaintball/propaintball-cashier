@@ -745,6 +745,34 @@ textarea{resize:none;line-height:1.5;}
           </div>
           <div id="reg-link-info" style="font-size:10px;color:var(--t3);margin-top:4px;"></div>
         </div>
+        <!-- Customer Management -->
+        <div class="card" style="border-color:var(--abd);">
+          <div class="ch" style="color:var(--amb);">👥 Registrovaní zákazníci</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+            <input type="text" id="cust-search" placeholder="Hľadať podľa mena alebo emailu..." oninput="renderCustList()" style="flex:1;font-size:12px;"/>
+            <button class="btn sm B" onclick="syncCustomers().then(()=>{renderCustList();toast('Synchronizované')})">🔄 Sync</button>
+            <span id="cust-count" style="font-size:11px;color:var(--t3);white-space:nowrap;"></span>
+          </div>
+          <div id="cust-list" style="max-height:400px;overflow-y:auto;"></div>
+        </div>
+        <!-- Customer Edit Modal -->
+        <div id="m-cust-edit" class="modal" style="display:none;">
+          <div class="mc" style="max-width:380px;">
+            <div class="mh">✏️ Upraviť zákazníka</div>
+            <div class="mb">
+              <div class="fr"><label class="lb">Nick / Meno</label><input type="text" id="ce-name"/></div>
+              <div class="fr"><label class="lb">Email</label><input type="email" id="ce-email"/></div>
+              <div class="fr"><label class="lb">Telefón</label><input type="tel" id="ce-phone"/></div>
+              <div style="font-size:10px;color:var(--t3);margin-top:4px;" id="ce-info"></div>
+            </div>
+            <div class="mf">
+              <button class="btn R" onclick="deleteCust()">🗑 Zmazať</button>
+              <div style="flex:1;"></div>
+              <button class="btn T" onclick="cm('m-cust-edit')">Zrušiť</button>
+              <button class="btn G" onclick="saveCustEdit()">Uložiť</button>
+            </div>
+          </div>
+        </div>
         <!-- NFC Analysis -->
         <div class="card" style="border-color:var(--abd);">
           <div class="ch" style="color:var(--amb);">📡 NFC / RFID Čítačka — technická analýza</div>
@@ -1364,6 +1392,54 @@ async function syncCustomers(){
       sCustomers([...merged.values()]);
     }
   }catch(e){console.error('[Customer sync]',e);}
+}
+// ══ CUSTOMER MANAGEMENT ══
+let _custEditId=null;
+function renderCustList(){
+  const el=$('cust-list');if(!el)return;
+  const q=($('cust-search')||{}).value||'';
+  let custs=lCustomers();
+  const cnt=$('cust-count');if(cnt)cnt.textContent=custs.length+' celkom';
+  if(q.length>=2){const ql=q.toLowerCase();custs=custs.filter(c=>c.name.toLowerCase().includes(ql)||c.email.toLowerCase().includes(ql)||(c.phone||'').includes(q));}
+  custs.sort((a,b)=>(b.registeredAt||'').localeCompare(a.registeredAt||''));
+  if(!custs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">'+(q?'Žiadne výsledky':'Zatiaľ žiadni zákazníci')+'</div>';return;}
+  el.innerHTML=custs.slice(0,100).map(c=>`<div style="display:flex;align-items:center;padding:8px 10px;border-bottom:.5px solid var(--b1);gap:10px;">
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:600;font-size:13px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.name)}</div>
+      <div style="font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.email)}${c.phone?' · '+escHtml(c.phone):''}</div>
+    </div>
+    <div style="font-size:10px;color:var(--t3);white-space:nowrap;">${c.registeredAt?new Date(c.registeredAt).toLocaleDateString('sk'):''}</div>
+    <button class="btn sm B" onclick="openCustEdit('${escHtml(c.id||c.email)}')" style="font-size:11px;padding:3px 8px;">✏️</button>
+  </div>`).join('')+(custs.length>100?'<div style="text-align:center;padding:10px;color:var(--t3);font-size:11px;">Zobrazených 100 z '+custs.length+'</div>':'');
+}
+function openCustEdit(idOrEmail){
+  const custs=lCustomers();
+  const c=custs.find(x=>x.id===idOrEmail||x.email===idOrEmail);
+  if(!c){toast('Zákazník nenájdený');return;}
+  _custEditId=c.id||c.email;
+  $('ce-name').value=c.name||'';
+  $('ce-email').value=c.email||'';
+  $('ce-phone').value=c.phone||'';
+  $('ce-info').textContent='ID: '+(c.id||'—')+' · Registrovaný: '+(c.registeredAt?new Date(c.registeredAt).toLocaleDateString('sk'):'—')+(c.lang?' · Jazyk: '+c.lang:'');
+  $('m-cust-edit').style.display='flex';
+}
+function saveCustEdit(){
+  if(!_custEditId)return;
+  const custs=lCustomers();
+  const idx=custs.findIndex(x=>x.id===_custEditId||x.email===_custEditId);
+  if(idx<0){toast('Zákazník nenájdený');return;}
+  const name=$('ce-name').value.trim();
+  const email=$('ce-email').value.trim().toLowerCase();
+  if(!name||!email){toast('Vyplň meno a email');return;}
+  custs[idx].name=name;custs[idx].email=email;custs[idx].phone=$('ce-phone').value.trim();
+  sCustomers(custs);cm('m-cust-edit');renderCustList();toast('Zákazník uložený');markDirty();
+}
+function deleteCust(){
+  if(!_custEditId)return;
+  if(!confirm('Naozaj zmazať tohto zákazníka?'))return;
+  let custs=lCustomers();
+  custs=custs.filter(x=>x.id!==_custEditId&&x.email!==_custEditId);
+  sCustomers(custs);cm('m-cust-edit');renderCustList();toast('Zákazník zmazaný');markDirty();
 }
 // ══ SUPABASE ══
 function sbSt(m,c='var(--t3)'){const e=$('sb-st');if(e)e.innerHTML=`<span style="color:${c};">${escHtml(m)}</span>`;}
@@ -5174,7 +5250,7 @@ function rSL(cid,arr,type){$(cid).innerHTML=arr.map((it,i)=>`<div class="si" sty
 function delSI(t,i){if(t==='arena')arenas.splice(i,1);else if(t==='instructor')instructors.splice(i,1);else if(t==='activity')activities.splice(i,1);save();rSL(t==='arena'?'al-l':t==='instructor'?'il-l':'acl-l',t==='arena'?arenas:t==='instructor'?instructors:activities,t);}
 function addSI(t){const ids={arena:'na',instructor:'ni',activity:'nac'};const v=$(ids[t]).value.trim();if(!v)return;if(t==='arena')arenas.push(v);else if(t==='instructor')instructors.push(v);else if(t==='activity')activities.push(v);$(ids[t]).value='';save();rSL(t==='arena'?'al-l':t==='instructor'?'il-l':'acl-l',t==='arena'?arenas:t==='instructor'?instructors:activities,t);}
 function saveBiz(){biz={name:$('biz-n').value.trim(),ico:$('biz-ico').value.trim(),dic:$('biz-dic').value.trim(),addr:$('biz-a').value.trim()};save();toast('Firemné údaje uložené');}
-function fillSett(){const su=$('sb-u'),sk=$('sb-k');if(su&&sbUrl)su.value=sbUrl;if(sk&&sbKey)sk.value=sbKey;const gdc=$('gdrive-client-id');if(gdc)gdc.value=LS.g('pb_gdrive_client_id','');updateGDriveStatus();const hr=$('hr-rate');if(hr)hr.value=hrRate;['biz-n','biz-ico','biz-dic','biz-a'].forEach((f,i)=>{const e=$(f);if(e&&biz[['name','ico','dic','addr'][i]])e.value=biz[['name','ico','dic','addr'][i]];});}
+function fillSett(){const su=$('sb-u'),sk=$('sb-k');if(su&&sbUrl)su.value=sbUrl;if(sk&&sbKey)sk.value=sbKey;const gdc=$('gdrive-client-id');if(gdc)gdc.value=LS.g('pb_gdrive_client_id','');updateGDriveStatus();const hr=$('hr-rate');if(hr)hr.value=hrRate;['biz-n','biz-ico','biz-dic','biz-a'].forEach((f,i)=>{const e=$(f);if(e&&biz[['name','ico','dic','addr'][i]])e.value=biz[['name','ico','dic','addr'][i]];});renderCustList();}
 // ══ MODALS ══
 function om(id){
   $(id).classList.add('op');
