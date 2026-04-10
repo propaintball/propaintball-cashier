@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ProPaintball — Registrácia</title>
+<meta name="description" content="Zaregistruj sa a získaj prehľad o tvojich hrách, štatistiky a exkluzívne ponuky.">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0e1a;--bg2:#111627;--bg3:#181f30;--card:#131929;
+  --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --t1:#eef0f8;--t2:#7c82a0;--t3:#464d66;
+  --red:#e63946;--rbg:rgba(230,57,70,.11);--rbd:rgba(230,57,70,.28);
+  --grn:#22c55e;--gbg:rgba(34,197,94,.10);--gbd:rgba(34,197,94,.28);
+  --blu:#3b82f6;--bbg:rgba(59,130,246,.10);--bbd:rgba(59,130,246,.28);
+  --amb:#f59e0b;--abg:rgba(245,158,11,.10);--abd:rgba(245,158,11,.28);
+  --pur:#a855f7;
+  --rs:10px;--r:14px;
+}
+body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.container{width:100%;max-width:440px;}
+.logo{text-align:center;margin-bottom:24px;}
+.logo-icon{font-size:56px;display:block;margin-bottom:8px;}
+.logo h1{font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.02em;}
+.logo p{font-size:12px;color:var(--t3);margin-top:4px;}
+.card{background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:16px;}
+.card-title{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.field label .opt{font-weight:400;text-transform:none;color:var(--t3);font-size:9px;}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--b2);border-radius:var(--rs);background:var(--bg2);color:var(--t1);font-size:15px;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--red);}
+.field input::placeholder{color:var(--t3);}
+.consent{display:flex;align-items:flex-start;gap:10px;padding:14px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--b1);margin-bottom:16px;cursor:pointer;}
+.consent input[type=checkbox]{width:20px;height:20px;accent-color:var(--red);flex-shrink:0;margin-top:2px;cursor:pointer;}
+.consent-text{font-size:11px;color:var(--t2);line-height:1.6;}
+.consent-text strong{color:var(--t1);}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.04em;}
+.btn-primary{background:var(--red);color:#fff;}
+.btn-primary:hover{background:#d42f3d;transform:translateY(-1px);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.benefits{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.benefit{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--b1);}
+.benefit-icon{font-size:20px;flex-shrink:0;}
+.benefit-text{font-size:10px;color:var(--t2);line-height:1.4;}
+.benefit-text strong{color:var(--t1);display:block;font-size:11px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--b2);color:var(--t1);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:1000;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{border-color:var(--rbd);color:var(--red);}
+/* Success screen */
+.success{display:none;text-align:center;padding:20px 0;}
+.success-icon{font-size:72px;animation:popIn .5s ease;}
+.success h2{font-size:20px;font-weight:800;color:var(--grn);margin:16px 0 8px;}
+.success p{font-size:13px;color:var(--t2);line-height:1.6;max-width:300px;margin:0 auto;}
+.success .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;}
+.success .stat{background:var(--bg2);border-radius:var(--rs);padding:12px;text-align:center;}
+.success .stat .val{font-size:24px;font-weight:800;color:var(--t1);}
+.success .stat .lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+@keyframes popIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+/* Footer */
+.footer{text-align:center;margin-top:20px;font-size:9px;color:var(--t3);line-height:1.8;}
+.footer a{color:var(--t2);text-decoration:none;}
+/* Error state */
+.field.err input{border-color:var(--red);}
+.field .err-msg{font-size:10px;color:var(--red);margin-top:3px;display:none;}
+.field.err .err-msg{display:block;}
+/* Loading */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:360px){
+  .benefits{grid-template-columns:1fr;}
+  .card{padding:18px;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- REGISTRATION FORM -->
+  <div id="reg-form">
+    <div class="logo">
+      <span class="logo-icon">🎯</span>
+      <h1>ProPaintball Bratislava</h1>
+      <p>Zaregistruj sa a sleduj svoje hry</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Registrácia</div>
+
+      <div class="field" id="f-name">
+        <label>Meno a priezvisko</label>
+        <input type="text" id="r-name" placeholder="Ján Novák" autocomplete="name"/>
+        <div class="err-msg">Zadaj meno</div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label>Email</label>
+        <input type="email" id="r-email" placeholder="jan@email.com" autocomplete="email"/>
+        <div class="err-msg" id="email-err">Zadaj platný email</div>
+      </div>
+
+      <div class="field" id="f-phone">
+        <label>Telefón <span class="opt">— voliteľné</span></label>
+        <input type="tel" id="r-phone" placeholder="+421 9XX XXX XXX" autocomplete="tel"/>
+      </div>
+
+      <label class="consent" id="consent-label">
+        <input type="checkbox" id="r-consent"/>
+        <div class="consent-text">
+          <strong>Súhlasím so spracovaním osobných údajov</strong>
+          za účelom zasielania ponúk, štatistík z mojich hier a noviniek.
+          Súhlas môžem kedykoľvek odvolať.
+          <br><span style="color:var(--t3);font-size:9px;">TRESAERIS GROUP s.r.o., IČO: 50925989</span>
+        </div>
+      </label>
+
+      <button class="btn btn-primary" id="submit-btn" onclick="submitReg()" disabled>
+        Zaregistrovať sa
+      </button>
+
+      <div class="benefits">
+        <div class="benefit">
+          <span class="benefit-icon">📊</span>
+          <div class="benefit-text"><strong>Štatistiky</strong>Koľko si vystrelil guličiek</div>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon">🎁</span>
+          <div class="benefit-text"><strong>Ponuky</strong>Exkluzívne zľavy emailom</div>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon">🏆</span>
+          <div class="benefit-text"><strong>VIP status</strong>Vracajúci hráči = bonus</div>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon">📧</span>
+          <div class="benefit-text"><strong>Výsledky</strong>Report z hry na email</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="reg-success" class="success">
+    <div class="success-icon">🎯</div>
+    <h2>Registrácia úspešná!</h2>
+    <p>Ďakujeme za registráciu. Na ďalšej hre stačí povedať svoje meno alebo email a budeme ťa mať v systéme.</p>
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="val" id="s-name">—</div>
+        <div class="lbl">Hráč</div>
+      </div>
+      <div class="stat">
+        <div class="val" id="s-email">—</div>
+        <div class="lbl">Email</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">Nová registrácia</button>
+    </div>
+  </div>
+
+  <!-- ALREADY REGISTERED -->
+  <div id="reg-exists" class="success" style="display:none;">
+    <div class="success-icon">✅</div>
+    <h2>Už si registrovaný!</h2>
+    <p id="exists-msg">Tento email je už v systéme. Na ďalšej hre stačí povedať svoje meno.</p>
+    <div style="margin-top:20px;">
+      <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">OK</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    ProPaintball Bratislava · TRESAERIS GROUP s.r.o.<br>
+    <a href="https://propaintball.sk" target="_blank">propaintball.sk</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ SUPABASE CONFIG ══
+let sbUrl='',sbKey='';
+
+// Read from URL params (generated by main app)
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  const s=params.get('s'),k=params.get('k');
+  if(s&&k){
+    try{sbUrl=atob(s);sbKey=atob(k);}catch(e){}
+  }
+  // Fallback: try localStorage (same device as cashier)
+  if(!sbUrl){try{sbUrl=localStorage.getItem('pb_sbu')||'';}catch(e){}}
+  if(!sbKey){try{sbKey=localStorage.getItem('pb_sbk')||'';}catch(e){}}
+  // Cache for this device
+  if(sbUrl)try{localStorage.setItem('pb_reg_sbu',sbUrl);}catch(e){}
+  if(sbKey)try{localStorage.setItem('pb_reg_sbk',sbKey);}catch(e){}
+  // Final fallback: cached
+  if(!sbUrl)try{sbUrl=localStorage.getItem('pb_reg_sbu')||'';}catch(e){}
+  if(!sbKey)try{sbKey=localStorage.getItem('pb_reg_sbk')||'';}catch(e){}
+})();
+
+// ══ UTILITIES ══
+function $(id){return document.getElementById(id);}
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let tT;
+function toast(msg,err){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast'+(err?' err':'')+' on';
+  clearTimeout(tT);
+  tT=setTimeout(()=>t.classList.remove('on'),3500);
+}
+function isValidEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+
+// ══ FORM VALIDATION ══
+const nameEl=$('r-name'),emailEl=$('r-email'),consentEl=$('r-consent'),submitBtn=$('submit-btn');
+
+function validate(){
+  const name=nameEl.value.trim();
+  const email=emailEl.value.trim();
+  const consent=consentEl.checked;
+
+  let valid=true;
+  // Name
+  if(name.length<2){$('f-name').classList.add('err');valid=false;}
+  else{$('f-name').classList.remove('err');}
+  // Email
+  if(!isValidEmail(email)){$('f-email').classList.add('err');valid=false;}
+  else{$('f-email').classList.remove('err');}
+
+  submitBtn.disabled=!valid||!consent;
+  return valid&&consent;
+}
+
+nameEl.addEventListener('input',validate);
+emailEl.addEventListener('input',function(){
+  validate();
+  // Check for duplicate on blur
+});
+consentEl.addEventListener('change',validate);
+
+// Also enable/disable button reactively
+emailEl.addEventListener('blur',async function(){
+  const email=emailEl.value.trim();
+  if(isValidEmail(email)){
+    const exists=await checkExisting(email);
+    if(exists){
+      $('email-err').textContent='Tento email je už registrovaný';
+      $('f-email').classList.add('err');
+    }else{
+      $('email-err').textContent='Zadaj platný email';
+    }
+  }
+});
+
+// ══ CHECK EXISTING ══
+async function checkExisting(email){
+  // Check localStorage first
+  try{
+    const local=JSON.parse(localStorage.getItem('pb_customers')||'[]');
+    if(local.find(c=>c.email.toLowerCase()===email.toLowerCase()))return true;
+  }catch(e){}
+  // Check Supabase
+  if(sbUrl&&sbKey){
+    try{
+      const r=await fetch(`${sbUrl}/rest/v1/pb_data?backup_type=eq.customer&select=payload`,{
+        headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
+      });
+      if(r.ok){
+        const rows=await r.json();
+        return rows.some(row=>row.payload&&row.payload.email&&row.payload.email.toLowerCase()===email.toLowerCase());
+      }
+    }catch(e){console.error('[Check]',e);}
+  }
+  return false;
+}
+
+// ══ SUBMIT ══
+async function submitReg(){
+  if(!validate())return;
+
+  const name=nameEl.value.trim();
+  const email=emailEl.value.trim().toLowerCase();
+  const phone=$('r-phone').value.trim();
+  const consent=consentEl.checked;
+
+  submitBtn.disabled=true;
+  submitBtn.innerHTML='<span class="spinner"></span>Registrujem...';
+
+  const customer={
+    id:'cust_'+Date.now(),
+    name:name,
+    email:email,
+    phone:phone,
+    registeredAt:new Date().toISOString(),
+    consent:consent
+  };
+
+  let saved=false;
+
+  // Save to Supabase
+  if(sbUrl&&sbKey){
+    try{
+      const r=await fetch(`${sbUrl}/rest/v1/pb_data`,{
+        method:'POST',
+        headers:{
+          'apikey':sbKey,
+          'Authorization':'Bearer '+sbKey,
+          'Content-Type':'application/json',
+          'Prefer':'return=minimal'
+        },
+        body:JSON.stringify({
+          id:customer.id,
+          payload:customer,
+          backup_type:'customer',
+          backup_label:'Registrácia: '+name,
+          updated_at:new Date().toISOString()
+        })
+      });
+      if(r.ok||r.status===201){
+        saved=true;
+      }else{
+        const errText=await r.text().catch(()=>'');
+        console.error('[Supabase]',r.status,errText);
+      }
+    }catch(e){
+      console.error('[Supabase]',e);
+    }
+  }
+
+  // Also save to localStorage (for same-device access)
+  try{
+    const local=JSON.parse(localStorage.getItem('pb_customers')||'[]');
+    const existing=local.findIndex(c=>c.email.toLowerCase()===email);
+    if(existing>=0){
+      local[existing]={...local[existing],...customer};
+    }else{
+      local.push(customer);
+    }
+    localStorage.setItem('pb_customers',JSON.stringify(local));
+    saved=true;
+  }catch(e){
+    console.error('[LocalStorage]',e);
+  }
+
+  if(saved){
+    // Show success
+    $('reg-form').style.display='none';
+    $('reg-success').style.display='block';
+    $('s-name').textContent=name.split(' ')[0];
+    $('s-email').textContent=email;
+    toast('Registrácia úspešná!');
+  }else{
+    submitBtn.disabled=false;
+    submitBtn.innerHTML='Zaregistrovať sa';
+    toast('Chyba pri registrácii. Skús znova.',true);
+  }
+}
+
+// ══ KEYBOARD SUPPORT ══
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!submitBtn.disabled){
+    submitReg();
+  }
+});
+
+// ══ INIT ══
+(function(){
+  if(!sbUrl){
+    console.warn('[ProPaintball] Supabase nie je nakonfigurovaný. Registrácie sa ukladajú len lokálne.');
+  }
+  // Auto-focus name field
+  setTimeout(()=>nameEl.focus(),300);
+})();
+</script>
+</body>
+</html>

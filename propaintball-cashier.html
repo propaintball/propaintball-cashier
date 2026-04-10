@@ -52,7 +52,7 @@ button,input,select,textarea{font-family:inherit;}
 .topbar{display:flex;align-items:center;gap:10px;padding:7px 14px 6px;border-bottom:.5px solid var(--b1);flex-shrink:0;background:var(--bg);}
 .tb-r{margin-left:auto;display:flex;gap:6px;align-items:center;}
 .sess-timer{font-size:13px;font-weight:700;color:var(--t1);letter-spacing:.04em;position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;}
-.sc{font-size:11px;color:var(--t2);background:var(--bg3);border:.5px solid var(--b2);padding:3px 9px;border-radius:99px;cursor:pointer;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc{font-size:11px;color:var(--t2);background:var(--bg3);border:.5px solid var(--b2);padding:3px 9px;border-radius:99px;cursor:pointer;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tabbar{display:flex;border-bottom:.5px solid var(--b1);flex-shrink:0;background:var(--bg);overflow-x:auto;scrollbar-width:none;}
 .tabbar::-webkit-scrollbar{display:none;}
 .tab{padding:8px 12px;font-size:12px;font-weight:600;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
@@ -69,8 +69,14 @@ button,input,select,textarea{font-family:inherit;}
 .ss::-webkit-scrollbar{display:none;}
 .spill{padding:5px 11px;border-radius:99px;border:.5px solid var(--b2);font-size:11px;font-weight:600;background:var(--bg3);color:var(--t2);cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .spill.cur{background:var(--rbg);color:var(--red);border-color:var(--rbd);}
+.msb-item{display:inline-flex;flex-direction:column;align-items:flex-start;padding:8px 14px;border-radius:var(--rs);border:1.5px solid var(--b2);background:var(--bg2);cursor:pointer;min-width:140px;max-width:200px;transition:all .2s;}
+.msb-item.active{border-color:var(--rbd);background:var(--rbg);}
+.msb-item:hover{border-color:var(--amb);transform:translateY(-1px);}
+.msb-item .msb-name{font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.msb-item .msb-meta{font-size:9px;color:var(--t3);margin-top:2px;}
+.msb-item .msb-stats{display:flex;gap:6px;margin-top:3px;font-size:10px;font-weight:600;}
 label.lb{display:block;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-input[type=text],input[type=number],input[type=date],input[type=time],input[type=password],input[type=email],select,textarea{width:100%;background:var(--bg3);border:.5px solid var(--b2);border-radius:var(--rs);padding:8px 10px;font-size:13px;color:var(--t1);outline:none;-webkit-appearance:none;}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=password],input[type=email],input[type=tel],select,textarea{width:100%;background:var(--bg3);border:.5px solid var(--b2);border-radius:var(--rs);padding:8px 10px;font-size:13px;color:var(--t1);outline:none;-webkit-appearance:none;}
 input:focus,select:focus,textarea:focus{border-color:var(--blu);background:var(--bg2);}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23464d66'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px;}
 input[type=date],input[type=time]{color-scheme:dark;}
@@ -121,7 +127,10 @@ textarea{resize:none;line-height:1.5;}
 /* Player number */
 .pnum{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:700;flex-shrink:0;padding:0 5px;}
 /* Wristbands */
-.wb{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:var(--rs);border:.5px solid var(--b1);cursor:pointer;margin-bottom:5px;background:var(--bg3);transition:all .12s;}
+.wb{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:var(--rs);border:.5px solid var(--b1);cursor:pointer;margin-bottom:5px;background:var(--bg3);transition:all .12s;position:relative;}
+.wb .hover-actions{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);gap:3px;padding:3px;background:var(--bg1);border:.5px solid var(--b1);border-radius:var(--rs);box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:10;}
+.wb:hover .hover-actions{display:flex;}
+@media(hover:none){.wb:hover .hover-actions{display:none;}}
 .wb.sel{border-color:var(--bbd);background:var(--bbg);}
 .wb.chk{border-color:var(--gbd);background:rgba(34,197,94,.06);}
 .wi{flex:1;min-width:0;}
@@ -214,6 +223,8 @@ textarea{resize:none;line-height:1.5;}
 .tw{position:fixed;top:calc(var(--st)+52px);left:50%;transform:translateX(-50%);z-index:9000;pointer-events:none;}
 .t{background:var(--card);border:.5px solid var(--b2);border-radius:99px;padding:7px 16px;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .2s;}
 .t.on{opacity:1;}
+@keyframes paySuccess{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:0}}
+.pay-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:80px;z-index:10000;pointer-events:none;animation:paySuccess .8s ease forwards;}
 .mw{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;align-items:center;justify-content:center;padding:16px;}
 .mw.op{display:flex;}
 .mb{background:var(--card);border-radius:var(--r);padding:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;}
@@ -246,6 +257,7 @@ textarea{resize:none;line-height:1.5;}
 /* Players responsive grid */
 .players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:7px;}
 .player-card{background:var(--bg3);border-radius:var(--rs);padding:7px 9px;border:.5px solid var(--b1);}
+#email-suggestions div:hover{background:var(--bg3)!important;}
 .player-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .player-meta{font-size:10px;color:var(--t3);margin-top:2px;}
 /* Arena filter chips */
@@ -401,6 +413,13 @@ textarea{resize:none;line-height:1.5;}
               <div class="fr">
                 <label class="lb">Meno hráča <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— zadaj číslo (napr. 8) pre hromadné pridanie</span></label>
                 <input type="text" id="cname" placeholder="Marek alebo zadaj číslo (napr. 8)" onkeydown="if(event.key==='Enter')addPlayer()"/>
+              </div>
+              <div class="fr" id="email-row" style="margin-top:-4px;">
+                <label class="lb">Email zákazníka <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— voliteľné, pre registrovaných zákazníkov</span></label>
+                <div style="position:relative;">
+                  <input type="email" id="cemail" placeholder="meno@email.com" autocomplete="off" oninput="emailAutocomplete(this.value)" onkeydown="if(event.key==='Enter')addPlayer()"/>
+                  <div id="email-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--b2);border-radius:0 0 var(--rs) var(--rs);max-height:150px;overflow-y:auto;z-index:100;"></div>
+                </div>
               </div>
               <button class="btn G" style="font-size:14px;padding:11px;" onclick="addPlayer()" data-i18n="add-player-btn">+ Pridať hráča</button>
             </div>
@@ -613,6 +632,21 @@ textarea{resize:none;line-height:1.5;}
         <div class="ch">Výkon inštruktorov</div>
         <div id="a-instructors"></div>
       </div>
+      <!-- Heatmapa vyťaženosti -->
+      <div class="card" style="border:.5px solid var(--abd);">
+        <div class="ch" style="color:var(--amb);">🗓 Heatmapa vyťaženosti — dni &amp; hodiny</div>
+        <div id="a-heatmap"></div>
+      </div>
+      <!-- Trendy -->
+      <div class="card" style="border:.5px solid var(--tbd);">
+        <div class="ch" style="color:var(--tel);">📈 Trendy — porovnanie s predchádzajúcim obdobím</div>
+        <div id="a-trends"></div>
+      </div>
+      <!-- CLV Zákazníci -->
+      <div class="card" style="border:.5px solid var(--gbd);">
+        <div class="ch" style="color:var(--grn);">👤 Vracajúci sa zákazníci (CLV)</div>
+        <div id="a-clv"></div>
+      </div>
     </div>
     <!-- MOJE AKCIE (inštruktor) -->
     <div id="p-moje" class="page"><div id="moje-list"></div></div>
@@ -696,6 +730,16 @@ textarea{resize:none;line-height:1.5;}
           <button class="btn sm A" onclick="changePw()">Zmeniť heslo</button>
         </div>
         <div class="card"><div class="ch">Produkty</div><div id="pm-l"></div><div class="div"></div><div class="ch">Pridať produkt</div><div class="r2"><div class="fr"><label class="lb">Názov</label><input type="text" id="np-n"/></div><div class="fr"><label class="lb">Cena €</label><input type="number" id="np-p" min="0" step="0.5"/></div></div><div class="r2"><div class="fr"><label class="lb">Kategória</label><select id="np-c"><option>Package</option><option>Ammo</option><option>Extras</option><option>Drinks</option><option>Extra hodina</option><option>Other</option></select></div><div class="fr"><label class="lb">Emoji</label><input type="text" id="np-e" placeholder="🎯"/></div></div><button class="btn G" onclick="addProd2()">Pridať produkt</button></div>
+        <div class="card" style="border-color:var(--abd);">
+          <div class="ch" style="color:var(--amb);">Registracia zakaznikov</div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Zakaznici sa zaregistruju cez tento link. Vytlac QR kod na prevadzku.</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="text" id="reg-link" readonly style="font-size:10px;flex:1;background:var(--bg3);"/>
+            <button class="btn sm B" onclick="genRegLink()">Generovat link</button>
+            <button class="btn sm G" onclick="copyRegLink()">Kopirovat</button>
+          </div>
+          <div id="reg-link-info" style="font-size:10px;color:var(--t3);margin-top:4px;"></div>
+        </div>
         <!-- NFC Analysis -->
         <div class="card" style="border-color:var(--abd);">
           <div class="ch" style="color:var(--amb);">📡 NFC / RFID Čítačka — technická analýza</div>
@@ -767,6 +811,10 @@ textarea{resize:none;line-height:1.5;}
       </div>
     </div>
   </div>
+</div>
+<!-- Multi-session bottom bar -->
+<div id="multi-sess-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:var(--bg1);border-top:1px solid var(--b1);padding:6px 10px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;backdrop-filter:blur(10px);">
+  <div id="multi-sess-items" style="display:flex;gap:6px;"></div>
 </div>
 <div class="tw"><div class="t" id="toast"></div></div>
 
@@ -844,6 +892,7 @@ textarea{resize:none;line-height:1.5;}
 <div class="mw" id="m-sess"><div class="mb"><div class="mt">Aktuálna session</div><div id="m-sess-b"></div><button class="btn" style="margin-top:10px;" onclick="cm('m-sess')">Zavrieť</button></div></div>
 <div class="mw" id="m-vrp"><div class="mb"><div class="mt">🧾 Doklad VRP2</div><div id="m-vrp-b"></div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;"><button class="btn B" onclick="window.open('https://vrp2.financnasprava.sk','_blank')">Otvoriť VRP2 →</button><button class="btn" onclick="cm('m-vrp')">Zavrieť</button></div></div></div>
 <div class="mw" id="m-reopen"><div class="mb"><div class="mt">Znovu otvoriť účet</div><div id="m-reopen-b"></div><div class="r2" style="margin-top:10px;"><button class="btn A" onclick="confirmReopen()">Znovu otvoriť</button><button class="btn" onclick="cm('m-reopen')">Zrušiť</button></div></div></div>
+<div class="mw" id="m-editamt"><div class="mb"><div class="mt">✎ Upraviť sumu</div><div id="m-editamt-info" style="font-size:12px;color:var(--t2);margin-bottom:10px;"></div><div id="m-editamt-items"></div><div class="r2" style="margin-top:10px;"><button class="btn G" onclick="saveEditAmt()">Uložiť</button><button class="btn" onclick="cm('m-editamt')">Zrušiť</button></div></div></div>
 <div class="mw" id="m-drink"><div class="mb"><div class="mt">🥤 Vydať nápoj</div><div class="fr"><label class="lb">Vyber nápoj</label><select id="dsel"></select></div><div class="r2" style="margin-top:10px;"><button class="btn G" onclick="confirmDrink()">Vydať</button><button class="btn" onclick="cm('m-drink')">Zrušiť</button></div></div></div>
 <div class="mw" id="m-xh"><div class="mb"><div class="mt" id="m-xh-t">Extra hodina</div><div id="m-xh-b"></div><div style="display:flex;flex-direction:column;gap:7px;margin-top:10px;"><button class="btn G" onclick="addXH('split')" data-i18n="xh-split">Rovnomerne na všetkých hráčov</button><button class="btn B" onclick="addXH('group')" data-i18n="xh-group">Na skupinový účet</button><div style="font-size:11px;color:var(--t3);" data-i18n="xh-specific-lbl">Konkrétny hráč:</div><select id="xh-sel" style="font-size:12px;"></select><button class="btn A" onclick="addXH('specific')" data-i18n="xh-add">Pridať vybranému hráčovi</button></div><button class="btn" style="margin-top:10px;" onclick="cm('m-xh')" data-i18n="cancel">Zavrieť</button></div></div>
 <div class="mw" id="m-pout"><div class="mb"><div class="mt">💰 Výplata inštruktora</div><div id="m-pout-i" style="font-size:12px;color:var(--t2);margin-bottom:12px;padding:9px;background:var(--bg3);border-radius:var(--rs);line-height:1.7;"></div><div class="fr"><label class="lb">Typ výplaty</label><select id="po-type" onchange="updPout()"><option value="fixed">Fixná: 30€ + 1% z tržby</option><option value="hourly">Hodinová sadzba</option><option value="custom">Vlastná suma</option></select></div><div class="fr" id="po-h-row" style="display:none;"><label class="lb">Počet hodín</label><input type="number" id="po-hrs" value="2" min="0.5" step="0.5" onchange="updPout()"/></div><div class="fr"><label class="lb">Odmena inštruktora (€)</label><input type="number" id="po-amt" step="0.5" min="0"/></div><div class="fr"><label class="lb">Iné náklady (€)</label><input type="number" id="po-costs" step="0.5" min="0" value="0"/></div><div class="fr"><label class="lb">Poznámka k nákladom</label><textarea id="po-note" rows="3" placeholder="Dôvod extra nákladov, nákup materiálu…"></textarea></div><div class="r2" style="margin-top:10px;"><button class="btn G" onclick="savePout()">Uložiť výplatu</button><button class="btn" onclick="cm('m-pout')">Zrušiť</button></div></div></div>
@@ -914,17 +963,14 @@ textarea{resize:none;line-height:1.5;}
 <!-- ZÁLOHA DEPOSIT MODAL -->
 <div class="mw" id="m-deposit"><div class="mb">
   <div class="mt">💰 Záloha vopred zaplatená?</div>
-  <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.7;">Zákazník zaplatil zálohu vopred (napr. pri rezervácii).<br>Záloha sa <strong>neodpočíta z tržby</strong> — ide o predčasnú platbu.</div>
+  <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.7;">Zákazník zaplatil zálohu vopred (napr. pri rezervácii).<br>Záloha sa odpočíta z hotovosti pri inkase.</div>
   <div class="fr">
     <label class="lb">Suma zálohy (€)</label>
     <input type="number" id="deposit-amount" value="50" min="0" step="5"/>
   </div>
   <div class="fr">
-    <label class="lb">Priradiť zálohu k</label>
-    <div class="nfc-toggle" style="margin-bottom:0;">
-      <button class="nfc-opt on" id="deposit-scope-player" onclick="setDepositScope('player')">👤 Tomuto hráčovi</button>
-      <button class="nfc-opt" id="deposit-scope-session" onclick="setDepositScope('session')">🎯 Celej akcii</button>
-    </div>
+    <label class="lb">Priradiť zálohu hráčovi</label>
+    <select id="deposit-player-sel"></select>
   </div>
   <div class="r2" style="margin-top:14px;">
     <button class="btn G" onclick="confirmDeposit()">✓ Áno, záloha bola zaplatená</button>
@@ -998,7 +1044,14 @@ const DEF_P=[
 ];
 // ══ STORAGE ══
 const LS={g:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
-function saveAll(){LS.s('pb_p',prods);LS.s('pb_wb',wbMap);LS.s('pb_cl',closed);LS.s('pb_nid',nextId);LS.s('pb_nfc',nfcN);LS.s('pb_ar',arenas);LS.s('pb_ins',instructors);LS.s('pb_ac',activities);LS.s('pb_ss',sessArr);LS.s('pb_cid',curSid);LS.s('pb_biz',biz);LS.s('pb_sbu',sbUrl);LS.s('pb_sbk',sbKey);LS.s('pb_hr',hrRate);LS.s('pb_adm',admPw);LS.s('pb_arch',archive);}
+function checkStorageQuota(){
+  try{
+    let total=0;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);total+=k.length+localStorage.getItem(k).length;}
+    const pct=total/(5*1024*1024)*100;
+    if(pct>80)toast('Ulozisko '+pct.toFixed(0)+'% plne! Exportuj zalohu a vymaz stare data.');
+  }catch(e){}
+}
+function saveAll(){LS.s('pb_p',prods);LS.s('pb_wb',wbMap);LS.s('pb_cl',closed);LS.s('pb_nid',nextId);LS.s('pb_nfc',nfcN);LS.s('pb_ar',arenas);LS.s('pb_ins',instructors);LS.s('pb_ac',activities);LS.s('pb_ss',sessArr);LS.s('pb_cid',curSid);LS.s('pb_biz',biz);LS.s('pb_sbu',sbUrl);LS.s('pb_sbk',sbKey);LS.s('pb_hr',hrRate);LS.s('pb_adm',admPw);LS.s('pb_arch',archive);checkStorageQuota();}
 // ══ STATE ══
 let prods=LS.g('pb_p',DEF_P);
 let wbMap=LS.g('pb_wb',{});
@@ -1013,6 +1066,7 @@ let sessArr=LS.g('pb_ss',[]);sessArr.forEach(s=>{if(!s.instructors){s.instructor
 let curSid=LS.g('pb_cid',null);
 let biz=LS.g('pb_biz',{name:'TRESAERIS GROUP s.r.o.',ico:'50925989',dic:'2120531996',addr:'Kopčianska 6211, Bratislava'});
 let sbUrl=LS.g('pb_sbu','');let sbKey=LS.g('pb_sbk','');let hrRate=LS.g('pb_hr',6);let admPw=LS.g('pb_adm','admin123');
+let _loginAttempts=0;let _loginLockUntil=0;
 // ── USER SYSTEM ──
 let currentUser=LS.g('pb_user',null);
 function buildIUsers(){
@@ -1024,9 +1078,9 @@ function buildIUsers(){
   });
 }
 function loginUser(nm,pw){
-  if(nm==='Admin'&&pw===admPw||nm===''&&pw===admPw||nm==='Admin'&&pw===admPw){currentUser={name:'Admin',role:'admin'};LS.s('pb_user',currentUser);return true;}
-  const u=buildIUsers().find(x=>x.name===nm&&x.pw===pw);
-  if(u){currentUser={name:u.name,role:'instructor'};LS.s('pb_user',currentUser);return true;}
+  if((nm==='Admin'||nm==='')&&checkPw(pw,admPw)){admPw=hashAndMigratePw(pw,admPw);save();currentUser={name:'Admin',role:'admin'};LS.s('pb_user',currentUser);_loginAttempts=0;_loginLockUntil=0;return true;}
+  const u=buildIUsers().find(x=>x.name===nm&&checkPw(pw,x.pw));
+  if(u){const customPws=LS.g('pb_custom_pws',{});if(customPws[u.name]){customPws[u.name]=hashAndMigratePw(pw,customPws[u.name]);LS.s('pb_custom_pws',customPws);}currentUser={name:u.name,role:'instructor'};LS.s('pb_user',currentUser);_loginAttempts=0;_loginLockUntil=0;return true;}
   return false;
 }
 function logoutUser(){
@@ -1091,6 +1145,9 @@ function actKey(){return curSid||'nosess';}
 function getPkg(w){for(const it of w.items){const p=prods.find(x=>x.id===it.id);if(p&&p.pkgId)return PKG[p.pkgId];}return null;}
 function totBalls(w){const pk=getPkg(w);let t=pk?pk.balls:0;for(const it of w.items){const p=prods.find(x=>x.id===it.id);if(p&&p.cat==='Ammo')t+=(p.addB||100)*it.qty;}return t;}
 function billAmt(w){return w.items.reduce((s,i)=>s+i.price*i.qty*(1-(i.disc||0)/100),0);}
+// Revenue amount — excludes deposit product (deposit doesn't reduce total revenue)
+function revenueAmt(w){return w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return !(p&&p.isDeposit);}).reduce((s,i)=>s+i.price*i.qty*(1-(i.disc||0)/100),0);}
+function depositItemAmt(w){return w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return p&&p.isDeposit;}).reduce((s,i)=>s+Math.abs(i.price)*i.qty*(1-(i.disc||0)/100),0);}
 function totalAmt(w){return billAmt(w)+(w.paidExtras||[]).reduce((s,e)=>s+e.price*e.qty*(1-(e.disc||0)/100),0);}
 
 // ── AGENCY PB HELPERS ──
@@ -1135,6 +1192,17 @@ function wPayLabel(w){
 }
 function fp(v){return'€'+(+v).toFixed(2);}
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function simpleHash(str){let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}return 'h_'+Math.abs(h).toString(36);}
+function checkPw(input,stored){if(stored.startsWith('h_'))return simpleHash(input)===stored;return input===stored;}
+function hashAndMigratePw(input,stored){if(!stored.startsWith('h_')){return simpleHash(input);}return stored;}
+function auditLog(action,detail){
+  try{
+    const log=JSON.parse(localStorage.getItem('pb_audit')||'[]');
+    log.push({t:new Date().toISOString(),u:currentUser?.name||'anon',a:action,d:detail||''});
+    if(log.length>500)log.splice(0,log.length-500);
+    localStorage.setItem('pb_audit',JSON.stringify(log));
+  }catch(e){}
+}
 
 // Get ALL drinks for a wristband — package drinks (dG) + purchased drinks (items)
 function getAllDrinks(w){
@@ -1162,12 +1230,12 @@ function buildDrinkStats(bills){
 function fD(iso){try{const d=new Date(iso);const dd=String(d.getDate()).padStart(2,'0');const mm=String(d.getMonth()+1).padStart(2,'0');const yyyy=d.getFullYear();return`${dd}. ${mm}. ${yyyy}`;}catch(e){return '';}}
 function fT(iso){try{return new Date(iso).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
 function fDT(iso){const d=fD(iso),t=fT(iso);return d?(d+(t?' '+t:'')):'—';}
-function lNotes(){try{return JSON.parse(localStorage.getItem('pb_notes')||'{}');}catch(e){return {};}}
+function lNotes(){try{return JSON.parse(localStorage.getItem('pb_notes')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_notes:',e);return {};}}
 function sNotes(n){localStorage.setItem('pb_notes',JSON.stringify(n));}
 
 
 // Session-level invoice confirmation (one per game, not per player)
-function lSessInvConf(){try{return JSON.parse(localStorage.getItem('pb_sess_inv')||'{}');}catch(e){return{};}}
+function lSessInvConf(){try{return JSON.parse(localStorage.getItem('pb_sess_inv')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_sess_inv:',e);return{};}}
 function sSessInvConf(d){localStorage.setItem('pb_sess_inv',JSON.stringify(d));}
 function markSessInvoicePaid(sessKey,paid){
   if(!isAdmin()){toast('Len admin môže potvrdiť úhradu faktúry');return;}
@@ -1182,7 +1250,7 @@ function markSessInvoicePaid(sessKey,paid){
 }
 function isSessInvPaid(sessKey){return !!(lSessInvConf()[sessKey]?.paid);}
 // Invoice payment confirmation — stored per wristband id
-function lInvConf(){try{return JSON.parse(localStorage.getItem('pb_inv_conf')||'{}');}catch(e){return{};}}
+function lInvConf(){try{return JSON.parse(localStorage.getItem('pb_inv_conf')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_inv_conf:',e);return{};}}
 function sInvConf(d){localStorage.setItem('pb_inv_conf',JSON.stringify(d));}
 function markInvoicePaid(wbId,paid,date){
   if(!isAdmin()){toast('Len admin môže potvrdiť úhradu faktúry');return;}
@@ -1193,12 +1261,74 @@ function markInvoicePaid(wbId,paid,date){
 }
 function isInvoicePaid(wbId){return !!(lInvConf()[wbId]?.paid);}
 
-function lPouts(){try{return JSON.parse(localStorage.getItem('pb_pouts')||'{}');}catch(e){return {};}}
+function lPouts(){try{return JSON.parse(localStorage.getItem('pb_pouts')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_pouts:',e);return {};}}
 function sPouts(p){localStorage.setItem('pb_pouts',JSON.stringify(p));}
-function lDE(){try{return JSON.parse(localStorage.getItem('pb_de')||'{}');}catch(e){return {};}}
+function lDE(){try{return JSON.parse(localStorage.getItem('pb_de')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_de:',e);return {};}}
 function sDE(d){localStorage.setItem('pb_de',JSON.stringify(d));}
+function lDeposits(){try{return JSON.parse(localStorage.getItem('pb_deposits')||'{}');}catch(e){console.warn('[Storage] Parse failed for pb_deposits:',e);return {};}}
+function sDeposits(d){localStorage.setItem('pb_deposits',JSON.stringify(d));}
+// ══ CUSTOMER DATABASE ══
+function lCustomers(){try{return JSON.parse(localStorage.getItem('pb_customers')||'[]');}catch(e){console.warn('[Storage] customers parse error',e);return [];}}
+function sCustomers(c){localStorage.setItem('pb_customers',JSON.stringify(c));}
+function addCustomer(name,email,phone,consent){
+  const customers=lCustomers();
+  const existing=customers.find(c=>c.email.toLowerCase()===email.toLowerCase());
+  if(existing){existing.name=name;if(phone)existing.phone=phone;existing.consent=consent;sCustomers(customers);return existing;}
+  const cust={id:'cust_'+Date.now(),name,email:email.toLowerCase(),phone:phone||'',registeredAt:new Date().toISOString(),consent:!!consent};
+  customers.push(cust);sCustomers(customers);return cust;
+}
+function findCustomerByEmail(email){return lCustomers().find(c=>c.email.toLowerCase()===email.toLowerCase());}
+function searchCustomers(query){
+  if(!query||query.length<2)return[];
+  const q=query.toLowerCase();
+  return lCustomers().filter(c=>c.name.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)).slice(0,8);
+}
+function emailAutocomplete(val){
+  const el=$('email-suggestions');if(!el)return;
+  if(!val||val.length<2){el.style.display='none';return;}
+  const matches=searchCustomers(val);
+  if(!matches.length){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=matches.map(c=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:.5px solid var(--b1);font-size:12px;" onmousedown="selectCustomer('${escHtml(c.email)}','${escHtml(c.name)}')" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <div style="font-weight:600;color:var(--t1);">${escHtml(c.name)}</div>
+    <div style="font-size:10px;color:var(--t3);">${escHtml(c.email)}</div>
+  </div>`).join('');
+}
+function selectCustomer(email,name){
+  $('cemail').value=email;
+  if(!$('cname').value.trim())$('cname').value=name;
+  hideSuggestions();
+}
+function hideSuggestions(){const el=$('email-suggestions');if(el)el.style.display='none';}
+document.addEventListener('click',function(e){if(!e.target.closest('#email-row'))hideSuggestions();});
+function genRegLink(){
+  const base=window.location.href.replace(/[^\/]*$/,'')+'propaintball-register.html';
+  const params=sbUrl&&sbKey?'?s='+btoa(sbUrl)+'&k='+btoa(sbKey):'';
+  $('reg-link').value=base+params;
+  $('reg-link-info').textContent=sbUrl?'Link obsahuje Supabase pripojenie':'Bez Supabase — registracia len na tomto zariadeni';
+}
+function copyRegLink(){
+  const link=$('reg-link').value;
+  if(!link){toast('Najprv vygeneruj link');return;}
+  navigator.clipboard.writeText(link).then(()=>toast('Link skopirovany')).catch(()=>{$('reg-link').select();document.execCommand('copy');toast('Skopirovane');});
+}
+async function syncCustomers(){
+  if(!sbUrl||!sbKey)return;
+  try{
+    const r=await fetch(`${sbUrl}/rest/v1/pb_data?backup_type=eq.customer&order=updated_at.desc`,{headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}});
+    if(r.ok){
+      const rows=await r.json();
+      const remote=rows.map(r=>r.payload).filter(p=>p&&p.email);
+      const local=lCustomers();
+      const merged=new Map();
+      local.forEach(c=>merged.set(c.email.toLowerCase(),c));
+      remote.forEach(c=>{if(c.email)merged.set(c.email.toLowerCase(),{...merged.get(c.email.toLowerCase())||{},...c});});
+      sCustomers([...merged.values()]);
+    }
+  }catch(e){console.error('[Customer sync]',e);}
+}
 // ══ SUPABASE ══
-function sbSt(m,c='var(--t3)'){const e=$('sb-st');if(e)e.innerHTML=`<span style="color:${c};">${m}</span>`;}
+function sbSt(m,c='var(--t3)'){const e=$('sb-st');if(e)e.innerHTML=`<span style="color:${c};">${escHtml(m)}</span>`;}
 function dot(i,c){const e=$('sdot');if(e){e.textContent=i;e.style.color=c||'var(--t3)';}}
 
 // ══════════════════════════════════════════════════════════════════
@@ -1256,8 +1386,9 @@ async function sbPush(){
     LS.s('pb_last_sync',Date.now());
     // Auto-create backup if needed
     autoBackupCheck();
+    syncCustomers();
     setTimeout(()=>dot('●','var(--t3)'),3000);
-  }catch(e){dot('!','var(--red)');sbSt('Chyba: '+e.message,'var(--red)');}
+  }catch(e){console.error('[Supabase push]',e);dot('!','var(--red)');sbSt('Chyba sync','var(--red)');}
 }
 async function sbPull(){
   if(!sbUrl||!sbKey){sbSt('Zadaj URL a kľúč','var(--red)');return;}
@@ -1274,8 +1405,9 @@ async function sbPull(){
     dot('✓','var(--grn)');
     sbSt('✓ Pull '+fT(new Date().toISOString()),'var(--grn)');
     toast('Synced!');
+    syncCustomers();
     setTimeout(()=>dot('●','var(--t3)'),3000);
-  }catch(e){dot('!','var(--red)');sbSt('Chyba: '+e.message,'var(--red)');}
+  }catch(e){console.error('[Supabase pull]',e);dot('!','var(--red)');sbSt('Chyba sync','var(--red)');}
 }
 
 // ── AUTO BACKUP SCHEDULER ──
@@ -1422,14 +1554,14 @@ async function bkList(){
                       row.backup_type==='auto-weekly'?'var(--blu)':'var(--t2)';
       return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--b1);">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:600;">${row.backup_label||row.id}</div>
+          <div style="font-size:12px;font-weight:600;">${escHtml(row.backup_label||row.id||'')}</div>
           <div style="font-size:10px;color:var(--t3);">${fDT(dt.toISOString())} · <span style="color:${typeColor};">${typeLabel}</span></div>
         </div>
         <button class="btn xs G" onclick="bkPreviewRestore('${row.id}','cloud')">↩ Obnoviť</button>
         <button class="btn xs R" onclick="bkDeleteCloud('${row.id}')">🗑</button>
       </div>`;
     }).join('');
-  }catch(e){el.innerHTML=`<div class="empty" style="color:var(--red);">Chyba: ${e.message}</div>`;}
+  }catch(e){el.innerHTML=`<div class="empty" style="color:var(--red);">Chyba: ${escHtml(e.message)}</div>`;}
 }
 function bkLocalList(){
   const el=$('bk-local-list');if(!el)return;
@@ -1465,7 +1597,7 @@ async function bkDeleteCloud(id){
       method:'DELETE',headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
     });
     bkList();toast('Záloha vymazaná');
-  }catch(e){toast('Chyba: '+e.message);}
+  }catch(e){console.error('[Supabase delete]',e);toast('Chyba pri mazaní zálohy');}
 }
 function bkDeleteLocal(i){
   if(!confirm('Vymazať lokálnu zálohu?'))return;
@@ -1503,7 +1635,7 @@ async function bkPreviewRestore(id,source){
       const label=rows[0].backup_label||id;
       const dt=fDT(rows[0].updated_at);
       $('m-rc-info').innerHTML=`Obnoviť cloud zálohu:<br><strong>${label}</strong><br><span style="color:var(--t3);">Dátum zálohy: ${dt}</span><br><span style="color:var(--t3);">Obsahuje: ${payload.closed?.length||0} účtov, ${payload.sessArr?.length||0} aktívnych akcií</span>`;
-    }catch(e){toast('Chyba: '+e.message);return;}
+    }catch(e){console.error('[Supabase restore]',e);toast('Chyba pri obnove zálohy');return;}
   }else if(source==='local'){
     const backups=LS.g('pb_local_backups',[]);
     const bk=backups.find(b=>b.id===id);if(!bk){toast('Záloha nenájdená');return;}
@@ -1522,6 +1654,7 @@ function confirmRestore(){
   selId=null;chkd=new Set();
   cm('m-restore-confirm');cm('m-backup');
   refUI();updateUserBtn();updateTabVisibility();
+  auditLog('data-import');
   toast('✓ Dáta obnovené! Záloha pred obnovou uložená.');
 }
 function bkImportFile(input){
@@ -1555,6 +1688,11 @@ function updateOnlineStatus(){
 window.addEventListener('online',()=>{updateOnlineStatus();toast('🟢 Pripojenie obnovené');});
 window.addEventListener('offline',()=>{updateOnlineStatus();toast('🔴 Bez internetu — dáta sa neukladajú do cloudu','var(--red)');});
 updateOnlineStatus();
+window.addEventListener('storage',function(e){
+  if(e.key&&e.key.startsWith('pb_')){
+    try{prods=LS.g('pb_p',prods);wbMap=LS.g('pb_wb',wbMap);closed=LS.g('pb_cl',closed);sessArr=LS.g('pb_ss',sessArr);curSid=LS.g('pb_cid',curSid);refUI();console.log('[Tab sync] Reloaded from other tab');}catch(err){}
+  }
+});
 // ══ CLOCK ══
 function tick(){const e=$('clk');if(e)e.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 tick();setInterval(tick,1000);
@@ -1699,6 +1837,7 @@ function askLogoutAfterSess(){
 }
 
 function checkAdm(){
+  if(Date.now()<_loginLockUntil){toast('Prilis vela pokusov. Skus o '+Math.ceil((_loginLockUntil-Date.now())/1000)+'s');return;}
   const pw=$('adm-pw').value;
   const selEl=$('adm-user-sel');
   const selName=selEl?selEl.value:'';
@@ -1708,26 +1847,30 @@ function checkAdm(){
       admUnlocked=true;
       $('adm-lock').style.display='none';$('sett-c').style.display='block';
       rPM();rSL('al-l',arenas,'arena');rSL('il-l',instructors,'instructor');rSL('acl-l',activities,'activity');fillSett();
+      auditLog('admin-login');
+    }else{
+      auditLog('login',currentUser.name);
     }
     // ✅ No remembering — require password every time
     updateTabVisibility();updateUserBtn();
-    toast('Prihlásený: '+currentUser.name+(isAdmin()?' (Admin)':' (Inštruktor)'));
+    toast('Prihlaseny: '+currentUser.name+(isAdmin()?' (Admin)':' (Instruktor)'));
     if(isAdmin())gT('spravca');
     else if(isInst())gT('moje');
   }else{
-    $('adm-err').textContent='Nesprávne heslo';
+    _loginAttempts++;if(_loginAttempts>=5){_loginLockUntil=Date.now()+30000;_loginAttempts=0;toast('Zablokovane na 30 sekund');}
+    $('adm-err').textContent='Nespravne heslo';
   }
 }
 function showAdmLogin(){
   $('adm-pw').value='';$('adm-err').textContent='';
   // Populate instructor list
   const sel=$('adm-user-sel');
-  if(sel){sel.innerHTML='<option value="">— Admin —</option>'+instructors.map(n=>`<option value="${n}">${n}</option>`).join('');}
+  if(sel){sel.innerHTML='<option value="">— Admin —</option>'+instructors.map(n=>`<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('');}
   om('m-adm');
 }
 function lockSett(){admUnlocked=false;$('adm-lock').style.display='flex';$('sett-c').style.display='none';}
 function logoutAndLock(){logoutUser();lockSett();updateTabVisibility();$('app').style.display='none';showLanding();toast('Odhlásený');}
-function changePw(){const o=$('old-pw').value,n=$('new-pw').value,n2=$('new-pw2').value;if(o!==admPw){toast('Nesprávne staré heslo');return;}if(n.length<4){toast('Min 4 znaky');return;}if(n!==n2){toast('Heslá sa nezhodujú');return;}admPw=n;save();$('old-pw').value='';$('new-pw').value='';$('new-pw2').value='';toast('Heslo zmenené');}
+function changePw(){const o=$('old-pw').value,n=$('new-pw').value,n2=$('new-pw2').value;if(!checkPw(o,admPw)){toast('Nesprávne staré heslo');return;}if(n.length<4){toast('Min 4 znaky');return;}if(n!==n2){toast('Heslá sa nezhodujú');return;}admPw=simpleHash(n);save();$('old-pw').value='';$('new-pw').value='';$('new-pw2').value='';auditLog('pw-change','admin');toast('Heslo zmenené');}
 function saveHR(){hrRate=parseFloat($('hr-rate').value)||6;save();toast('Sadzba: €'+hrRate+'/hod');}
 // ══ TABS ══
 const TABS=['reg','open','spravca','analyzy','moje','sett'];
@@ -1813,7 +1956,7 @@ function rPills(cid,items,grp){
   const e=$(cid);if(!e)return;
   // Admin nie je inštruktor — nepatrí do zoznamu hráčov
   const list=[...items];
-  e.innerHTML=list.map(it=>`<span class="pill" data-g="${grp}" data-v="${it}" onclick="pickP(this,'${grp}')">${it}</span>`).join('');
+  e.innerHTML=list.map(it=>`<span class="pill" data-g="${escHtml(grp)}" data-v="${escHtml(it)}" onclick="pickP(this,'${escHtml(grp)}')">${escHtml(it)}</span>`).join('');
 }
 // pickP defined above (Návrh C login flow)
 function gP(grp){const e=document.querySelector(`.pill[data-g="${grp}"].on`);return e?e.dataset.v:null;}
@@ -1851,9 +1994,40 @@ function rAppSessBar(){
     const tooltip=`${s.arena} · ${s.activity} · ${instrArr.join(', ')}${hasAgency&&!allAgencyClean?' — nezaplatené doplnky':''}`;
     return`<span class="spill ${isCur?'cur':''}" onclick="swSess('${s.key}')" title="${tooltip}">${name}${statusIcon}${isCur?' ●':''}</span>`;
   }).join('');
+  // Update multi-session bottom bar
+  const msBar=$('multi-sess-bar');const msItems=$('multi-sess-items');
+  if(msBar&&msItems){
+    if(sessArr.length>1){
+      msBar.style.display='block';
+      document.querySelector('.content')?.style.setProperty('padding-bottom','70px');
+      msItems.innerHTML=sessArr.map(s=>{
+        const wbs=wbMap[s.key]||[];
+        const isCur=s.key===curSid;
+        const instrArr=getSessionInstructors(s);
+        const closedCount=closed.filter(w=>w.sKey===s.key).length;
+        const activePlayers=wbs.length;
+        const totalRev=closed.filter(w=>w.sKey===s.key).reduce((sum,w)=>sum+billAmt(w),0);
+        const elapsed=s.startedAt?Math.round((Date.now()-new Date(s.startedAt).getTime())/60000):0;
+        const elapsedStr=elapsed>0?Math.floor(elapsed/60)+'h'+String(elapsed%60).padStart(2,'0')+'m':'';
+        const actColor=s.activity?.toLowerCase().includes('airsoft')?'var(--grn)':s.activity?.toLowerCase().includes('laser')?'var(--tel)':s.activity?.toLowerCase().includes('gel')?'var(--blu)':'var(--red)';
+        return`<div class="msb-item ${isCur?'active':''}" onclick="swSess('${s.key}')">
+          <div class="msb-name">${escHtml(s.arena||'—')} <span style="color:${actColor};">· ${escHtml(s.activity||'—')}</span></div>
+          <div class="msb-meta">👤 ${instrArr.map(n=>n.split(' ')[0]).join(', ')} ${elapsedStr?'· ⏱'+elapsedStr:''}</div>
+          <div class="msb-stats">
+            <span style="color:var(--grn);">👥${activePlayers}</span>
+            <span style="color:var(--pur);">✓${closedCount}</span>
+            ${totalRev>0?`<span style="color:var(--grn);">${fp(totalRev)}</span>`:''}
+          </div>
+        </div>`;
+      }).join('');
+    }else{
+      msBar.style.display='none';
+      document.querySelector('.content')?.style.setProperty('padding-bottom','0');
+    }
+  }
 }
 function swSess(k){curSid=k;selId=null;chkd=new Set();save();refUI();startSessTimer();const sg=getSess();toast('Session: '+(sg?.arena||'—')+' · '+(sg?.activity||''));}
-function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;e.textContent=s?(s.arena||'')+(s.activity?' · '+s.activity:''):'Bez session';}
+function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;if(!s){e.textContent='Bez session';return;}const instrArr=getSessionInstructors(s);const instrStr=instrArr.length>0?' · '+instrArr.map(n=>n.split(' ')[0]).join(', '):'';e.textContent=(s.arena||'')+(s.activity?' · '+s.activity:'')+instrStr;}
 function showSessModal(){
   const s=getSess();if(!s)return;
   const instr=getSessionInstructors(s);
@@ -1865,11 +2039,12 @@ function showSessModal(){
     <div class="rr" style="align-items:flex-start;"><span>Inštruktori</span>
       <div style="text-align:right;">
         ${instr.map(i=>`<div style="font-size:12px;font-weight:600;">${escHtml(i)}</div>`).join('')}
-        ${currentUser?`<button class="btn xs B" style="margin-top:5px;" onclick="cm('m-sess');openAddInstructor()">+ Pridať inštruktora</button>`:''}
       </div>
     </div>
-    ${dep?`<div class="rr" style="color:var(--grn);"><span>💰 Záloha</span><span>${fp(dep.amount)} (${dep.scope==='session'?'celá akcia':'hráč'})</span></div>`:''}
-  </div>`;
+    ${dep?`<div class="rr" style="color:var(--grn);"><span>💰 Záloha</span><span>${fp(dep.amount)} → ${(()=>{const allW=getWbs();const dw=allW.find(w=>w.id===dep.wbId);return dw?escHtml(dw.name):(dep.wbId||'—');})()}</span></div>`:''}
+  </div>
+  ${currentUser?`<button class="btn B" style="margin-top:12px;font-size:13px;padding:10px;" onclick="cm('m-sess');openAddInstructor()">👤 + Pridať inštruktora do akcie</button>`:''}
+  `;
   om('m-sess');
 }
 function endSess(){
@@ -1941,7 +2116,7 @@ function nfcWSConnect(){
   if(_nfcWS&&(_nfcWS.readyState===WebSocket.OPEN||_nfcWS.readyState===WebSocket.CONNECTING))return;
   nfcSetStatus('🔄 Pripájam sa...','var(--amb)','var(--abg)');
   try{_nfcWS=new WebSocket(NFC_WS_URL);}
-  catch(e){nfcSetStatus('❌ WebSocket chyba: '+e.message,'var(--red)','var(--rbg)');return;}
+  catch(e){console.error('[NFC WebSocket]',e);nfcSetStatus('WebSocket chyba','var(--red)','var(--rbg)');return;}
   _nfcWS.onopen=()=>{
     nfcSetStatus('✅ <strong>Čítačka pripojená</strong> — prikladaj náramky.','var(--grn)','var(--gbg)');
     $('nfc-scan-area').style.display='block';
@@ -1983,7 +2158,7 @@ function _nfcHandleUID(uid){
 function onNFCFocus(){const inp=$('mid');if(inp){inp.value='';inp.style.borderColor='var(--blu)';}}
 function onNFCBlur(){const inp=$('mid');if(inp)inp.style.borderColor='var(--bbd)';}
 function onNFCKey(e){if(e.key==='Enter'){e.preventDefault();const raw=($('mid')||{}).value||'';if(raw.trim())_nfcProcess(raw);}}
-function onNFCInput(e){clearTimeout(window._nfcDebounce);window._nfcDebounce=setTimeout(()=>{const raw=($('mid')||{}).value||'';if(raw.trim().length>=4)_nfcProcess(raw);},80);}
+function onNFCInput(e){clearTimeout(window._nfcDebounce);window._nfcDebounce=setTimeout(()=>{const raw=($('mid')||{}).value||'';if(raw.trim().length>=4)_nfcProcess(raw);},300);}
 function _nfcProcess(raw){
   clearTimeout(window._nfcDebounce);
   const hex=raw.replace(/[:\s\-]/g,'').toUpperCase();
@@ -2017,12 +2192,13 @@ function addPlayer(){
       const idx=startIdx+i;
       assignWb('H-'+Date.now()+'-'+i,'Hráč '+idx);
     }
-    $('cname').value='';$('cname').focus();
+    $('cname').value='';if($('cemail')){$('cemail').value='';hideSuggestions();}$('cname').focus();
     toast(num+' hráčov pridaných');
     return;
   }
-  assignWb('H-'+Date.now(),nm);
-  $('cname').value='';$('cname').focus();
+  const email=$('cemail')?.value?.trim()||'';
+  assignWb('H-'+Date.now(),nm,email);
+  $('cname').value='';if($('cemail')){$('cemail').value='';hideSuggestions();}$('cname').focus();
 }
 // totBalls = total balls purchased (pkg balls + all ammo added)
 // bUsed = how many have been shot (tracked manually)
@@ -2372,10 +2548,12 @@ function addP(pid){
       // All free slots used — fall through to add to bill
     }
   }
-  // Záloha produkt — max 1 na hráča
+  // Záloha produkt — max 1 na celú session (akciu)
   if(p.isDeposit){
-    const existing=w.items.find(i=>i.id===pid);
-    if(existing){toast('Záloha už bola pridaná na tento účet');return;}
+    // Check if ANY player in this session already has the deposit product
+    const allWbs=getWbs();
+    const anyHasDeposit=allWbs.some(w2=>w2.items.some(i=>i.id===pid));
+    if(anyHasDeposit){toast('Záloha už bola pridelená v tejto akcii (max 1× na akciu)');return;}
     w.items.push({id:pid,name:p.name,price:p.price,qty:1,disc:0});
     save();rBill();rWbs();rPbt();rDrk();return;
   }
@@ -2448,6 +2626,13 @@ function rWbs(){
         <span style="font-size:12px;font-weight:600;color:${billAmt(w)>0?'var(--grn)':'var(--t3)'};">${fp(billAmt(w))}</span>
         ${billAmt(w)>0?`<button class="btn xs G" onclick="event.stopPropagation();quickPay('${w.id}')" title="Rýchla platba">💳</button>`:''}
         ${canEditWb(w.id)?`<button class="btn xs B" onclick="event.stopPropagation();openEWbFor('${w.id}')">✎</button>`:''}
+      </div>
+      <div class="hover-actions" onclick="event.stopPropagation()">
+        ${billAmt(w)>0?`<button class="btn xs G" onclick="quickPay('${w.id}')" title="Zaplatiť">💰</button>`:''}
+        <button class="btn xs B" onclick="selWb('${w.id}');gT('reg')" title="Pridať produkt">➕</button>
+        ${(pk&&(pk.isPB||pk.isAS||pk.isGB))?`<button class="btn xs" style="background:var(--rbg);color:var(--red);border-color:var(--rbd);" onclick="selWb('${w.id}');mShot(100)" title="+100 guličiek">🔴</button>`:''}
+        ${canEditWb(w.id)?`<button class="btn xs B" onclick="openEWbFor('${w.id}')" title="Editovať meno">✎</button>`:''}
+        <button class="btn xs A" onclick="togChk('${w.id}')" title="Označiť">${ch?'☑':'☐'}</button>
       </div>
     </div>`;
   }).join('');
@@ -2573,7 +2758,7 @@ function saveWb(){
   if(ni&&ni!==w.id&&wbs.find(x=>x.id===ni)){toast('ID už použité');return;}
   if(ni)w.id=ni;if(nn)w.name=nn;selId=w.id;cm('m-wb');save();rWbs();rBill();toast('Aktualizované');
 }
-function assignWb(id,name){
+function assignWb(id,name,email){
   // ✅ Only session's own instructor (or admin) can add wristbands
   if(!currentUser){toast('Prihlás sa pre pridanie hráča');return;}
   const s=getSess();
@@ -2584,7 +2769,9 @@ function assignWb(id,name){
     }
   }
   const wbs=getWbs();if(wbs.find(w=>w.id===id)){toast('Hráč/náramok '+id+' už existuje');return;}
-  wbs.push({id,name:name||'Hráč',items:[],sKey:actKey(),sArena:s?.arena,sInstr:s?.instructor,sAct:s?.activity,openedAt:new Date().toISOString(),bUsed:0,bLoad:0,dG:[],pkgDone:false});
+  const closedDup=closed.find(c=>c.id===id);
+  if(closedDup){toast('ID '+id+' už bol použitý (uzavretý účet '+closedDup.name+')');return;}
+  wbs.push({id,name:name||'Hráč',email:email||'',items:[],sKey:actKey(),sArena:s?.arena,sInstr:s?.instructor,sAct:s?.activity,openedAt:new Date().toISOString(),bUsed:0,bLoad:0,dG:[],pkgDone:false});
   setWbs(wbs);selId=id;save();rWbs();rBill();rPbt();rDrk();rProds();toast(`#${wbs.length} ${name||'Hráč'} pridaný`);
 }
 function payAll(){
@@ -2667,9 +2854,10 @@ function rBill(){
         `</div>`;
     }).join('');
   }
-  const dep=getDepositForWb(selId);const sessDep2=getSessionDeposit();const totalDep=dep+sessDep2;
-  if(totalDep>0){
-    totEl.innerHTML=`<span style="font-size:14px;">${fp(billAmt(w))}</span><br><span style="font-size:10px;color:var(--grn);">💰 Záloha: -${fp(totalDep)}</span><br><span style="font-size:18px;font-weight:800;color:var(--amb);">Na inkaso: ${fp(Math.max(0,billAmt(w)-totalDep))}</span>`;
+  const dep=getDepositForWb(selId);
+  if(dep>0){
+    const naInkaso=billAmt(w)-dep;
+    totEl.innerHTML=`<span style="font-size:14px;">${fp(billAmt(w))}</span><br><span style="font-size:10px;color:var(--grn);">💰 Záloha: -${fp(dep)}</span><br><span style="font-size:18px;font-weight:800;color:var(--amb);">Na inkaso: ${fp(naInkaso)}</span>`;
   }else{
     totEl.textContent=fp(billAmt(w));
   }
@@ -2731,7 +2919,7 @@ function confirmAddInstructor(){
   if(!pw){$('add-instr-err').textContent='Zadaj heslo';$('add-instr-pw').focus();return;}
   const users=buildIUsers();
   const u=users.find(x=>x.name===name&&x.pw===pw);
-  if(!u){$('add-instr-err').textContent='Zlé heslo — Nepridaný';$('add-instr-pw').value='';$('add-instr-pw').focus();return;}
+  if(!u){$('add-instr-err').textContent='Chybné heslo — Inštruktor NEPRIDANÝ';$('add-instr-pw').value='';$('add-instr-pw').focus();return;}
   const sess=getSess();if(!sess)return;
   if(!sess.instructors)sess.instructors=[sess.instructor].filter(Boolean);
   if(!sess.instructors.includes(name)){sess.instructors.push(name);save();}
@@ -2750,61 +2938,77 @@ function instrLabel(sess){
 }
 // ══ DEPOSIT (ZÁLOHA) ══
 let _depositPendClose=null;
-let _depositScope='player';
-function setDepositScope(scope){
-  _depositScope=scope;
-  $('deposit-scope-player').classList.toggle('on',scope==='player');
-  $('deposit-scope-session').classList.toggle('on',scope==='session');
-}
+let _depositIsGroupPay=false;
 function checkDepositBeforeClose(wbId){
   const sess=getSess();if(!sess)return false;
-  // Already asked for this session → skip
-  if(sess.depositAsked)return false;
-  // Already has deposit → skip
+  const depositProd=prods.find(p=>p.isDeposit);
+  // If deposit was confirmed via popup, it's settled
   if(sess.deposit)return false;
-  // Check if there are already closed bills for this session
-  const existingClosed=closed.filter(w=>w.sKey===sess.key);
-  if(existingClosed.length>0){sess.depositAsked=true;save();return false;}
-  // First bill ever in this session → ask
+  // Check if any active player has the deposit product on their bill
+  if(depositProd){
+    const allWbs=getWbs();
+    const anyHasDepositProduct=allWbs.some(w=>w.items.some(i=>i.id===depositProd.id));
+    if(anyHasDepositProduct)return false;
+    // Also check already-closed bills for this session
+    const closedWithDeposit=closed.filter(w=>w.sKey===sess.key&&w.items.some(i=>i.id===depositProd.id));
+    if(closedWithDeposit.length>0)return false;
+  }
+  // Also check persistent deposits
+  const deps=lDeposits();
+  if(deps[sess.key])return false;
+  // No deposit settled → show popup
   return true;
 }
-function openDepositModal(wbId){
+function openDepositModal(wbId,isGroup){
   _depositPendClose=wbId;
-  _depositScope='player';
-  $('deposit-scope-player').classList.add('on');
-  $('deposit-scope-session').classList.remove('on');
+  _depositIsGroupPay=!!isGroup;
   $('deposit-amount').value='50';
+  // Populate player dropdown with active players in this session
+  const allWbs=getWbs();
+  const sel=$('deposit-player-sel');
+  sel.innerHTML=allWbs.map(w=>`<option value="${w.id}" ${w.id===wbId?'selected':''}>${escHtml(w.name)}</option>`).join('');
   om('m-deposit');
 }
 function confirmDeposit(){
   const amt=parseFloat($('deposit-amount').value)||0;
   if(amt<=0){toast('Zadaj sumu zálohy');return;}
   const sess=getSess();if(!sess)return;
-  sess.deposit={amount:amt,scope:_depositScope,wbId:_depositScope==='player'?_depositPendClose:null};
-  sess.depositAsked=true;
+  const selectedWbId=$('deposit-player-sel').value;
+  sess.deposit={amount:amt,scope:'player',wbId:selectedWbId};
   save();
   cm('m-deposit');
-  toast('💰 Záloha '+fp(amt)+' zaznamenaná');
-  // Continue with the original close bill flow
-  _proceedCloseBill(_depositPendClose);
+  toast('💰 Záloha '+fp(amt)+' zaznamenaná → '+getWbs().find(w=>w.id===selectedWbId)?.name);
+  // Continue with the original close flow
+  if(_depositIsGroupPay){
+    _continueGroupPay();
+  }else{
+    _proceedCloseBill(_depositPendClose);
+  }
 }
 function skipDeposit(){
-  const sess=getSess();if(sess){sess.depositAsked=true;save();}
+  // User said "Nie" — do NOT mark as asked. Popup will appear again next time.
+  // Just continue with the current close flow.
   cm('m-deposit');
-  _proceedCloseBill(_depositPendClose);
+  if(_depositIsGroupPay){
+    _continueGroupPay();
+  }else{
+    _proceedCloseBill(_depositPendClose);
+  }
 }
 function getDepositForWb(wbId){
   const sess=getSess();if(!sess||!sess.deposit)return 0;
   const d=sess.deposit;
   if(d.scope==='player'&&d.wbId===wbId)return d.amount;
-  if(d.scope==='session'){
-    return 0; // handled separately in rBill
-  }
   return 0;
 }
 function getSessionDeposit(){
-  const sess=getSess();if(!sess||!sess.deposit)return 0;
-  if(sess.deposit.scope==='session')return sess.deposit.amount;
+  // No longer used — deposit is always per-player now
+  return 0;
+}
+// Get total deposit amount for any session key (for reports)
+function getDepositForSession(sessKey){
+  const sess=sessArr.find(s=>s.key===sessKey);
+  if(sess&&sess.deposit)return sess.deposit.amount;
   return 0;
 }
 // ══ CLOSE BILL ══
@@ -2831,14 +3035,12 @@ function _proceedCloseBill(wbId){
   pendClose=wbId;payM=null;$('po-c').className='po';$('po-k').className='po';$('po-f').className='po';
   const b=$('pay-btn');b.disabled=true;b.style.opacity='.4';
   const dep=getDepositForWb(wbId);
-  const sessDep=getSessionDeposit();
-  const totalDeposit=dep+sessDep;
-  const amtAfterDeposit=billAmt(w)-totalDeposit;
+  const amtAfterDeposit=billAmt(w)-dep;
   $('pay-prev').innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:7px;">${w.name}</div>`+
     w.items.map(i=>{const d=i.disc||0;return`<div class="rr"><span>${i.name} ×${i.qty}${d>0?` -${d}%`:''}</span><span>${fp(i.price*i.qty*(1-d/100))}</span></div>`;}).join('')+
-    (totalDeposit>0?`<div class="rr" style="color:var(--grn);">` +
-      `<span>💰 Záloha (zaplatená vopred${sessDep>0?' – celá akcia':''})</span><span>-${fp(totalDeposit)}</span></div>`+
-      `<div class="rr tot" style="color:var(--amb);"><span>Na inkaso teraz</span><span>${fp(Math.max(0,amtAfterDeposit))}</span></div>`
+    (dep>0?`<div class="rr" style="color:var(--grn);">` +
+      `<span>💰 Záloha (zaplatená vopred)</span><span>-${fp(dep)}</span></div>`+
+      `<div class="rr tot" style="color:var(--amb);"><span>Na inkaso teraz</span><span>${fp(amtAfterDeposit)}</span></div>`
     :`<div class="rr tot"><span>${t("total")}</span><span>${fp(billAmt(w))}</span></div>`);
   om('m-pay');
 }
@@ -2902,14 +3104,17 @@ function confirmAgencyPay(){
 function confirmPay(){
   if(!payM)return;const wbs=getWbs();const w=wbs.find(w=>w.id===pendClose);if(!w)return;
   const s=getSess();const snapSid=curSid; // capture before any possible switch
-  w.closedAt=new Date().toISOString();w.payM=payM;w.justClosed=true;w.sKey=actKey();w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;
+  w.closedAt=new Date().toISOString();w.orderIdx=closed.filter(x=>x.sKey===actKey()).length;w.payM=payM;w.justClosed=true;w.sKey=actKey();w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;
   closed.unshift(w);const newWbs=wbs.filter(x=>x.id!==pendClose);setWbs(newWbs);
   if(chkd.has(pendClose))chkd.delete(pendClose);if(selId===pendClose)selId=null;
+  auditLog('bill-close',w.name+' '+payM+' '+fp(billAmt(w)));
+  if(w.email){const cust=findCustomerByEmail(w.email);if(!cust)addCustomer(w.name,w.email,'',false);}
   pendClose=null;cm('m-pay');save();rWbs();rBill();rPbt();rDrk();
   if($('p-closed')?.classList.contains('on'))rClosed();
   if($('p-spravca')?.classList.contains('on'))rSpravca();
   if($('p-analyzy')?.classList.contains('on'))rAnalyzy();
   toast(`${payM==='cash'?'💵 Hotovosť':payM==='invoice'?'🧾 Faktúra':'💳 Karta'} – zaplatené`);
+  playPaySound();const pf=document.createElement('div');pf.className='pay-flash';pf.textContent='✅';document.body.appendChild(pf);setTimeout(()=>pf.remove(),1000);
   if(newWbs.length===0){checkLastPlayerClosed(snapSid);}
 }
 // P8: Last player closed — ask instructor about closing session
@@ -2945,8 +3150,9 @@ function openCloseSess(key,bills){
   // Auto-close agency players with only packages → invoice
   if(agencyPending.length>0){
     const now=new Date().toISOString();
-    agencyPending.forEach(w=>{
-      w.closedAt=now;w.payM='invoice';w.justClosed=true;
+    const agBaseIdx=closed.filter(x=>x.sKey===key).length;
+    agencyPending.forEach((w,idx)=>{
+      w.closedAt=now;w.orderIdx=agBaseIdx+idx;w.payM='invoice';w.justClosed=true;
       w.sKey=key;w.sArena=sess?.arena;w.sInstr=sess?.instructor;w.sAct=sess?.activity;w.sDate=sess?.date;w.sTime=sess?.time;
       closed.unshift(w);
     });
@@ -3026,8 +3232,11 @@ function confirmCloseSess(){
   if(costs>0&&!note){$('cs-note-req').style.display='inline';toast('Poznámka k nákladom je povinná');return;}
   $('cs-note-req').style.display='none';
   const savedKey=closeSessKey;
+  auditLog('sess-close',savedKey);
   // ✅ Capture session info BEFORE removing from sessArr
   const savedSess=sessArr.find(s=>s.key===savedKey)||{};
+  // Save deposit data persistently (session will be removed from sessArr)
+  if(savedSess.deposit){const deps=lDeposits();deps[savedKey]=savedSess.deposit;sDeposits(deps);}
   // Save payout
   const pouts=lPouts();pouts[savedKey]={amt:pay,costs,note,type:'manual'};sPouts(pouts);
   // ✅ Remove session from active sessArr + wbMap so it disappears from top bar & start screen
@@ -3064,7 +3273,26 @@ function confirmCloseSess(){
   askLogoutAfterSess();
 }
 function selGPay(m){gPayM=m;$('gpo-c').className='po'+(m==='cash'?' cash':'');$('gpo-k').className='po'+(m==='card'?' card':'');$('gpo-f').className='po'+(m==='invoice'?' invoice':'');const b=$('grp-btn');b.disabled=false;b.style.opacity='1';}
+let _pendingGrpPayM=null;
+function _continueGroupPay(){
+  // Resume group payment after deposit popup
+  if(!_pendingGrpPayM)return;
+  gPayM=_pendingGrpPayM;_pendingGrpPayM=null;
+  _doConfirmGrp();
+}
 function confirmGrp(){
+  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
+  if(!gPayM)return;
+  // Check deposit before group pay
+  if(checkDepositBeforeClose(pendGrp[0])){
+    _pendingGrpPayM=gPayM;
+    cm('m-grp');
+    openDepositModal(pendGrp[0],true);
+    return;
+  }
+  _doConfirmGrp();
+}
+function _doConfirmGrp(){
   if(!currentUser){toast('Prihlás sa pre inkaso');return;}
   if(!gPayM)return;const wbs=getWbs();const s=getSess();const sk=actKey();
   const sel=wbs.filter(w=>pendGrp.includes(w.id)&&canEditWb(w.id));
@@ -3080,14 +3308,17 @@ function confirmGrp(){
     const nonAgency=sel.filter(w=>!isAgencyWb(w));
     if(nonAgency.length>0){toast('❌ Len Agentúra PB môže platiť faktúrou');return;}
   }
-  sel.forEach(w=>{w.closedAt=new Date().toISOString();w.payM=gPayM;w.justClosed=true;w.sKey=sk;w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;closed.unshift(w);});
+  const grpBaseIdx=closed.filter(x=>x.sKey===sk).length;
+  sel.forEach((w,idx)=>{w.closedAt=new Date().toISOString();w.orderIdx=grpBaseIdx+idx;w.payM=gPayM;w.justClosed=true;w.sKey=sk;w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;closed.unshift(w);if(w.email){const cust=findCustomerByEmail(w.email);if(!cust)addCustomer(w.name,w.email,'',false);}});
   const newWbs=wbs.filter(w=>!pendGrp.includes(w.id));setWbs(newWbs);
   pendGrp.forEach(id=>{if(chkd.has(id))chkd.delete(id);});if(pendGrp.includes(selId))selId=null;
   cm('m-grp');save();rWbs();rBill();rPbt();rDrk();
   if($('p-closed')?.classList.contains('on'))rClosed();
   if($('p-spravca')?.classList.contains('on'))rSpravca();
   if($('p-analyzy')?.classList.contains('on'))rAnalyzy();
-  toast(`Skupinová platba ${gPayM==='cash'?'💵':gPayM==='invoice'?'🧾':'💳'} potvrdená`);pendGrp=null;
+  toast(`Skupinová platba ${gPayM==='cash'?'💵':gPayM==='invoice'?'🧾':'💳'} potvrdená`);
+  playPaySound();const pf=document.createElement('div');pf.className='pay-flash';pf.textContent='✅';document.body.appendChild(pf);setTimeout(()=>pf.remove(),1000);
+  pendGrp=null;
   if(newWbs.length===0){checkLastPlayerClosed(sk);}
 }
 function selEPay(m){ePayM=m;$('epo-c').className='po'+(m==='cash'?' cash':'');$('epo-k').className='po'+(m==='card'?' card':'');$('epo-f').className='po'+(m==='invoice'?' invoice':'');}
@@ -3096,6 +3327,48 @@ function openEPayM(id){ePayId=id;const w=closed.find(c=>c.id===id);ePayM=w?w.pay
 // ══ REOPEN ══
 function openReopen(id){reopW=closed.find(c=>c.id===id);if(!reopW)return;$('m-reopen-b').innerHTML=`<p style="font-size:13px;color:var(--t2);margin-bottom:9px;">Znovu otvoriť <strong style="color:var(--t1);">${reopW.name}</strong>?</p><p style="font-size:11px;color:var(--t3);">Uzavreté: ${fDT(reopW.closedAt)}</p>`;om('m-reopen');}
 function confirmReopen(){if(!reopW)return;const wbs=getWbs();if(wbs.find(x=>x.id===reopW.id)){toast('Hráč s týmto ID už existuje');return;}const w={...reopW};delete w.closedAt;delete w.payM;wbs.push(w);setWbs(wbs);closed=closed.filter(c=>c.id!==reopW.id);selId=w.id;cm('m-reopen');save();gT('reg');rWbs();rBill();rPbt();rDrk();toast('Účet '+w.name+' znovu otvorený');reopW=null;}
+// ══ EDIT AMOUNT (Správca) ══
+let _editAmtId=null;
+function openEditAmt(id){
+  if(!admUnlocked){toast('Len admin');return;}
+  const w=closed.find(c=>c.id===id);if(!w){toast('Hráč nenájdený');return;}
+  _editAmtId=id;
+  $('m-editamt-info').innerHTML=`<strong style="color:var(--t1);">${escHtml(w.name)}</strong> · ${w.payM==='card'?'💳':w.payM==='invoice'?'🧾':'💵'} · Celkom: <strong>${fp(billAmt(w))}</strong>`;
+  $('m-editamt-items').innerHTML=w.items.map((it,idx)=>{
+    const d=it.disc||0;const lineTotal=it.price*it.qty*(1-d/100);
+    return`<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:6px 8px;background:var(--bg3);border-radius:var(--rs);border:.5px solid var(--b1);">
+      <div style="flex:1;font-size:12px;color:var(--t1);">${escHtml(it.name)} x${it.qty}${d>0?' -'+d+'%':''}</div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" id="eamt-q-${idx}" value="${it.qty}" min="0" step="1" style="width:50px;padding:4px 6px;font-size:12px;text-align:center;">
+        <span style="font-size:11px;color:var(--t3);">ks</span>
+        <input type="number" id="eamt-p-${idx}" value="${it.price}" step="0.5" style="width:70px;padding:4px 6px;font-size:12px;text-align:right;">
+        <span style="font-size:11px;color:var(--t3);">€/ks</span>
+        <input type="number" id="eamt-d-${idx}" value="${d}" min="0" max="100" step="5" style="width:50px;padding:4px 6px;font-size:12px;text-align:center;">
+        <span style="font-size:11px;color:var(--t3);">%</span>
+      </div>
+    </div>`;
+  }).join('');
+  om('m-editamt');
+}
+function saveEditAmt(){
+  if(!_editAmtId)return;
+  const w=closed.find(c=>c.id===_editAmtId);if(!w)return;
+  const oldAmt=billAmt(w);
+  w.items.forEach((it,idx)=>{
+    const qEl=$('eamt-q-'+idx);const pEl=$('eamt-p-'+idx);const dEl=$('eamt-d-'+idx);
+    if(qEl)it.qty=Math.max(0,parseInt(qEl.value)||0);
+    if(pEl)it.price=parseFloat(pEl.value)||0;
+    if(dEl)it.disc=Math.min(100,Math.max(0,parseFloat(dEl.value)||0));
+  });
+  // Remove items with 0 qty
+  w.items=w.items.filter(it=>it.qty>0);
+  cm('m-editamt');save();
+  if($('p-spravca')?.classList.contains('on'))rSpravca();
+  if($('p-closed')?.classList.contains('on'))rClosed();
+  if($('p-analyzy')?.classList.contains('on'))rAnalyzy();
+  toast('Suma zmenená: '+fp(oldAmt)+' → '+fp(billAmt(w)));
+  _editAmtId=null;
+}
 // ══ VRP2 ══
 function openVrp(){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w||!w.items.length){toast('Žiadne položky');return;}
@@ -3470,7 +3743,7 @@ function openReport(key){
     <div class="rep-section">
       <div class="rep-title">💰 Finančný súhrn</div>
       <div class="rep-row bold green"><span>Celkové tržby</span><span>${fp(tot)}</span></div>
-      ${(()=>{const sessDeposits=Object.values(Object.fromEntries(sessArr.filter(s=>s.key===key&&s.deposit).map(s=>[s.key,s.deposit])));const depositsFromClosed=[];let depAmt=0;try{const s=sessArr.find(x=>x.key===key);if(s&&s.deposit)depAmt=s.deposit.amount;}catch(e){}return depAmt>0?`<div class="rep-row" style="color:var(--grn);"><span>💰 Záloha (vopred zaplatená)</span><span>-${fp(depAmt)}</span></div><div class="rep-row" style="color:var(--amb);"><span>Na inkaso v deň akcie</span><span>${fp(Math.max(0,tot-depAmt))}</span></div>`:''})()}
+      ${(()=>{let depAmt=0;try{const s=sessArr.find(x=>x.key===key);if(s&&s.deposit)depAmt=s.deposit.amount;else{const deps=lDeposits();if(deps[key])depAmt=deps[key].amount;}}catch(e){}const depProduct=grp.reduce((s,w)=>s+w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return p&&p.isDeposit;}).reduce((s2,i)=>s2+Math.abs(i.price)*i.qty,0),0);const totalDep=depAmt+depProduct;return totalDep>0?`<div class="rep-row" style="color:var(--grn);"><span>💰 Zálohy uhradené vopred</span><span>${fp(totalDep)}</span></div><div class="rep-row bold" style="color:var(--amb);"><span>💵 Hotovosť (po odpočítaní záloh)</span><span>${fp(cash-totalDep)}</span></div>`:''})()}
       <div class="rep-row"><span>💵 Hotovosť</span><span>${fp(cash)}</span></div>
       <div class="rep-row"><span>💳 Karta</span><span>${fp(card)}</span></div>
       ${inv>0?`<div class="rep-row" style="color:${sessInvPaid?'var(--pur)':'var(--amb)'};"><span>🧾 Faktúra${sessInvPaid?' ✅':' ⏳'}</span><span>${fp(inv)}</span></div>`:''}
@@ -3508,7 +3781,7 @@ function openReport(key){
     </div>
     <div class="rep-section">
       <div class="rep-title">📋 Zákazníci</div>
-      ${grp.map((w,i)=>`<div class="rep-row"><span>#${i+1} ${w.name}</span><span style="display:flex;gap:6px;align-items:center;"><span style="font-size:10px;color:var(--t2);">${(w.paidExtras&&w.paidExtras.length)?'🧾'+(w.paidExtras.some(e=>e.payM==='card')?' +💳':'')+(w.paidExtras.some(e=>e.payM==='cash')?' +💵':''):w.payM==='card'?'💳':w.payM==='invoice'?'🧾':'💵'}</span><strong>${fp(totalAmt(w))}</strong></span></div>`).join('')}
+      ${(()=>{const sorted=[...grp].sort((a,b)=>(a.orderIdx||0)-(b.orderIdx||0));return sorted.map((w,i)=>`<div class="rep-row"><span>#${i+1} ${w.name}</span><span style="display:flex;gap:6px;align-items:center;"><span style="font-size:10px;color:var(--t2);">${(w.paidExtras&&w.paidExtras.length)?'🧾'+(w.paidExtras.some(e=>e.payM==='card')?' +💳':'')+(w.paidExtras.some(e=>e.payM==='cash')?' +💵':''):w.payM==='card'?'💳':w.payM==='invoice'?'🧾':'💵'}</span><strong>${fp(totalAmt(w))}</strong></span></div>`).join('');})()}
       <div class="rep-row bold"><span>Celkom</span><span>${fp(tot)}</span></div>
     </div>
 `  <!-- chart removed -->;
@@ -3565,7 +3838,14 @@ function sendMailReport(){
   L.push('FINANCIE');
   L.push(SEP);
   L.push('Trzby celkom:  '+fp(tot));
+  // Deposit info
+  let emailDepAmt=0;
+  try{const s=sessArr.find(x=>x.key===key);if(s&&s.deposit)emailDepAmt=s.deposit.amount;else{const deps=lDeposits();if(deps[key])emailDepAmt=deps[key].amount;}}catch(e){}
+  const emailDepProd=grp.reduce((s,w)=>s+w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return p&&p.isDeposit;}).reduce((s2,i)=>s2+Math.abs(i.price)*i.qty,0),0);
+  const emailTotalDep=emailDepAmt+emailDepProd;
+  if(emailTotalDep>0)L.push('Zaloha uhr.:   '+fp(emailTotalDep));
   L.push('Hotovost:      '+fp(cash));
+  if(emailTotalDep>0)L.push('Hot. po zal.:  '+fp(cash-emailTotalDep));
   L.push('Karta:         '+fp(card));
   if(pout){
     L.push('Odmena:        '+fp(pout.amt));
@@ -3576,7 +3856,8 @@ function sendMailReport(){
   L.push('');
   L.push('HRACOV CELKOM: '+grp.length);
   L.push(SEP);
-  grp.forEach((w,i)=>{
+  const grpMailSorted=[...grp].sort((a,b)=>(a.orderIdx||0)-(b.orderIdx||0));
+  grpMailSorted.forEach((w,i)=>{
     const pkg=getPkg(w);const amt=totalAmt(w);
     L.push('');
     L.push((i+1)+'. '+sk(w.name)+'  ['+fp(amt)+'] '+((w.paidExtras&&w.paidExtras.length)?'FAKTURA+('+w.paidExtras.map(e=>e.payM.toUpperCase()).filter((v,i,a)=>a.indexOf(v)===i).join('+')+')'  :w.payM==='card'?'KARTA':w.payM==='invoice'?'FAKTURA':'HOTOVOST'));
@@ -3621,10 +3902,11 @@ function confirmDelSess(){
   sessArr=sessArr.filter(s=>s.key!==key);
   delete wbMap[key];
   if(curSid===key){curSid=sessArr.length?sessArr[0].key:null;}
-  // Clean up pouts/notes/de
+  // Clean up pouts/notes/de/deposits
   delete pouts[key];sPouts(pouts);
   delete notes[key];sNotes(notes);
   delete de[key];sDE(de);
+  const deps=lDeposits();delete deps[key];sDeposits(deps);
   cm('m-del-sess');save();rClosed();rAkcie();rAppSessBar();
   toast('Akcia archivovaná a vymazaná');delSessKey=null;
 }
@@ -3896,8 +4178,17 @@ function rSpravca(){
   const pouts=lPouts();
   const totPay=allKeys.reduce((s,k)=>s+(pouts[k]?pouts[k].amt:0),0);
   const totCosts=allKeys.reduce((s,k)=>s+(pouts[k]?pouts[k].costs||0:0),0);
+  // Deposit calculation for Správca
+  const sDeps=lDeposits();
+  const sPopupDep=allKeys.reduce((s,k)=>{
+    const d=sDeps[k];if(d)return s+d.amount;
+    const sess=sessArr.find(x=>x.key===k);if(sess&&sess.deposit)return s+sess.deposit.amount;
+    return s;
+  },0);
+  const sDepProd=bills.reduce((s,w)=>s+depositItemAmt(w),0);
+  const sTotalDep=sPopupDep+sDepProd;
   const srevEl=$('srev-s');
-  if(srevEl)srevEl.innerHTML=`<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(tot)}</div><div class="rbl">Celkom</div></div><div class="rb"><div class="rbv" style="color:var(--grn);">${fp(cash)}</div><div class="rbl">💵 Hotovosť</div></div><div class="rb"><div class="rbv" style="color:var(--blu);">${fp(card)}</div><div class="rbl">💳 Karta</div></div>${invPaid>0?`<div class="rb" style="background:var(--pbg);border:.5px solid var(--pbd);"><div class="rbv" style="color:var(--pur);">${fp(invPaid)}</div><div class="rbl">🧾 Faktúra uhradená</div></div>`:''} ${invUnpaid>0?`<div class="rb" style="background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(invUnpaid)}</div><div class="rbl">🧾 Faktúra neuhradená</div></div>`:''} ${(totPay+totCosts)>0?`<div class="rb" style="grid-column:1/-1;background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(cash-totPay-totCosts)}</div><div class="rbl">💵 Čistá hotovosť</div></div>`:''}  `;
+  if(srevEl)srevEl.innerHTML=`<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(tot)}</div><div class="rbl">Celkom</div></div>${sTotalDep>0?`<div class="rb" style="background:var(--gbg);border:.5px solid var(--gbd);"><div class="rbv" style="color:var(--grn);">${fp(sTotalDep)}</div><div class="rbl">💰 Zálohy</div></div>`:''}<div class="rb"><div class="rbv" style="color:var(--grn);">${fp(cash)}</div><div class="rbl">💵 Hotovosť</div></div><div class="rb"><div class="rbv" style="color:var(--blu);">${fp(card)}</div><div class="rbl">💳 Karta</div></div>${invPaid>0?`<div class="rb" style="background:var(--pbg);border:.5px solid var(--pbd);"><div class="rbv" style="color:var(--pur);">${fp(invPaid)}</div><div class="rbl">🧾 Faktúra uhradená</div></div>`:''} ${invUnpaid>0?`<div class="rb" style="background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(invUnpaid)}</div><div class="rbl">🧾 Faktúra neuhradená</div></div>`:''} ${(totPay+totCosts)>0?`<div class="rb" style="grid-column:1/-1;background:var(--abg);border:.5px solid var(--abd);"><div class="rbv" style="color:var(--amb);">${fp(cash-totPay-totCosts)}</div><div class="rbl">💵 Čistá hotovosť</div></div>`:''}  `;
 
   if(!bills.length){el.innerHTML='<div class="empty" style="padding:2rem;">Žiadne akcie za vybrané obdobie</div>';return;}
 
@@ -3930,6 +4221,10 @@ function rSpravca(){
     const pout=pouts[key];const note=notes[key]||'';
     const shot=grp.reduce((t,w)=>t+Math.min(w.bUsed||0,totBalls(w)),0);
     const dStats=buildDrinkStats(grp);const drinkCount=Object.values(dStats).reduce((s,v)=>s+v,0);
+    // Deposit per game
+    let grpDepAmt=0;
+    try{const gd=sDeps[key];if(gd)grpDepAmt=gd.amount;else{if(sess&&sess.deposit)grpDepAmt=sess.deposit.amount;}}catch(e){}
+    grpDepAmt+=grp.reduce((s,w)=>s+depositItemAmt(w),0);
     // Invoice color: unpaid=amber border, paid=purple, no invoice=normal
     const rowBorder=grpInv>0?(sessInvPaid?'var(--pbd)':'var(--abd)'):'var(--b1)';
     const totColor=grpInv>0?(sessInvPaid?'var(--pur)':'var(--amb)'):'var(--grn)';
@@ -3956,6 +4251,7 @@ function rSpravca(){
           <div style="display:flex;gap:5px;">
             ${grpCash>0?`<span style="font-size:10px;background:var(--gbg);color:var(--grn);padding:1px 6px;border-radius:99px;">💵${fp(grpCash)}</span>`:''}
             ${grpCard>0?`<span style="font-size:10px;background:var(--bbg);color:var(--blu);padding:1px 6px;border-radius:99px;">💳${fp(grpCard)}</span>`:''}
+            ${grpDepAmt>0?`<span style="font-size:10px;background:var(--gbg);color:var(--grn);padding:1px 6px;border-radius:99px;">💰${fp(grpDepAmt)}</span>`:''}
             ${grpInv>0?`<span style="font-size:10px;background:${sessInvPaid?'var(--pbg)':'var(--abg)'};color:${sessInvPaid?'var(--pur)':'var(--amb)'};padding:1px 6px;border-radius:99px;">🧾${fp(grpInv)}</span>`:''}
           </div>
           <div style="font-size:10px;color:var(--t3);">👥 ${grp.length} hráčov${shot>0?` · 🔴${shot}`:''}</div>
@@ -3993,6 +4289,7 @@ function rSpravca(){
             const invConf=lSessInvConf();const sKey=w.sKey||'unknown';const isPaid=!!(invConf[sKey]?.paid);const paidDate=invConf[sKey]?.date||'';
             return`<div class="player-card" style="border-color:${w.payM==='card'?'var(--bbd)':isInv?(isPaid?'var(--pbd)':'var(--abd)'):'var(--gbd)'};">
               <div class="player-name">${escHtml(w.name)}</div>
+              ${(w.email||w.phone)?`<div style="font-size:9px;color:var(--t3);">${escHtml(w.email||w.phone)}</div>`:''}
               <div class="player-meta" style="margin-top:3px;">
                 ${w.payM==='card'?'<span style="color:var(--blu);">💳</span>':isInv?`<span style="color:${isPaid?'var(--pur)':'var(--amb)'};">🧾</span>`:'<span style="color:var(--grn);">💵</span>'} <strong>${fp(totalAmt(w))}</strong>
                 ${balls?`<span style="color:var(--t3);"> · 🔴${balls}</span>`:''}
@@ -4005,8 +4302,9 @@ function rSpravca(){
                 </label>
               </div>`:isInv?`<div style="margin-top:3px;font-size:9px;color:${isPaid?'var(--pur)':'var(--amb);font-style:italic'};">${isPaid?'✅ Uhradená '+paidDate:'⏳ Čaká na úhradu'}</div>`:''}
               <div style="display:flex;gap:3px;margin-top:5px;">
-                <button class="btn xs B" onclick="openEPayM('${w.id}')">✎</button>
-                <button class="btn xs A" onclick="openReopen('${w.id}')">↩</button>
+                <button class="btn xs B" onclick="openEPayM('${w.id}')" title="Zmeniť platbu">✎ Platba</button>
+                ${admUnlocked?`<button class="btn xs T" onclick="openEditAmt('${w.id}')" title="Upraviť sumu">✎ Suma</button>`:''}
+                <button class="btn xs A" onclick="openReopen('${w.id}')" title="Znovu otvoriť">↩</button>
               </div>
             </div>`;}).join('')}
           </div>
@@ -4119,7 +4417,8 @@ function getABills(){
 function rAnalyzy(){
   if(!$('p-analyzy'))return;
   const bills=getABills();
-  const tot=bills.reduce((s,w)=>s+totalAmt(w),0);
+  // Analytics: use revenueAmt (excludes deposit product) for total revenue
+  const tot=bills.reduce((s,w)=>s+revenueAmt(w)+(w.paidExtras||[]).reduce((s2,e)=>s2+e.price*e.qty*(1-(e.disc||0)/100),0),0);
   const cash=bills.reduce((s,w)=>s+wCashAmt(w),0);
   const card=bills.reduce((s,w)=>s+wCardAmt(w),0);
   const invConf=lSessInvConf();
@@ -4133,6 +4432,17 @@ function rAnalyzy(){
   const shotsGB=bills.filter(w=>w.sAct&&w.sAct.toLowerCase().includes('gel')).reduce((s,w)=>s+Math.min(w.bUsed||0,totBalls(w)),0);
   const custCount=bills.length;
   const avgSpend=custCount>0?tot/custCount:0;
+
+  // ── Deposit calculation for analytics ──
+  const periodKeys=[...new Set(bills.map(w=>w.sKey||'unknown'))];
+  const deps=lDeposits();
+  const periodPopupDeposits=periodKeys.reduce((s,k)=>{
+    const d=deps[k];if(d)return s+d.amount;
+    const sess=sessArr.find(x=>x.key===k);if(sess&&sess.deposit)return s+sess.deposit.amount;
+    return s;
+  },0);
+  const depositProdAmt=bills.reduce((s,w)=>s+depositItemAmt(w),0);
+  const totalDepositsForPeriod=periodPopupDeposits+depositProdAmt;
 
   // ── DATA INSIGHT #1: Priemerný počet hráčov na hru ──
   const gameKeys=[...new Set(bills.map(w=>w.sKey||'unknown'))];
@@ -4149,12 +4459,12 @@ function rAnalyzy(){
   });
 
   const allPouts=lPouts();
-  const periodKeys=[...new Set(bills.map(w=>w.sKey||'unknown'))];
   const totalOdmena=periodKeys.reduce((s,k)=>s+(allPouts[k]?allPouts[k].amt:0),0);
   const totalNaklady=periodKeys.reduce((s,k)=>s+(allPouts[k]?allPouts[k].costs||0:0),0);
   const statsEl=$('a-stats');
   if(statsEl)statsEl.innerHTML=[
     {v:fp(tot),l:'Celkové tržby',c:'var(--grn)'},
+    ...(totalDepositsForPeriod>0?[{v:fp(totalDepositsForPeriod),l:'💰 Zálohy uhradené vopred',c:'var(--grn)'}]:[]),
     {v:fp(cash),l:'💵 Hotovosť',c:'var(--grn)'},
     {v:fp(cash+card-totalOdmena-totalNaklady),l:'💵 Disponibilná hotovosť',c:'var(--grn)'},
     {v:fp(card),l:'💳 Karta',c:'var(--blu)'},
@@ -4202,9 +4512,12 @@ function rAnalyzy(){
     avgEl.innerHTML=rows;
   }else if(avgEl){avgEl.innerHTML='<div class="empty">Žiadne dáta</div>';}
 
-  // ── PIE CHART — individual products by count AND revenue ──
+  // ── PIE CHART — individual products by count AND revenue (exclude deposit) ──
   const prodStats={};
   bills.forEach(w=>w.items.forEach(it=>{
+    // Exclude deposit product from analytics
+    const prodRef=prods.find(p=>p.id===it.id);
+    if(prodRef&&prodRef.isDeposit)return;
     const key=it.name;
     if(!prodStats[key])prodStats[key]={name:key,cat:it.cat||'Other',count:0,rev:0};
     prodStats[key].count+=it.qty;
@@ -4346,18 +4659,24 @@ function rAnalyzy(){
   // ── INSTRUCTOR PERFORMANCE ──
   const instStats={};
   const pouts=lPouts();
+  const instDeps=lDeposits();
   bills.forEach(w=>{
     const n=w.sInstr||'Neznámy';
-    if(!instStats[n])instStats[n]={name:n,games:new Set(),customers:0,cash:0,card:0,invoice:0,odmena:0};
+    if(!instStats[n])instStats[n]={name:n,games:new Set(),customers:0,cash:0,card:0,invoice:0,odmena:0,deposit:0};
     instStats[n].games.add(w.sKey||'unknown');
     instStats[n].customers++;
     instStats[n].card+=wCardAmt(w);instStats[n].invoice+=wInvoiceAmt(w);instStats[n].cash+=wCashAmt(w);
+    instStats[n].deposit+=depositItemAmt(w);
   });
-  // Add odmena from pouts (per game key)
+  // Add odmena and popup deposits from pouts (per game key)
   Object.values(instStats).forEach(inst=>{
     inst.games.forEach(gameKey=>{
       const p=pouts[gameKey];
       if(p&&p.amt)inst.odmena+=p.amt;
+      // Add popup deposits per game
+      const d=instDeps[gameKey];
+      if(d)inst.deposit+=d.amount;
+      else{const sess=sessArr.find(x=>x.key===gameKey);if(sess&&sess.deposit)inst.deposit+=sess.deposit.amount;}
     });
   });
   const instEl=$('a-instructors');
@@ -4365,15 +4684,17 @@ function rAnalyzy(){
     const sorted=Object.values(instStats).sort((a,b)=>(a.cash+a.card)-(b.cash+b.card)).reverse();
     if(!sorted.length){instEl.innerHTML='<div class="empty">Žiadne dáta</div>';}
     else{
+      const anyDeposit=sorted.some(i=>i.deposit>0);
       instEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;">
-        <div style="display:grid;grid-template-columns:1fr 90px 70px 70px 70px 70px;gap:6px;font-size:11px;font-weight:700;color:var(--t3);padding:6px 10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--b1);">
+        <div style="display:grid;grid-template-columns:1fr 90px 70px 70px ${anyDeposit?'70px ':''}70px 70px;gap:6px;font-size:11px;font-weight:700;color:var(--t3);padding:6px 10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--b1);">
           <span>Inštruktor</span><span style="text-align:right;">Celkom</span>
           <span style="text-align:center;font-size:16px;">💵</span>
           <span style="text-align:center;font-size:16px;">💳</span>
+          ${anyDeposit?'<span style="text-align:center;font-size:14px;">💰 Záloha</span>':''}
           <span style="text-align:center;font-size:16px;">🧾</span>
           <span style="text-align:center;font-size:16px;color:var(--amb);">💰</span>
         </div>
-        ${sorted.map(i=>{const tot=i.cash+i.card+(i.invoice||0);return`<div style="display:grid;grid-template-columns:1fr 90px 70px 70px 70px 70px;gap:6px;align-items:center;padding:10px;border-radius:var(--rs);background:var(--bg2);border:.5px solid var(--b1);">
+        ${sorted.map(i=>{const tot=i.cash+i.card+(i.invoice||0)+i.deposit;return`<div style="display:grid;grid-template-columns:1fr 90px 70px 70px ${anyDeposit?'70px ':''}70px 70px;gap:6px;align-items:center;padding:10px;border-radius:var(--rs);background:var(--bg2);border:.5px solid var(--b1);">
           <div>
             <div style="font-size:14px;font-weight:700;color:var(--t1);">${escHtml(i.name)}</div>
             <div style="font-size:10px;color:var(--t3);margin-top:2px;">${i.games.size} hier · ${i.customers} zák.</div>
@@ -4381,10 +4702,160 @@ function rAnalyzy(){
           <div style="text-align:right;font-size:16px;font-weight:800;color:var(--grn);">${fp(tot)}</div>
           <div style="text-align:center;font-size:14px;font-weight:600;color:var(--grn);">${fp(i.cash)}</div>
           <div style="text-align:center;font-size:14px;font-weight:600;color:var(--blu);">${fp(i.card)}</div>
+          ${anyDeposit?`<div style="text-align:center;font-size:14px;font-weight:600;color:var(--grn);">${i.deposit>0?fp(i.deposit):'—'}</div>`:''}
           <div style="text-align:center;font-size:14px;font-weight:600;color:var(--pur);">${(i.invoice||0)>0?fp(i.invoice):'—'}</div>
           <div style="text-align:center;font-size:14px;font-weight:700;color:var(--amb);">${i.odmena>0?fp(i.odmena):'—'}</div>
         </div>`}).join('')}
       </div>`;
+    }
+  }
+
+  // ── HEATMAP ──
+  const heatEl=$('a-heatmap');
+  if(heatEl){
+    const dayNames=['Po','Ut','St','Št','Pi','So','Ne'];
+    const heatData={};
+    let heatMax=0;
+    bills.forEach(w=>{
+      let dt;
+      try{dt=new Date(w.closedAt||w.sDate);}catch(e){return;}
+      if(!dt||isNaN(dt.getTime()))return;
+      const dow=(dt.getDay()+6)%7;
+      const hr=dt.getHours();
+      if(hr<8||hr>21)return;
+      const key=dow+'-'+hr;
+      heatData[key]=(heatData[key]||0)+1;
+      if(heatData[key]>heatMax)heatMax=heatData[key];
+    });
+    if(heatMax>0){
+      let grid='<div style="display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;font-size:10px;">';
+      grid+='<div></div>'+dayNames.map(d=>`<div style="text-align:center;font-weight:700;color:var(--t2);padding:4px 0;">${d}</div>`).join('');
+      for(let h=8;h<=21;h++){
+        grid+=`<div style="text-align:right;padding:4px 6px 4px 0;color:var(--t3);font-weight:600;">${h}:00</div>`;
+        for(let d=0;d<7;d++){
+          const cnt=heatData[d+'-'+h]||0;
+          const intensity=heatMax>0?cnt/heatMax:0;
+          const bg=cnt>0?`rgba(230,57,70,${0.15+intensity*0.75})`:'var(--bg3)';
+          const txtCol=intensity>0.5?'#fff':'var(--t3)';
+          grid+=`<div style="text-align:center;padding:6px 2px;border-radius:4px;background:${bg};color:${txtCol};font-weight:${cnt>0?'700':'400'};min-height:28px;display:flex;align-items:center;justify-content:center;">${cnt||''}</div>`;
+        }
+      }
+      grid+='</div>';
+      grid+='<div style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:center;">';
+      grid+='<span style="font-size:9px;color:var(--t3);">Menej</span>';
+      [0.1,0.3,0.5,0.7,0.9].forEach(v=>{
+        grid+=`<div style="width:16px;height:16px;border-radius:3px;background:rgba(230,57,70,${0.15+v*0.75});"></div>`;
+      });
+      grid+='<span style="font-size:9px;color:var(--t3);">Viac</span></div>';
+      heatEl.innerHTML=grid;
+    }else{heatEl.innerHTML='<div class="empty">Žiadne dáta pre heatmapu</div>';}
+  }
+
+  // ── TRENDS ──
+  const trendEl=$('a-trends');
+  if(trendEl){
+    const periodMs=(fTo?fTo.getTime():Date.now())-(fFrom?fFrom.getTime():0);
+    const prevFrom=fFrom?new Date(fFrom.getTime()-periodMs):null;
+    const prevTo=fFrom?new Date(fFrom.getTime()):null;
+    const prevBills=(prevFrom&&prevTo)?closed.filter(w=>{
+      let dt;try{dt=new Date(w.closedAt||w.sDate);}catch(e){return false;}
+      return dt>=prevFrom&&dt<prevTo;
+    }):[];
+    const curRev=tot;const prevRev=prevBills.reduce((s,w)=>s+billAmt(w),0);
+    const curCust=custCount;const prevCust=prevBills.length;
+    const curAvg=avgSpend;const prevAvg=prevCust>0?prevRev/prevCust:0;
+    const pctChange=(cur,prev)=>prev>0?((cur-prev)/prev*100):cur>0?100:0;
+    const arrow=(val)=>val>0?'<span style="color:var(--grn);">▲</span>':val<0?'<span style="color:var(--red);">▼</span>':'<span style="color:var(--t3);">■</span>';
+    const trendItems=[
+      {label:'Tržby',cur:fp(curRev),prev:fp(prevRev),pct:pctChange(curRev,prevRev)},
+      {label:'Zákazníci',cur:curCust,prev:prevCust,pct:pctChange(curCust,prevCust)},
+      {label:'Priemer/hráč',cur:fp(curAvg),prev:fp(prevAvg),pct:pctChange(curAvg,prevAvg)},
+    ];
+    if(prevBills.length>0){
+      trendEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        ${trendItems.map(t=>`<div style="background:var(--bg3);border-radius:var(--rs);padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">${t.label}</div>
+          <div style="font-size:20px;font-weight:800;color:var(--t1);">${t.cur}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">predtým: ${t.prev}</div>
+          <div style="margin-top:6px;font-size:14px;font-weight:700;color:${t.pct>0?'var(--grn)':t.pct<0?'var(--red)':'var(--t3)'};">
+            ${arrow(t.pct)} ${t.pct>0?'+':''}${t.pct.toFixed(1)}%
+          </div>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:9px;color:var(--t3);text-align:center;margin-top:6px;">Porovnanie s predchádzajúcim obdobím rovnakej dĺžky</div>`;
+    }else{
+      trendEl.innerHTML='<div class="empty">Nedostatok dát pre porovnanie s predchádzajúcim obdobím</div>';
+    }
+  }
+
+  // ── CLV — Returning Customers ──
+  const clvEl=$('a-clv');
+  if(clvEl){
+    const allCustomers={};
+    closed.forEach(w=>{
+      const email=(w.email||w.phone||'').trim();
+      if(!email)return;
+      const normalized=email.toLowerCase().trim();
+      if(!normalized||!normalized.includes('@'))return;
+      if(!allCustomers[normalized])allCustomers[normalized]={email:normalized,displayEmail:email,names:new Set(),visits:[],totalSpent:0};
+      allCustomers[normalized].names.add(w.name);
+      allCustomers[normalized].visits.push({date:w.closedAt||w.sDate,amount:billAmt(w),sKey:w.sKey});
+      allCustomers[normalized].totalSpent+=billAmt(w);
+    });
+    // Also include registered customers without visits
+    const regCustomers=lCustomers();
+    regCustomers.forEach(c=>{
+      const norm=c.email.toLowerCase().trim();
+      if(!norm||!norm.includes('@'))return;
+      if(!allCustomers[norm]){
+        allCustomers[norm]={email:norm,displayEmail:c.email,names:new Set([c.name]),visits:[],totalSpent:0,registered:true};
+      }else{
+        allCustomers[norm].registered=true;
+        allCustomers[norm].names.add(c.name);
+      }
+    });
+    const customers=Object.values(allCustomers).filter(c=>c.visits.length>0);
+    const returning=customers.filter(c=>{
+      const uniqueSessions=new Set(c.visits.map(v=>v.sKey));
+      return uniqueSessions.size>1;
+    });
+    const totalWithEmail=customers.length;
+    const returnRate=totalWithEmail>0?(returning.length/totalWithEmail*100):0;
+    const topCustomers=[...customers].sort((a,b)=>b.totalSpent-a.totalSpent).slice(0,10);
+    const avgReturnSpend=returning.length>0?returning.reduce((s,c)=>s+c.totalSpent,0)/returning.length:0;
+    const newCustomers=customers.filter(c=>new Set(c.visits.map(v=>v.sKey)).size===1);
+    const avgNewSpend=newCustomers.length>0?newCustomers.reduce((s,c)=>s+(c.totalSpent/c.visits.length),0)/newCustomers.length:0;
+
+    if(totalWithEmail>0){
+      clvEl.innerHTML=`
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px;margin-bottom:12px;">
+          <div class="rb"><div class="rbv" style="color:var(--grn);">${totalWithEmail}</div><div class="rbl">Registrovaných</div></div>
+          <div class="rb"><div class="rbv" style="color:var(--pur);">${returning.length}</div><div class="rbl">Vracajúcich sa</div></div>
+          <div class="rb"><div class="rbv" style="color:var(--amb);">${returnRate.toFixed(1)}%</div><div class="rbl">Retencia</div></div>
+          <div class="rb"><div class="rbv" style="color:var(--grn);">${fp(avgReturnSpend)}</div><div class="rbl">Ø Útrata (vracajúci)</div></div>
+          <div class="rb"><div class="rbv" style="color:var(--t2);">${fp(avgNewSpend)}</div><div class="rbl">Ø Útrata (nový)</div></div>
+        </div>
+        ${topCustomers.length?`
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">🏆 Top 10 zákazníkov</div>
+        <div style="display:grid;gap:4px;">
+          ${topCustomers.map((c,i)=>{
+            const uniqueS=new Set(c.visits.map(v=>v.sKey)).size;
+            const isReturn=uniqueS>1;
+            return`<div style="display:grid;grid-template-columns:24px 1fr 80px 60px 60px;gap:6px;align-items:center;padding:8px 10px;background:var(--bg3);border-radius:var(--rs);border-left:3px solid ${isReturn?'var(--grn)':'var(--b2)'};">
+              <span style="font-size:12px;font-weight:800;color:${i<3?'var(--amb)':'var(--t3)'};">#${i+1}</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--t1);">${escHtml([...c.names][0])}</div>
+                <div style="font-size:9px;color:var(--t3);">${escHtml(c.displayEmail)}</div>
+              </div>
+              <div style="text-align:right;font-size:13px;font-weight:700;color:var(--grn);">${fp(c.totalSpent)}</div>
+              <div style="text-align:center;font-size:11px;color:var(--pur);">${uniqueS}× návštev</div>
+              <div style="text-align:center;font-size:9px;padding:2px 5px;border-radius:99px;background:${isReturn?'var(--gbg)':'var(--bg2)'};color:${isReturn?'var(--grn)':'var(--t3)'};">${isReturn?'VIP':'Nový'}</div>
+            </div>`;
+          }).join('')}
+        </div>`:''}
+      `;
+    }else{
+      clvEl.innerHTML='<div class="empty">Žiadni registrovaní zákazníci. Zdieľaj registračný link alebo pridaj email pri registrácii hráča.</div>';
     }
   }
 }
@@ -4424,6 +4895,13 @@ async function exportXLS(key){
   const ballsRemain=ballsTotal-ballsShot;
   const netCash=totC-(pout?pout.amt:0)-(pout?pout.costs||0:0);
 
+  // Deposit amount for this session
+  let xlsDepAmt=0;
+  try{const s=sessArr.find(x=>x.key===key);if(s&&s.deposit)xlsDepAmt=s.deposit.amount;else{const deps=lDeposits();if(deps[key])xlsDepAmt=deps[key].amount;}}catch(e){}
+  const xlsDepProduct=gb.reduce((s,w)=>s+w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return p&&p.isDeposit;}).reduce((s2,i)=>s2+Math.abs(i.price)*i.qty,0),0);
+  const xlsTotalDep=xlsDepAmt+xlsDepProduct;
+  // Sort bills by orderIdx for correct numbering (Hráč 1, Hráč 2, ...)
+  const gbSorted=[...gb].sort((a,b)=>(a.orderIdx||0)-(b.orderIdx||0));
   // ── SÚHRN ──
   const sumData=[
     ['ProPaintball – Finančný report akcie','',''],
@@ -4438,7 +4916,9 @@ async function exportXLS(key){
     [''],
     ['FINANČNÝ PREHĽAD','',''],
     ['Celkové tržby',parseFloat(tot.toFixed(2)),''],
+    ...(xlsTotalDep>0?[['Zálohy uhradené vopred',parseFloat(xlsTotalDep.toFixed(2)),'']]:[] ),
     ['  z toho Hotovosť',parseFloat(totC.toFixed(2)),''],
+    ...(xlsTotalDep>0?[['  Hotovosť po odpočítaní záloh',parseFloat((totC-xlsTotalDep).toFixed(2)),'']]:[] ),
     ['  z toho Karta',parseFloat(totK.toFixed(2)),''],
     ['  z toho Faktúra',parseFloat(totInv.toFixed(2)),''],
     ['Počet zákazníkov',gb.length,''],
@@ -4467,7 +4947,7 @@ async function exportXLS(key){
     [''],
     ['ZÁKAZNÍCI — PREHĽAD','',''],
     ['#','Meno','Platba','Guličky distribuované','Guličky vystrelené','Zostatok','Nápoje','Suma (€)'],
-    ...gb.map((w,i)=>{
+    ...gbSorted.map((w,i)=>{
       const tb=totBalls(w);const sh=Math.min(w.bUsed||0,tb);
       return[i+1,w.name,wPayLabel(w),tb,sh,tb-sh,(w.dG||[]).join(', '),parseFloat(billAmt(w).toFixed(2))];
     }),
@@ -4480,26 +4960,34 @@ async function exportXLS(key){
   XLSX.utils.book_append_sheet(wbx,ws1,'Súhrn');
 
   // ── DETAILNÉ POLOŽKY ──
-  const det=[['#','Meno','Čas uzavretia','Platba','Produkt','Kategória','Ks','Cena/ks (€)','Zľava %','Riadok (€)','Gul. distribuované','Gul. vystrelené','Nápoje']];
-  gb.forEach((w,wi)=>{
+  // Determine deposit player for this session
+  let xlsDepWbId=null;
+  try{const s=sessArr.find(x=>x.key===key);if(s&&s.deposit)xlsDepWbId=s.deposit.wbId;else{const deps=lDeposits();if(deps[key])xlsDepWbId=deps[key].wbId;}}catch(e){}
+  const det=[['#','Meno','Čas uzavretia','Platba','Produkt','Kategória','Ks','Cena/ks (€)','Zľava %','Riadok (€)','Gul. distribuované','Gul. vystrelené','Nápoje','Záloha']];
+  gbSorted.forEach((w,wi)=>{
     const tb=totBalls(w);const sh=Math.min(w.bUsed||0,tb);
+    const isDepPlayer=w.id===xlsDepWbId;
+    const depNote=isDepPlayer?('Záloha '+fp(xlsDepAmt)):(depositItemAmt(w)>0?'Záloha produkt '+fp(depositItemAmt(w)):'');
     w.items.forEach((it,idx)=>{
       const d=it.disc||0;
       det.push([wi+1,w.name,idx===0?fDT(w.closedAt):'',idx===0?wPayLabel(w):'',
         it.name,it.cat||'',it.qty,it.price,d,
         parseFloat((it.price*it.qty*(1-d/100)).toFixed(2)),
-        idx===0?tb:'',idx===0?sh:'',idx===0?(w.dG||[]).join(', '):'']);
+        idx===0?tb:'',idx===0?sh:'',idx===0?(w.dG||[]).join(', '):'',idx===0?depNote:'']);
     });
-    det.push(['','','','','','','','','Účet celkom',parseFloat(billAmt(w).toFixed(2)),'','','']);
+    det.push(['','','','','','','','','Účet celkom',parseFloat(billAmt(w).toFixed(2)),'','','','']);
     det.push([]);
   });
   const ws2=XLSX.utils.aoa_to_sheet(det);
-  ws2['!cols']=[{wch:4},{wch:16},{wch:16},{wch:10},{wch:22},{wch:10},{wch:5},{wch:9},{wch:8},{wch:10},{wch:16},{wch:14},{wch:20}];
+  ws2['!cols']=[{wch:4},{wch:16},{wch:16},{wch:10},{wch:22},{wch:10},{wch:5},{wch:9},{wch:8},{wch:10},{wch:16},{wch:14},{wch:20},{wch:18}];
   XLSX.utils.book_append_sheet(wbx,ws2,'Detaily');
 
-  // ── PRODUKTY ──
+  // ── PRODUKTY (bez zálohy) ──
   const pS={};
   gb.forEach(w=>w.items.forEach(it=>{
+    // Exclude deposit product from product stats
+    const prodRef=prods.find(p=>p.id===it.id);
+    if(prodRef&&prodRef.isDeposit)return;
     if(!pS[it.name])pS[it.name]={n:it.name,cat:it.cat||'',qty:0,rev:0,rC:0,rK:0};
     pS[it.name].qty+=it.qty;
     const r=it.price*it.qty*(1-(it.disc||0)/100);
@@ -4550,9 +5038,13 @@ async function exportXLS(key){
   }
 
   const safeName=(s)=>(s||'').replace(/[^\w\s]/g,'').replace(/\s+/g,'_').slice(0,20);
-  const safeStart=(startStr||'').replace(/[\s.:\\/]/g,'-').slice(0,10);
-  const safeEnd=(endStr||'').replace(/[\s.:\\/]/g,'-').replace(/:/g,'h').slice(0,13);
-  const fileName=`ProPaintball_${safeName(si.arena||'akcia')}_${safeStart}_do_${safeEnd}.xlsx`;
+  // Extract hours from startStr/endStr for filename (e.g. "09.04.2026 14:00" → "14-00")
+  const extractHour=(s)=>{const m=(s||'').match(/(\d{1,2}):(\d{2})/);return m?m[1]+'-'+m[2]:'';};
+  const safeDate=(startStr||'').replace(/[\s.:]/g,'-').replace(/--+/g,'-').slice(0,10);
+  const startHour=extractHour(startStr);
+  const endHour=extractHour(endStr);
+  const hourPart=(startHour&&endHour)?`_${startHour}_do_${endHour}`:(startHour?`_${startHour}`:'');
+  const fileName=`ProPaintball_${safeName(si.arena||'akcia')}_${safeDate}${hourPart}.xlsx`;
   XLSX.writeFile(wbx,fileName);
   toast('📊 Excel exportovaný ✓');
 }
@@ -4639,6 +5131,39 @@ function cm(id){
   if(fb)fb.style.opacity=anyOpen?'0':'1';
 }
 ['m-pay','m-epay','m-grp','m-adm','m-item','m-wb','m-sess','m-vrp','m-reopen','m-drink','m-xh','m-pout','m-note','m-chart','m-edates','m-report','m-del-sess','m-backup','m-restore-confirm','m-agency-pay'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',function(e){if(e.target===this){cm(id);if(id==='m-close-sess')closeSessKey=null;if(id==='m-del-sess')delSessKey=null;}});});
+// ══ SOUND EFFECTS ══
+let _audioCtx=null;
+function getAudioCtx(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();return _audioCtx;}
+function playPaySound(){
+  try{
+    const ctx=getAudioCtx();
+    const osc1=ctx.createOscillator();const gain1=ctx.createGain();
+    osc1.connect(gain1);gain1.connect(ctx.destination);
+    osc1.type='sine';osc1.frequency.setValueAtTime(800,ctx.currentTime);
+    osc1.frequency.setValueAtTime(1200,ctx.currentTime+0.1);
+    gain1.gain.setValueAtTime(0.3,ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.3);
+    osc1.start(ctx.currentTime);osc1.stop(ctx.currentTime+0.3);
+    const osc2=ctx.createOscillator();const gain2=ctx.createGain();
+    osc2.connect(gain2);gain2.connect(ctx.destination);
+    osc2.type='sine';osc2.frequency.setValueAtTime(1600,ctx.currentTime+0.1);
+    gain2.gain.setValueAtTime(0.2,ctx.currentTime+0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.5);
+    osc2.start(ctx.currentTime+0.1);osc2.stop(ctx.currentTime+0.5);
+  }catch(e){}
+}
+function playErrorSound(){
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='square';osc.frequency.setValueAtTime(300,ctx.currentTime);
+    osc.frequency.setValueAtTime(200,ctx.currentTime+0.15);
+    gain.gain.setValueAtTime(0.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.3);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
 let tT;function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),2800);}
 // ══ PWA ══
 // ══ MANIFEST (data URI — works on iOS Safari) ══
@@ -4833,8 +5358,8 @@ function changeInstPw(){
   if(newPw!==newPw2){toast('Heslá sa nezhodujú');return;}
   if(newPw.length<4){toast('Min. 4 znaky');return;}
   const users=buildIUsers();const u=users.find(x=>x.name===currentUser.name);
-  if(!u||u.pw!==oldPw){toast('Nesprávne staré heslo');return;}
-  const customPws=LS.g('pb_custom_pws',{});customPws[currentUser.name]=newPw;LS.s('pb_custom_pws',customPws);
+  if(!u||!checkPw(oldPw,u.pw)){toast('Nesprávne staré heslo');return;}
+  const customPws=LS.g('pb_custom_pws',{});customPws[currentUser.name]=simpleHash(newPw);LS.s('pb_custom_pws',customPws);
   LS.s('pb_remembered',null);
   toast('Heslo zmenené. Prihláste sa znova.');
   ['inst-old-pw','inst-new-pw','inst-new-pw2'].forEach(id=>{const e=$(id);if(e)e.value='';});
@@ -5119,7 +5644,7 @@ function connectNFCBridge(){
     };
     _nfcWs.onerror=()=>{if(statusEl)statusEl.innerHTML='<span style="color:var(--red);">❌ Chyba pripojenia</span>';};
     _nfcWs.onclose=()=>{if(statusEl)statusEl.innerHTML='<span style="color:var(--t3);">Odpojený</span>';};
-  }catch(e){if(statusEl)statusEl.textContent='Chyba: '+e.message;}
+  }catch(e){console.error('[NFC Bridge]',e);if(statusEl)statusEl.textContent='Chyba pripojenia';}
 }
 function disconnectNFCBridge(){
   if(_nfcWs){_nfcWs.close();_nfcWs=null;}
