@@ -128,7 +128,7 @@ textarea{resize:none;line-height:1.5;}
 .pnum{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:700;flex-shrink:0;padding:0 5px;}
 /* Wristbands */
 .wb{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:var(--rs);border:.5px solid var(--b1);cursor:pointer;margin-bottom:5px;background:var(--bg3);transition:all .12s;position:relative;}
-.wb .hover-actions{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);gap:3px;padding:3px;background:var(--bg1);border:.5px solid var(--b1);border-radius:var(--rs);box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:10;}
+.wb .hover-actions{display:none;position:absolute;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;gap:6px;padding:4px;background:rgba(15,23,42,.88);border-radius:var(--rs);z-index:10;backdrop-filter:blur(2px);}
 .wb:hover .hover-actions{display:flex;}
 @media(hover:none){.wb:hover .hover-actions{display:none;}}
 .wb.sel{border-color:var(--bbd);background:var(--bbg);}
@@ -410,9 +410,10 @@ textarea{resize:none;line-height:1.5;}
             </div>
             <!-- Manual mode -->
             <div id="manual-panel">
-              <div class="fr">
-                <label class="lb">Meno hráča <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— zadaj číslo (napr. 8) pre hromadné pridanie</span></label>
-                <input type="text" id="cname" placeholder="Marek alebo zadaj číslo (napr. 8)" onkeydown="if(event.key==='Enter')addPlayer()"/>
+              <div class="fr" style="position:relative;">
+                <label class="lb">Meno / Nick hráča <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— zadaj číslo (napr. 8) pre hromadné pridanie</span></label>
+                <input type="text" id="cname" placeholder="Nick alebo číslo (napr. 8)" autocomplete="off" oninput="nickAutocomplete(this.value)" onkeydown="if(event.key==='Enter'){hideSuggestions();addPlayer()}"/>
+                <div id="nick-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--b2);border-radius:0 0 var(--rs) var(--rs);max-height:150px;overflow-y:auto;z-index:100;"></div>
               </div>
               <div class="fr" id="email-row" style="margin-top:-4px;">
                 <label class="lb">Email zákazníka <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— voliteľné, pre registrovaných zákazníkov</span></label>
@@ -427,17 +428,20 @@ textarea{resize:none;line-height:1.5;}
             <div id="nfc-panel" style="display:none;">
               <!-- Setup instructions -->
               <div id="nfc-setup-info" style="font-size:11px;background:var(--bg3);border:.5px solid var(--b2);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;line-height:1.8;">
-                <div style="font-weight:700;color:var(--t2);margin-bottom:6px;">📋 Prvé spustenie (raz):</div>
+                <div style="font-weight:700;color:var(--t2);margin-bottom:6px;">📋 Nastavenie NFC čítačky:</div>
                 <div style="color:var(--t3);">
-                  1. Stiahni <strong style="color:var(--t1);">nfc_bridge.py</strong> a <strong style="color:var(--t1);">NFC_INSTALACIA.bat</strong><br>
-                  2. Spusti <code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">NFC_INSTALACIA.bat</code> (raz)<br>
-                  3. Spusti <code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">NFC_SPUSTIT.bat</code> pred každou zmenou<br>
+                  <strong style="color:var(--grn);">Odporúčané:</strong> Akasa čítačka v HID Keyboard režime — funguje natívne na <strong>macOS (M4)</strong>, Windows aj Linuxe bez ovládačov.<br>
+                  Stačí kliknúť do poľa „Ručné zadanie UID" a priložiť náramok.<br><br>
+                  <strong style="color:var(--t2);">WebSocket bridge (voliteľné):</strong><br>
+                  1. Stiahni <strong style="color:var(--t1);">nfc_bridge.py</strong><br>
+                  2. <code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">pip3 install websockets nfcpy</code> (raz)<br>
+                  3. <code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">python3 nfc_bridge.py</code> pred každou zmenou<br>
                   4. Klikni <strong style="color:var(--blu);">Pripojiť</strong> nižšie
                 </div>
               </div>
               <!-- Status banner -->
               <div id="nfc-status-banner" style="border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.6;background:var(--bg3);border:.5px solid var(--b2);color:var(--t3);text-align:center;">
-                ⚫ Nepripojené — spusti <strong>NFC_SPUSTIT.bat</strong> a klikni Pripojiť
+                ⚫ Nepripojené — spusti <strong>python3 nfc_bridge.py</strong> a klikni Pripojiť
               </div>
               <!-- Connect row -->
               <div style="display:flex;gap:7px;margin-bottom:10px;">
@@ -449,9 +453,10 @@ textarea{resize:none;line-height:1.5;}
                 <div id="nfc-live-status" style="font-size:14px;font-weight:600;padding:16px;border-radius:var(--r);background:var(--gbg);border:.5px solid var(--gbd);color:var(--grn);margin-bottom:10px;text-align:center;min-height:56px;display:flex;align-items:center;justify-content:center;">
                   📡 Prikladaj náramok na čítačku...
                 </div>
-                <div class="fr">
-                  <label class="lb">Meno zákazníka (voliteľné)</label>
-                  <input type="text" id="cname-nfc" placeholder="napr. Marek — nechaj prázdne pre auto-číslovanie"/>
+                <div class="fr" style="position:relative;">
+                  <label class="lb">Nick / Email zákazníka <span style="color:var(--t3);font-weight:400;font-size:9px;text-transform:none;">— nechaj prázdne pre auto-číslovanie</span></label>
+                  <input type="text" id="cname-nfc" placeholder="Maťo alebo email" autocomplete="off" oninput="nfcNickAutocomplete(this.value)"/>
+                  <div id="nfc-nick-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--b2);border-radius:0 0 var(--rs) var(--rs);max-height:150px;overflow-y:auto;z-index:100;"></div>
                 </div>
               </div>
               <!-- Fallback manual UID -->
@@ -766,7 +771,7 @@ textarea{resize:none;line-height:1.5;}
             </div>
           </div>
           <div style="font-size:11px;color:var(--t3);background:var(--bg3);border-radius:var(--rs);padding:9px;">
-            💡 <strong>Pre Akasa + iPad:</strong> Čítačka cez USB-C hub → iPad nemá natívny HID prístup v Safari. Najlepšia cesta: použiť PC/Mac ako prostredníka cez WebSocket alebo pripojiť čítačku k Macu a otvoriť app v Chrome.
+            💡 <strong>Pre Akasa + Mac Mini M4:</strong> Pripoj čítačku cez USB-C. macOS rozpozná HID zariadenie automaticky. V Pokladni prepni na NFC/RFID tab → klikni do poľa UID → prilož náramok. Funguje v Safari aj Chrome bez ovládačov.
           </div>
           <div style="margin-top:9px;">
             <div style="font-size:10px;font-weight:700;color:var(--t3);margin-bottom:5px;">NFC Nastavenia</div>
@@ -1299,8 +1304,43 @@ function selectCustomer(email,name){
   if(!$('cname').value.trim())$('cname').value=name;
   hideSuggestions();
 }
-function hideSuggestions(){const el=$('email-suggestions');if(el)el.style.display='none';}
-document.addEventListener('click',function(e){if(!e.target.closest('#email-row'))hideSuggestions();});
+function hideSuggestions(){const el=$('email-suggestions');if(el)el.style.display='none';const nl=$('nick-suggestions');if(nl)nl.style.display='none';}
+document.addEventListener('click',function(e){if(!e.target.closest('#email-row')&&!e.target.closest('#cname')&&!e.target.closest('#nick-suggestions'))hideSuggestions();});
+function nickAutocomplete(val){
+  const el=$('nick-suggestions');if(!el)return;
+  if(!val||val.length<2||!isNaN(parseInt(val))){el.style.display='none';return;}
+  const q=val.toLowerCase();
+  const matches=lCustomers().filter(c=>c.name.toLowerCase().includes(q));
+  if(!matches.length){el.style.display='none';return;}
+  if(matches.length>10){
+    el.style.display='block';
+    el.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--t3);">Viac ako 10 zhôd — zadaj email pre upresnenie</div>';
+    return;
+  }
+  el.style.display='block';
+  el.innerHTML=matches.map(c=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:.5px solid var(--b1);font-size:12px;" onmousedown="selectCustomer('${escHtml(c.email)}','${escHtml(c.name)}')" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <div style="font-weight:600;color:var(--t1);">${escHtml(c.name)}</div>
+    <div style="font-size:10px;color:var(--t3);">${escHtml(c.email)}</div>
+  </div>`).join('');
+}
+function nfcNickAutocomplete(val){
+  const el=$('nfc-nick-suggestions');if(!el)return;
+  if(!val||val.length<2){el.style.display='none';return;}
+  const q=val.toLowerCase();
+  const matches=lCustomers().filter(c=>c.name.toLowerCase().includes(q)||c.email.toLowerCase().includes(q));
+  if(!matches.length){el.style.display='none';return;}
+  if(matches.length>10){
+    el.style.display='block';
+    el.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--t3);">Viac ako 10 zhôd — zadaj email pre upresnenie</div>';
+    return;
+  }
+  el.style.display='block';
+  el.innerHTML=matches.map(c=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:.5px solid var(--b1);font-size:12px;" onmousedown="selectNfcCustomer('${escHtml(c.name)}')" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <div style="font-weight:600;color:var(--t1);">${escHtml(c.name)}</div>
+    <div style="font-size:10px;color:var(--t3);">${escHtml(c.email)}</div>
+  </div>`).join('');
+}
+function selectNfcCustomer(name){$('cname-nfc').value=name;const el=$('nfc-nick-suggestions');if(el)el.style.display='none';}
 function genRegLink(){
   $('reg-link').value='propaintball-register.html';
   $('reg-link-info').textContent='Statický link — umiestni na rovnaký server ako pokladňu';
@@ -2626,11 +2666,11 @@ function rWbs(){
         ${canEditWb(w.id)?`<button class="btn xs B" onclick="event.stopPropagation();openEWbFor('${w.id}')">✎</button>`:''}
       </div>
       <div class="hover-actions" onclick="event.stopPropagation()">
-        ${billAmt(w)>0?`<button class="btn xs G" onclick="quickPay('${w.id}')" title="Zaplatiť">💰</button>`:''}
-        <button class="btn xs B" onclick="selWb('${w.id}');gT('reg')" title="Pridať produkt">➕</button>
-        ${(pk&&(pk.isPB||pk.isAS||pk.isGB))?`<button class="btn xs" style="background:var(--rbg);color:var(--red);border-color:var(--rbd);" onclick="selWb('${w.id}');mShot(100)" title="+100 guličiek">🔴</button>`:''}
-        ${canEditWb(w.id)?`<button class="btn xs B" onclick="openEWbFor('${w.id}')" title="Editovať meno">✎</button>`:''}
-        <button class="btn xs A" onclick="togChk('${w.id}')" title="Označiť">${ch?'☑':'☐'}</button>
+        ${billAmt(w)>0?`<button class="btn sm G" onclick="quickPay('${w.id}')" title="Zaplatiť" style="font-size:14px;padding:6px 10px;">💰 Zaplatiť</button>`:''}
+        <button class="btn sm B" onclick="selWb('${w.id}');gT('reg')" title="Pridať produkt" style="font-size:14px;padding:6px 10px;">➕ Produkt</button>
+        ${(pk&&(pk.isPB||pk.isAS||pk.isGB))?`<button class="btn sm" style="background:var(--rbg);color:var(--red);border-color:var(--rbd);font-size:14px;padding:6px 10px;" onclick="selWb('${w.id}');mShot(100)" title="+100 guličiek">🔴 +100</button>`:''}
+        ${canEditWb(w.id)?`<button class="btn sm B" onclick="openEWbFor('${w.id}')" title="Editovať" style="font-size:14px;padding:6px 10px;">✎</button>`:''}
+        <button class="btn sm A" onclick="togChk('${w.id}')" title="Označiť" style="font-size:14px;padding:6px 10px;">${ch?'☑':'☐'}</button>
       </div>
     </div>`;
   }).join('');
@@ -2777,14 +2817,24 @@ function payAll(){
   const wbs=getWbs();if(!wbs.length){toast('Žiadni hráči');return;}
   const allowed=wbs.filter(w=>canEditWb(w.id));
   if(!allowed.length){toast('Nemáš oprávnenie na žiadneho hráča');return;}
-  pendGrp=allowed.map(w=>w.id);showGrpModal();
+  pendGrp=allowed.map(w=>w.id);_checkDepositThenGrpModal();
 }
 function grpCheckout(){
   if(!currentUser){toast('Prihlás sa pre inkaso');return;}
   const wbs=getWbs();const sel=wbs.filter(w=>chkd.has(w.id)&&canEditWb(w.id));
   if(!sel.length){toast('Označ hráčov (musíš byť ich inštruktor)');return;}
-  pendGrp=sel.map(w=>w.id);showGrpModal();
+  pendGrp=sel.map(w=>w.id);_checkDepositThenGrpModal();
 }
+function _checkDepositThenGrpModal(){
+  // Check deposit BEFORE showing group modal
+  if(checkDepositBeforeClose(pendGrp[0])){
+    _depositAfterGrp=true;
+    openDepositModal(pendGrp[0],false);
+    return;
+  }
+  showGrpModal();
+}
+let _depositAfterGrp=false;
 function showGrpModal(){
   const wbs=getWbs();const sel=wbs.filter(w=>pendGrp.includes(w.id));const tot=sel.reduce((s,w)=>s+totalAmt(w),0);
   // Calculate deposit for this session
@@ -2989,18 +3039,23 @@ function confirmDeposit(){
   save();
   cm('m-deposit');
   toast('💰 Záloha '+fp(amt)+' zaznamenaná → '+getWbs().find(w=>w.id===selectedWbId)?.name);
-  // Continue with the original close flow
-  if(_depositIsGroupPay){
+  // Continue with the original flow
+  if(_depositAfterGrp){
+    _depositAfterGrp=false;
+    showGrpModal();
+  }else if(_depositIsGroupPay){
     _continueGroupPay();
   }else{
     _proceedCloseBill(_depositPendClose);
   }
 }
 function skipDeposit(){
-  // User said "Nie" — do NOT mark as asked. Popup will appear again next time.
-  // Just continue with the current close flow.
+  // User said "Nie" — just continue with the current flow.
   cm('m-deposit');
-  if(_depositIsGroupPay){
+  if(_depositAfterGrp){
+    _depositAfterGrp=false;
+    showGrpModal();
+  }else if(_depositIsGroupPay){
     _continueGroupPay();
   }else{
     _proceedCloseBill(_depositPendClose);
@@ -3294,13 +3349,6 @@ function _continueGroupPay(){
 function confirmGrp(){
   if(!currentUser){toast('Prihlás sa pre inkaso');return;}
   if(!gPayM)return;
-  // Check deposit before group pay
-  if(checkDepositBeforeClose(pendGrp[0])){
-    _pendingGrpPayM=gPayM;
-    cm('m-grp');
-    openDepositModal(pendGrp[0],true);
-    return;
-  }
   _doConfirmGrp();
 }
 function _doConfirmGrp(){

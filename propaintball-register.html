@@ -91,9 +91,9 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
       <div class="card-title">📋 Registrácia</div>
 
       <div class="field" id="f-name">
-        <label>Meno a priezvisko</label>
-        <input type="text" id="r-name" placeholder="Ján Novák" autocomplete="name"/>
-        <div class="err-msg">Zadaj meno</div>
+        <label>Krstné meno alebo Nick</label>
+        <input type="text" id="r-name" placeholder="Maťo" autocomplete="given-name" maxlength="30"/>
+        <div class="err-msg">Zadaj meno alebo nick</div>
       </div>
 
       <div class="field" id="f-email">
@@ -110,9 +110,9 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
       <label class="consent" id="consent-label">
         <input type="checkbox" id="r-consent"/>
         <div class="consent-text">
-          <strong>Súhlasím so spracovaním osobných údajov</strong>
-          za účelom zasielania ponúk, štatistík z mojich hier a noviniek.
-          Súhlas môžem kedykoľvek odvolať.
+          <strong>Súhlasím so spracovaním kontaktných údajov</strong>
+          (nick/meno, email) za účelom zasielania ponúk, štatistík z mojich hier a noviniek.
+          Súhlas môžem kedykoľvek odvolať emailom.
           <br><span style="color:var(--t3);font-size:9px;">TRESAERIS GROUP s.r.o., IČO: 50925989</span>
         </div>
       </label>
@@ -146,7 +146,7 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
   <div id="reg-success" class="success">
     <div class="success-icon">🎯</div>
     <h2>Registrácia úspešná!</h2>
-    <p>Ďakujeme za registráciu. Na ďalšej hre stačí povedať svoje meno alebo email a budeme ťa mať v systéme.</p>
+    <p>Ďakujeme za registráciu. Na ďalšej hre stačí povedať svoj nick alebo email a budeme ťa mať v systéme.</p>
     <div class="stat-grid">
       <div class="stat">
         <div class="val" id="s-name">—</div>
@@ -166,7 +166,7 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
   <div id="reg-exists" class="success" style="display:none;">
     <div class="success-icon">✅</div>
     <h2>Už si registrovaný!</h2>
-    <p id="exists-msg">Tento email je už v systéme. Na ďalšej hre stačí povedať svoje meno.</p>
+    <p id="exists-msg">Tento email je už v systéme. Na ďalšej hre stačí povedať svoj nick.</p>
     <div style="margin-top:20px;">
       <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">OK</button>
     </div>
@@ -350,7 +350,7 @@ async function submitReg(){
     // Show success
     $('reg-form').style.display='none';
     $('reg-success').style.display='block';
-    $('s-name').textContent=name.split(' ')[0];
+    $('s-name').textContent=name;
     $('s-email').textContent=email;
     toast('Registrácia úspešná!');
   }else{
