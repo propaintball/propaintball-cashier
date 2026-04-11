@@ -748,7 +748,7 @@ textarea{resize:none;line-height:1.5;}
           <div class="ch" style="color:var(--amb);">👥 Registrovaní zákazníci</div>
           <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
             <input type="text" id="cust-search" data-ph="reg-search-ph" placeholder="Hľadať podľa mena alebo emailu..." oninput="renderCustList()" style="flex:1;font-size:12px;"/>
-            <button class="btn sm B" onclick="syncCustomers().then(()=>{renderCustList();toast('Synchronizované')})">🔄 Sync</button>
+            <button class="btn sm B" onclick="syncCustomers().then(()=>{renderCustList();toast(t('toast-synced'))})">🔄 Sync</button>
             <span id="cust-count" style="font-size:11px;color:var(--t3);white-space:nowrap;"></span>
           </div>
           <div id="cust-list" style="max-height:400px;overflow-y:auto;"></div>
@@ -1872,7 +1872,7 @@ function startSessWithLogin(){
       const pw=$('inst-pw-input');if(pw){pw.value='';pw.focus();}
       toast('Zadaj heslo pre prvé prihlásenie');
     }else{
-      toast('Vyber inštruktora');aT('instructor');
+      toast(t('toast-select-instructor'));aT('instructor');
     }
     return;
   }
@@ -1900,7 +1900,7 @@ function handleUserBtn(){
     setTimeout(()=>document.addEventListener('click',removeMenu,{once:true}),100);
   }else{
     if($('app')&&$('app').style.display==='flex'){showAdmLogin();}
-    else{aT('instructor');toast('Vyber inštruktora');}
+    else{aT('instructor');toast(t('toast-select-instructor'));}
   }
 }
 
@@ -1930,7 +1930,7 @@ function askLogoutAfterSess(){
   if(currentUser&&isInst()){
     setTimeout(()=>{
       if(confirm('Odhlásiť '+currentUser.name+' po uzavretí akcie?\n(zapamätanie zostane)')){
-        logoutUser();updateUserBtn();updateStartTabs();toast('Odhlásený');
+        logoutUser();updateUserBtn();updateStartTabs();toast(t('toast-logged-out'));
       }
     },500);
   }
@@ -1969,14 +1969,14 @@ function showAdmLogin(){
   om('m-adm');
 }
 function lockSett(){admUnlocked=false;$('adm-lock').style.display='flex';$('sett-c').style.display='none';}
-function logoutAndLock(){logoutUser();lockSett();updateTabVisibility();$('app').style.display='none';showLanding();toast('Odhlásený');}
+function logoutAndLock(){logoutUser();lockSett();updateTabVisibility();$('app').style.display='none';showLanding();toast(t('toast-logged-out'));}
 function changePw(){const o=$('old-pw').value,n=$('new-pw').value,n2=$('new-pw2').value;if(!checkPw(o,admPw)){toast('Nesprávne staré heslo');return;}if(n.length<4){toast('Min 4 znaky');return;}if(n!==n2){toast('Heslá sa nezhodujú');return;}admPw=simpleHash(n);save();$('old-pw').value='';$('new-pw').value='';$('new-pw2').value='';auditLog('pw-change','admin');toast('Heslo zmenené');}
 function saveHR(){hrRate=parseFloat($('hr-rate').value)||6;save();toast('Sadzba: €'+hrRate+'/hod');}
 // ══ TABS ══
 const TABS=['reg','open','spravca','analyzy','moje','sett'];
 function gT(n){
   if((n==='spravca'||n==='analyzy')&&!currentUser){showAdmLogin();return;}
-  if(n==='analyzy'&&!isAdmin()){toast('Iba pre admina');return;}
+  if(n==='analyzy'&&!isAdmin()){toast(t('toast-admin-only'));return;}
   if(n==='moje'&&!currentUser){showAdmLogin();return;}
   TABS.forEach(t=>{const el=$('p-'+t);if(el)el.classList.toggle('on',t===n);});
   document.querySelectorAll('.tab').forEach(el=>{
@@ -2063,7 +2063,7 @@ function gP(grp){const e=document.querySelector(`.pill[data-g="${grp}"].on`);ret
 function startSess(){
   const arena=gP('arena'),instructor=gP('instructor'),activity=gP('activity');
   if(!arena){toast('Vyber areál');aT('arena');return;}
-  if(!instructor){toast('Vyber inštruktora');aT('instructor');return;}
+  if(!instructor){toast(t('toast-select-instructor'));aT('instructor');return;}
   if(!activity){toast('Vyber aktivitu');aT('activity');return;}
   // Session instructor = selected pill value (not necessarily logged-in user)
   // This allows admin to create session for any instructor
@@ -2273,7 +2273,7 @@ function simNFC(){nfcN++;const nm=t('player-default')+' '+(getWbs().length+1);as
 // ══ MANUAL ADD PLAYER ══
 function addPlayer(){
   // ✅ Only session's own instructor (or admin) can add players
-  if(!currentUser){toast('Prihlás sa pre pridanie hráča');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   const sess=getSess();
   if(!isAdmin()&&sess&&currentUser){
     const sessInstrsCheck=getSessionInstructors(sess);
@@ -2283,7 +2283,7 @@ function addPlayer(){
   }
   const nm=$('cname').value.trim();
 
-  if(!nm){toast('Zadaj meno hráča');$('cname').focus();return;}
+  if(!nm){toast(t('toast-enter-name'));$('cname').focus();return;}
   // If input is a pure number, add that many players
   const num=parseInt(nm);
   if(!isNaN(num)&&String(num)===nm&&num>0&&num<=50){
@@ -2354,7 +2354,7 @@ function rPbt(){
 // P1: PB shot tracker — auto-add Ammo when at/above max
 function mShot(n){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
-  if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+  if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
   const pk=getPkg(w);
   // AIRSOFT: balls go directly to bUsed (no package limit tracking)
   if(pk&&pk.isAS){
@@ -2395,7 +2395,7 @@ function mShot(n){
 
 function uShot(n){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
-  if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+  if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
   const oldUsed=w.bUsed||0;
   const pkgBalls=getPkg(w)?getPkg(w).balls:0;
   const ammoBallsOnBill=w.items.filter(i=>{const p=prods.find(x=>x.id===i.id);return p&&p.cat==='Ammo'&&p.mode==='pb';}).reduce((s,i)=>{const p=prods.find(x=>x.id===i.id);return s+(p.addB||100)*i.qty;},0);
@@ -2452,7 +2452,7 @@ function openDrk(i){
   om('m-drink');
 }
 function openGrpDrink(){
-  if(!canEditWb([...chkd][0])){toast('Nemáš oprávnenie');return;}
+  if(!canEditWb([...chkd][0])){toast(t('toast-no-permission'));return;}
   const wbs=getWbs();
   const eligible=wbs.filter(w=>chkd.has(w.id)&&isAgencyWb(w)&&getPkg(w)?.drinks&&(w.dG||[]).length<getPkg(w).drinks);
   if(!eligible.length){toast('Žiadny označený hráč nemá dostupný nápoj zadarmo');return;}
@@ -2523,7 +2523,7 @@ function addP(pid){
   const wbs=getWbs();const p=prods.find(x=>x.id===pid);if(!p)return;
   // ── PACKAGE ──
   if(p.pkgId){
-    if(!currentUser){toast('Prihlás sa pre pridanie balíka');return;}
+    if(!currentUser){toast(t('toast-login-required'));return;}
     if(chkd.size>0){
       let added=0,skipped=0;
       wbs.filter(w=>chkd.has(w.id)).forEach(w=>{
@@ -2536,7 +2536,7 @@ function addP(pid){
       toast(p.name+' pridaný '+added+' hráčom'+(skipped?' ('+skipped+' preskočených)':''));
       save();rBill();rWbs();rPbt();rDrk();return;
     }
-    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
     const w=wbs.find(w=>w.id===selId);if(!w)return;
     if(!canEditWb(selId)){toast('Nemáš oprávnenie upravovať túto hru');return;}
     if(w.pkgDone){toast('Balík už bol pridaný. Najprv odstráň existujúci.');return;}
@@ -2546,9 +2546,9 @@ function addP(pid){
   }
   // ── AMMO — airsoft ammo goes directly to bUsed ──
   if(p.cat==='Ammo'&&p.mode==='as'){
-    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
     const w=wbs.find(w=>w.id===selId);if(!w)return;
-    if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+    if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
     const pkg=getPkg(w);
     if(pkg&&pkg.isAS){
       w.bUsed=(w.bUsed||0)+(p.addB||200);
@@ -2559,9 +2559,9 @@ function addP(pid){
   }
   // ── AMMO GB (Gelblaster) — same logic as airsoft ──
   if(p.cat==='Ammo'&&p.mode==='gb'){
-    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
     const w=wbs.find(w=>w.id===selId);if(!w)return;
-    if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+    if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
     const pkg=getPkg(w);
     if(pkg&&pkg.isGB){
       w.bUsed=(w.bUsed||0)+(p.addB||1000);
@@ -2572,7 +2572,7 @@ function addP(pid){
   }
   // ── AMMO (PB) — acts as +balls if player has remaining ──
   if(p.cat==='Ammo'&&p.mode==='pb'){
-    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
     const w=wbs.find(w=>w.id===selId);if(!w)return;
     const pkg=getPkg(w);
     if(pkg&&pkg.isPB){
@@ -2602,9 +2602,9 @@ function addP(pid){
   }
   // ── AMMO (AS) — Airsoft ammo goes directly to shot counter ──
   if(p.cat==='Ammo'&&p.mode==='as'){
-    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
     const w=wbs.find(w=>w.id===selId);if(!w)return;
-    if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+    if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
     const pkg=getPkg(w);
     if(pkg&&pkg.isAS){
       w.bUsed=(w.bUsed||0)+(p.addB||200);
@@ -2615,12 +2615,12 @@ function addP(pid){
   }
   // ── POUKAZ (VOUCHER) ──
   if(p.isVoucher){
-    if(!selId){toast('Najprv vyber hráča');return;}
-    if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+    if(!selId){toast(t('toast-select-player'));return;}
+    if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
     $('vc-amt').value='';$('vc-num').value='';om('m-voucher');return;
   }
   // ── ŠTANDARDNÝ PRODUKT ──
-  if(!selId){toast('Najprv vyber hráča');return;}
+  if(!selId){toast(t('toast-select-player'));return;}
   const w=wbs.find(w=>w.id===selId);if(!w)return;
   if(!canEditWb(selId)){toast('Nemáš oprávnenie upravovať túto hru');return;}
   // Extra hodiny: only the assigned instructor (or admin) can add
@@ -2675,7 +2675,7 @@ function openXH(pid){
       toast('Extra hodiny môže pridať len '+sessInstrsXH.join(' alebo '));return;
     }
   }
-  if(!currentUser){toast('Prihlás sa pre pridanie extra hodiny');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   xhPid=pid;const p=prods.find(x=>x.id===pid);const wbs=getWbs();
   $('m-xh-t').textContent=`⏰ ${p?p.name:''} – ${fp(p?p.price:0)}`;
   const perP=wbs.length?(p?p.price:0)/wbs.length:0;
@@ -2694,9 +2694,9 @@ function addXH(mode){
       toast('Extra hodiny môže pridať len '+sessInstrsAXH.join(' alebo '));cm('m-xh');return;
     }
   }
-  if(mode==='split'){if(!wbs.length){toast('Žiadni hráči');return;}const pp=parseFloat((p.price/wbs.length).toFixed(2));wbs.forEach(w=>{w.items.push({id:p.id,name:p.name+' (1/'+wbs.length+')',price:pp,qty:1,disc:0});});toast(`Extra hodina: ${fp(pp)}/hráč`);}
-  else if(mode==='group'){const w=wbs.find(w=>w.id===selId)||(wbs.length?wbs[0]:null);if(!w){toast('Vyber hráča');return;}w.items.push({id:p.id,name:p.name+' (skupina)',price:p.price,qty:1,disc:0});toast('Extra hodina – skupinový účet');}
-  else if(mode==='specific'){const tid=$('xh-sel').value;const w=wbs.find(w=>w.id===tid);if(!w){toast('Hráč nenájdený');return;}w.items.push({id:p.id,name:p.name,price:p.price,qty:1,disc:0});toast('Extra hodina → '+w.name);}
+  if(mode==='split'){if(!wbs.length){toast(t('toast-no-players'));return;}const pp=parseFloat((p.price/wbs.length).toFixed(2));wbs.forEach(w=>{w.items.push({id:p.id,name:p.name+' (1/'+wbs.length+')',price:pp,qty:1,disc:0});});toast(`Extra hodina: ${fp(pp)}/hráč`);}
+  else if(mode==='group'){const w=wbs.find(w=>w.id===selId)||(wbs.length?wbs[0]:null);if(!w){toast(t('toast-select-player'));return;}w.items.push({id:p.id,name:p.name+' (skupina)',price:p.price,qty:1,disc:0});toast('Extra hodina – skupinový účet');}
+  else if(mode==='specific'){const tid=$('xh-sel').value;const w=wbs.find(w=>w.id===tid);if(!w){toast(t('toast-player-not-found'));return;}w.items.push({id:p.id,name:p.name,price:p.price,qty:1,disc:0});toast('Extra hodina → '+w.name);}
   cm('m-xh');save();rBill();rWbs();
 }
 // ══ WRISTBANDS ══
@@ -2805,7 +2805,7 @@ function payAllAgencyExtras(){
 
 function confirmBulkAgencyExtras(wbIds){
   const payEl=$('bulk-po-c');const payM=payEl?.classList.contains('cash')?'cash':($('bulk-po-k')?.classList.contains('card')?'card':null);
-  if(!payM){toast('Vyber spôsob platby');return;}
+  if(!payM){toast(t('toast-select-pay'));return;}
   const wbs=getWbs();let count=0;
   wbIds.forEach(id=>{
     const w=wbs.find(x=>x.id===id);if(!w)return;
@@ -2839,27 +2839,27 @@ function updInvBadge(){
 }
 function selWb(id){selId=id;rWbs();rBill();rPbt();rDrk();rProds();}
 function openEditWb(){
-  if(!currentUser){toast('Prihlás sa pre úpravu hráča');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   if(!canEditWb(selId)){toast('Nemáš oprávnenie upravovať tohto hráča');return;}
   openEWbFor(selId);
 }
 function openEWbFor(id){
-  if(!currentUser){toast('Prihlás sa pre úpravu hráča');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   selId=id;const wbs=getWbs();const w=wbs.find(w=>w.id===id);if(!w)return;
   if(!canEditWb(id)){toast('Nemáš oprávnenie upravovať tohto hráča');return;}
   $('ew-n').value=w.name;$('ew-id').value=w.id;om('m-wb');
 }
 function saveWb(){
-  if(!currentUser){toast('Prihlás sa');return;}
-  if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
+  if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
   const ni=$('ew-id').value.trim(),nn=$('ew-n').value.trim();
-  if(ni&&ni!==w.id&&wbs.find(x=>x.id===ni)){toast('ID už použité');return;}
-  if(ni)w.id=ni;if(nn)w.name=nn;selId=w.id;cm('m-wb');save();rWbs();rBill();toast('Aktualizované');
+  if(ni&&ni!==w.id&&wbs.find(x=>x.id===ni)){toast(t('toast-id-exists'));return;}
+  if(ni)w.id=ni;if(nn)w.name=nn;selId=w.id;cm('m-wb');save();rWbs();rBill();toast(t('toast-updated'));
 }
 function assignWb(id,name,email){
   // ✅ Only session's own instructor (or admin) can add wristbands
-  if(!currentUser){toast('Prihlás sa pre pridanie hráča');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   const s=getSess();
   if(!isAdmin()&&s&&currentUser){
     const sessInstrsAW=getSessionInstructors(s);
@@ -2874,14 +2874,14 @@ function assignWb(id,name,email){
   setWbs(wbs);selId=id;save();rWbs();rBill();rPbt();rDrk();rProds();toast(`#${wbs.length} ${name||'Hráč'} pridaný`);
 }
 function payAll(){
-  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
-  const wbs=getWbs();if(!wbs.length){toast('Žiadni hráči');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
+  const wbs=getWbs();if(!wbs.length){toast(t('toast-no-players'));return;}
   const allowed=wbs.filter(w=>canEditWb(w.id));
   if(!allowed.length){toast('Nemáš oprávnenie na žiadneho hráča');return;}
   pendGrp=allowed.map(w=>w.id);_checkDepositThenGrpModal();
 }
 function grpCheckout(){
-  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   const wbs=getWbs();const sel=wbs.filter(w=>chkd.has(w.id)&&canEditWb(w.id));
   if(!sel.length){toast('Označ hráčov (musíš byť ich inštruktor)');return;}
   pendGrp=sel.map(w=>w.id);_checkDepositThenGrpModal();
@@ -2980,7 +2980,7 @@ function rBill(){
 }
 function remItem(idx){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
-  if(!currentUser){toast('Prihlás sa pre úpravu účtu');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   if(!canEditWb(selId)){toast('Nemáš oprávnenie upravovať túto hru');return;}
   const it=w.items[idx];
   // If removing a package item, reset pkgDone so another package can be added
@@ -2995,15 +2995,15 @@ function remItem(idx){
   save();rBill();rWbs();rPbt();rDrk();
 }
 function openEItem(idx){
-  if(!currentUser){toast('Prihlás sa pre úpravu položky');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   if(!canEditWb(selId)){toast('Nemáš oprávnenie upravovať tento účet');return;}
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
   editIdx=idx;const it=w.items[idx];$('m-it').textContent='Upraviť: '+it.name;$('eq').value=it.qty;$('ed').value=it.disc||0;om('m-item');
 }
 function sd(v){$('ed').value=v;}
 function saveItem(){
-  if(!currentUser){toast('Prihlás sa');return;}
-  if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
+  if(!canEditWb(selId)){toast(t('toast-no-permission'));return;}
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w||editIdx===null)return;
   w.items[editIdx].qty=Math.max(1,parseInt($('eq').value)||1);
   w.items[editIdx].disc=Math.min(100,Math.max(0,parseFloat($('ed').value)||0));
@@ -3045,7 +3045,7 @@ function saveVoucherEdit(){
 }
 // ══ MULTI-INSTRUCTOR ══
 function openAddInstructor(){
-  if(!getSess()){toast('Žiadna aktívna session');return;}
+  if(!getSess()){toast(t('toast-no-session'));return;}
   const sel=$('add-instr-sel');if(!sel)return;
   const sess=getSess();
   const currentInstrs=sess.instructors||[sess.instructor].filter(Boolean);
@@ -3127,7 +3127,7 @@ function openDepositModal(wbId,isGroup){
 }
 function confirmDeposit(){
   const amt=parseFloat($('deposit-amount').value)||0;
-  if(amt<=0){toast('Zadaj sumu zálohy');return;}
+  if(amt<=0){toast(t('toast-deposit-enter'));return;}
   const sess=getSess();if(!sess)return;
   const selectedWbId=$('deposit-player-sel').value;
   sess.deposit={amount:amt,scope:'player',wbId:selectedWbId};
@@ -3176,7 +3176,7 @@ function getDepositForSession(sessKey){
 function closeBill(){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);
   if(w&&!canEditWb(selId)){toast('Nemáš oprávnenie uzavrieť tento účet');return;}
-  if(!w){toast('Vyber hráča');return;}if(!w.items.length){toast('Žiadne položky');return;}
+  if(!w){toast(t('toast-select-player'));return;}if(!w.items.length){toast(t('toast-no-items'));return;}
   if(isAgencyWb(w)){
     const extItems=agencyExtraItems(w);
     if(extItems.length>0){
@@ -3215,7 +3215,7 @@ function selPay(m){payM=m;$('po-c').className='po'+(m==='cash'?' cash':'');$('po
 let agencyExtrasPayM=null;let agencyPendClose=null;
 
 function openAgencyPay(wbId){
-  if(!canEditWb(wbId)){toast('Nemáš oprávnenie');return;}
+  if(!canEditWb(wbId)){toast(t('toast-no-permission'));return;}
   const wbs=getWbs();const w=wbs.find(x=>x.id===wbId);if(!w)return;
   const extItems=agencyExtraItems(w);
   if(extItems.length===0){toast('Žiadne doplnky na platbu');return;}
@@ -3383,14 +3383,14 @@ function cancelCloseSess(){
     wbMap[sk]=curWbs;
     closed=closed.filter(w=>!(w.sKey===sk&&w.justClosed));
     save();rWbs();rBill();rOpen();rAppSessBar();
-    toast('Platba zrušená – hráči obnovení');
+    toast(t('toast-pay-cancelled'));
   }
   closeSessKey=null;cm('m-close-sess');
 }
 function confirmCloseSess(){
   const pay=parseFloat($('cs-pay').value);const costs=parseFloat($('cs-costs').value)||0;const note=$('cs-note').value.trim();
-  if(isNaN(pay)||pay<0){toast('Zadaj odmenu inštruktora');return;}
-  if(costs>0&&!note){$('cs-note-req').style.display='inline';toast('Poznámka k nákladom je povinná');return;}
+  if(isNaN(pay)||pay<0){toast(t('toast-enter-reward'));return;}
+  if(costs>0&&!note){$('cs-note-req').style.display='inline';toast(t('toast-cost-note-required'));return;}
   $('cs-note-req').style.display='none';
   const savedKey=closeSessKey;
   auditLog('sess-close',savedKey);
@@ -3442,15 +3442,15 @@ function _continueGroupPay(){
   _doConfirmGrp();
 }
 function confirmGrp(){
-  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   if(!gPayM)return;
   _doConfirmGrp();
 }
 function _doConfirmGrp(){
-  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   if(!gPayM)return;const wbs=getWbs();const s=getSess();const sk=actKey();
   const sel=wbs.filter(w=>pendGrp.includes(w.id)&&canEditWb(w.id));
-  if(!sel.length){toast('Nemáš oprávnenie');return;}
+  if(!sel.length){toast(t('toast-no-permission'));return;}
   // ✅ Block invoice if any agency player still has extras
   if(gPayM==='invoice'){
     const withExtras=sel.filter(w=>isAgencyWb(w)&&agencyExtraItems(w).length>0);
@@ -3476,7 +3476,7 @@ function _doConfirmGrp(){
   if(newWbs.length===0){checkLastPlayerClosed(sk);}
 }
 function selEPay(m){ePayM=m;$('epo-c').className='po'+(m==='cash'?' cash':'');$('epo-k').className='po'+(m==='card'?' card':'');$('epo-f').className='po'+(m==='invoice'?' invoice':'');}
-function confirmEPay(){if(!confirm('Naozaj zmeniť spôsob platby?'))return;const w=closed.find(c=>c.id===ePayId);if(w&&ePayM)w.payM=ePayM;cm('m-epay');save();rClosed();toast('Platba zmenená');}
+function confirmEPay(){if(!confirm('Naozaj zmeniť spôsob platby?'))return;const w=closed.find(c=>c.id===ePayId);if(w&&ePayM)w.payM=ePayM;cm('m-epay');save();rClosed();toast(t('toast-pay-changed'));}
 function openEPayM(id){ePayId=id;const w=closed.find(c=>c.id===id);ePayM=w?w.payM:'cash';$('epo-c').className='po'+(ePayM==='cash'?' cash':'');$('epo-k').className='po'+(ePayM==='card'?' card':'');$('epo-f').className='po'+(ePayM==='invoice'?' invoice':'');om('m-epay');}
 // ══ REOPEN ══
 function openReopen(id){reopW=closed.find(c=>c.id===id);if(!reopW)return;$('m-reopen-b').innerHTML=`<p style="font-size:13px;color:var(--t2);margin-bottom:9px;">Znovu otvoriť <strong style="color:var(--t1);">${reopW.name}</strong>?</p><p style="font-size:11px;color:var(--t3);">Uzavreté: ${fDT(reopW.closedAt)}</p>`;om('m-reopen');}
@@ -3484,8 +3484,8 @@ function confirmReopen(){if(!reopW)return;const wbs=getWbs();if(wbs.find(x=>x.id
 // ══ EDIT AMOUNT (Správca) ══
 let _editAmtId=null;
 function openEditAmt(id){
-  if(!admUnlocked){toast('Len admin');return;}
-  const w=closed.find(c=>c.id===id);if(!w){toast('Hráč nenájdený');return;}
+  if(!admUnlocked){toast(t('toast-admin-only'));return;}
+  const w=closed.find(c=>c.id===id);if(!w){toast(t('toast-player-not-found'));return;}
   _editAmtId=id;
   $('m-editamt-info').innerHTML=`<strong style="color:var(--t1);">${escHtml(w.name)}</strong> · ${w.payM==='card'?'💳':w.payM==='invoice'?'🧾':'💵'} · Celkom: <strong>${fp(billAmt(w))}</strong>`;
   $('m-editamt-items').innerHTML=w.items.map((it,idx)=>{
@@ -3525,7 +3525,7 @@ function saveEditAmt(){
 }
 // ══ VRP2 ══
 function openVrp(){
-  const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w||!w.items.length){toast('Žiadne položky');return;}
+  const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w||!w.items.length){toast(t('toast-no-items'));return;}
   const tot=billAmt(w),round=Math.round(tot/0.05)*0.05,rnd=round-tot;const now=new Date();const s=getSess();
   const rows=w.items.map(i=>{const d=i.disc||0;const lp=i.price*i.qty*(1-d/100);return`  ${i.name.padEnd(20).slice(0,20)} ${String(i.qty).padStart(3)}× €${i.price.toFixed(2).padStart(6)} = €${lp.toFixed(2).padStart(7)}${d>0?` -${d}%`:''}`;}).join('\n');
   $('m-vrp-b').innerHTML=`<div class="vrp">POKLADNIČNÝ DOKLAD\n${biz.name||''}\nIČO: ${biz.ico||'—'}  DIČ: ${biz.dic||'—'}\n${biz.addr||''}\nAreál: ${s?.arena||'—'}  Inštruktor: ${s?.instructor||'—'}\n${'─'.repeat(40)}\nZákazník: ${w.name}\nDátum: ${now.toLocaleDateString('sk-SK')} ${now.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}\n${'─'.repeat(40)}\n${rows}\n${'─'.repeat(40)}\nCELKOM:       ${('€'+round.toFixed(2)).padStart(10)}\nDPH (20%):    ${('€'+(tot*0.2/1.2).toFixed(2)).padStart(10)}\n${'─'.repeat(40)}</div><div style="font-size:11px;color:var(--t3);margin-top:7px;">VRP2 → Nový doklad → zadaj → vydaj</div>`;
@@ -3558,11 +3558,11 @@ function canEditWb(wbId){
 }
 
 function quickPay(wbId){
-  if(!currentUser){toast('Prihlás sa pre inkaso');return;}
+  if(!currentUser){toast(t('toast-login-required'));return;}
   // Find wb in all sessions
   let foundWb=null;let foundSid=null;
   for(const s of sessArr){const wbs=wbMap[s.key]||[];const found=wbs.find(x=>x.id===wbId);if(found){foundWb=found;foundSid=s.key;break;}}
-  if(!foundWb){toast('Hráč nenájdený');return;}
+  if(!foundWb){toast(t('toast-player-not-found'));return;}
   if(!canEditSession(foundSid)){toast('Nemáš oprávnenie na tento účet');return;}
   // Switch to correct session if needed
   if(foundSid!==curSid){curSid=foundSid;save();}
@@ -4153,13 +4153,13 @@ function updPout(){
 }
 function savePout(){
   const amt=parseFloat($('po-amt').value)||0;const costs=parseFloat($('po-costs').value)||0;const note=$('po-note').value.trim();const type=$('po-type').value;const hrs=parseFloat($('po-hrs').value)||0;
-  if(costs>0&&!note){toast('Poznámka k nákladom je povinná');return;}
+  if(costs>0&&!note){toast(t('toast-cost-note-required'));return;}
   const pouts=lPouts();pouts[poutKey]={amt,costs,note,type,hrs};sPouts(pouts);
   cm('m-pout');save();toast('Výplata uložená: '+fp(amt));rAkcie();if($('p-closed').classList.contains('on'))rClosed();
 }
 // ══ NOTE ══
 function openNote(key){noteKey=key;const notes=lNotes();$('note-t').value=notes[key]||'';om('m-note');}
-function saveNote(){const notes=lNotes();notes[noteKey]=$('note-t').value.trim();sNotes(notes);const s=sessArr.find(x=>x.key===noteKey);if(s){s.note=notes[noteKey];save();}else save();cm('m-note');toast('Poznámka uložená');if($('p-akcie').classList.contains('on'))rAkcie();}
+function saveNote(){const notes=lNotes();notes[noteKey]=$('note-t').value.trim();sNotes(notes);const s=sessArr.find(x=>x.key===noteKey);if(s){s.note=notes[noteKey];save();}else save();cm('m-note');toast(t('toast-note-saved'));if($('p-akcie').classList.contains('on'))rAkcie();}
 // ══ CHART ══
 function showChart(){
   const now=new Date();const cm2=now.getMonth(),cy=now.getFullYear();
@@ -5493,7 +5493,7 @@ function handleLogoutFromMenu(btn){
 }
 function handleLandingLogout(){
   // ✅ No confirm() — just logout (confirm was blocking click event chain)
-  logoutUser();updateLandingUser();updateTabVisibility();toast('Odhlásený');
+  logoutUser();updateLandingUser();updateTabVisibility();toast(t('toast-logged-out'));
 }
 
 function goNewGame(){
@@ -5821,7 +5821,7 @@ function saveNFCMode(){
 }
 
 function manualCloseSess(){
-  if(!curSid){toast('Žiadna aktívna session');return;}
+  if(!curSid){toast(t('toast-no-session'));return;}
   const bills=closed.filter(w=>w.sKey===curSid);
   openCloseSess(curSid,bills);
 }
@@ -5945,6 +5945,11 @@ const LANG={
     'toast-synced':'Synchronizované',
     'toast-select-instructor':'Vyber inštruktora','toast-enter-pw':'Zadaj heslo',
     'toast-wrong-pw-instr':'Chybné heslo — Inštruktor NEPRIDANÝ',
+    'toast-logged-out':'Odhlásený','toast-no-items':'Žiadne položky',
+    'toast-player-not-found':'Hráč nenájdený','toast-admin-only':'Len admin',
+    'toast-no-session':'Žiadna aktívna session',
+    'toast-cost-note-required':'Poznámka k nákladom je povinná',
+    'toast-note-saved':'Poznámka uložená','toast-pay-changed':'Platba zmenená',
     'email-lbl':'Email zákazníka','email-ph':'meno@email.com','email-hint':'— voliteľné, pre registrovaných zákazníkov',
     'name-lbl':'Meno / Nick hráča','name-hint':'— zadaj číslo (napr. 8) pre hromadné pridanie',
     'nfc-name-lbl':'Nick / Email zákazníka','nfc-name-hint':'— nechaj prázdne pre auto-číslovanie',
@@ -6063,6 +6068,11 @@ const LANG={
     'toast-synced':'Synced',
     'toast-select-instructor':'Select instructor','toast-enter-pw':'Enter password',
     'toast-wrong-pw-instr':'Wrong password — Instructor NOT added',
+    'toast-logged-out':'Logged out','toast-no-items':'No items',
+    'toast-player-not-found':'Player not found','toast-admin-only':'Admin only',
+    'toast-no-session':'No active session',
+    'toast-cost-note-required':'Cost note is required',
+    'toast-note-saved':'Note saved','toast-pay-changed':'Payment changed',
     'email-lbl':'Customer email','email-ph':'name@email.com','email-hint':'— optional, for registered customers',
     'name-lbl':'Player name / nick','name-hint':'— enter number (e.g. 8) for bulk add',
     'nfc-name-lbl':'Customer nick / email','nfc-name-hint':'— leave empty for auto-numbering',
