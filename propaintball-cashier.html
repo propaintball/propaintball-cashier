@@ -128,11 +128,9 @@ textarea{resize:none;line-height:1.5;}
 .pnum{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:700;flex-shrink:0;padding:0 5px;}
 /* Wristbands */
 .wb{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:var(--rs);border:.5px solid var(--b1);cursor:pointer;margin-bottom:5px;background:var(--bg3);transition:all .12s;position:relative;}
-.wb .hover-actions{display:none;position:absolute;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;gap:6px;padding:4px;background:rgba(15,23,42,.88);border-radius:var(--rs);z-index:10;backdrop-filter:blur(2px);}
-.wb:hover .hover-actions{display:flex;}
-@media(hover:none){.wb:hover .hover-actions{display:none;}}
 .wb.sel{border-color:var(--bbd);background:var(--bbg);}
 .wb.chk{border-color:var(--gbd);background:rgba(34,197,94,.06);}
+.wb.chk.sel{border-color:var(--grn);background:rgba(34,197,94,.18);box-shadow:0 0 0 1px var(--grn);}
 .wi{flex:1;min-width:0;}
 .wn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .wm{display:flex;gap:4px;align-items:center;margin-top:2px;flex-wrap:wrap;}
@@ -755,24 +753,7 @@ textarea{resize:none;line-height:1.5;}
           </div>
           <div id="cust-list" style="max-height:400px;overflow-y:auto;"></div>
         </div>
-        <!-- Customer Edit Modal -->
-        <div id="m-cust-edit" class="modal" style="display:none;">
-          <div class="mc" style="max-width:380px;">
-            <div class="mh">✏️ Upraviť zákazníka</div>
-            <div class="mb">
-              <div class="fr"><label class="lb">Nick / Meno</label><input type="text" id="ce-name"/></div>
-              <div class="fr"><label class="lb">Email</label><input type="email" id="ce-email"/></div>
-              <div class="fr"><label class="lb">Telefón</label><input type="tel" id="ce-phone"/></div>
-              <div style="font-size:10px;color:var(--t3);margin-top:4px;" id="ce-info"></div>
-            </div>
-            <div class="mf">
-              <button class="btn R" onclick="deleteCust()">🗑 Zmazať</button>
-              <div style="flex:1;"></div>
-              <button class="btn T" onclick="cm('m-cust-edit')">Zrušiť</button>
-              <button class="btn G" onclick="saveCustEdit()">Uložiť</button>
-            </div>
-          </div>
-        </div>
+        <!-- Customer Edit Modal moved to body level -->
         <!-- NFC Analysis -->
         <div class="card" style="border-color:var(--abd);">
           <div class="ch" style="color:var(--amb);">📡 NFC / RFID Čítačka — technická analýza</div>
@@ -1010,6 +991,10 @@ textarea{resize:none;line-height:1.5;}
     <button class="btn" onclick="skipDeposit()">Nie, pokračovať</button>
   </div>
 </div></div>
+<!-- Voucher Modal -->
+<div class="mw" id="m-voucher"><div class="mb"><div class="mt">🎫 Poukaz</div><div class="fr"><label class="lb">Suma poukazu (€)</label><input type="number" id="vc-amt" min="0" step="0.5" value="0" placeholder="Napr. 50"/></div><div class="fr"><label class="lb">Číslo poukazu</label><input type="text" id="vc-num" placeholder="Napr. VP-2026-001"/></div><div class="r2" style="margin-top:10px;"><button class="btn G" onclick="confirmVoucher()">Pridať na účet</button><button class="btn" onclick="cm('m-voucher')">Zrušiť</button></div></div></div>
+<!-- Customer Edit Modal -->
+<div class="mw" id="m-cust-edit"><div class="mb"><div class="mt">✏️ Upraviť zákazníka</div><div class="fr"><label class="lb">Nick / Meno</label><input type="text" id="ce-name"/></div><div class="fr"><label class="lb">Email</label><input type="email" id="ce-email"/></div><div class="fr"><label class="lb">Telefón</label><input type="tel" id="ce-phone"/></div><div style="font-size:10px;color:var(--t3);margin-top:4px;" id="ce-info"></div><div style="display:flex;gap:7px;margin-top:10px;"><button class="btn R" onclick="deleteCust()">🗑 Zmazať</button><div style="flex:1;"></div><button class="btn" onclick="cm('m-cust-edit')">Zrušiť</button><button class="btn G" onclick="saveCustEdit()">Uložiť</button></div></div></div>
 <!-- Delete confirm -->
 <div class="mw" id="m-del-sess"><div class="mb"><div class="mt">🗑 Vymazať akciu</div><div id="m-del-b" style="font-size:13px;color:var(--t2);margin-bottom:12px;"></div><div style="font-size:11px;color:var(--amb);background:var(--abg);padding:8px;border-radius:var(--rs);margin-bottom:12px;">⚠ Akcia bude archivovaná pred vymazaním. Obnoviť ju bude možné v sekcii Archív.</div><div class="r2"><button class="btn R" onclick="confirmDelSess()">Vymazať &amp; archivovať</button><button class="btn" onclick="cm('m-del-sess')">Zrušiť</button></div></div></div>
 <script>
@@ -1073,7 +1058,8 @@ const DEF_P=[
   {id:32,name:'Chipsy',              price:4,   cat:'Pochutiny',  emoji:'🥔'},
   {id:33,name:'Chrumky',             price:1.5, cat:'Pochutiny',  emoji:'🍿'},
   {id:34,name:'Kexík',               price:1.5, cat:'Pochutiny',  emoji:'🍪'},
-  {id:35,name:'Záloha',             price:-50, cat:'Záloha',     emoji:'💰', isDeposit:true},
+  {id:35,name:'Záloha',             price:-50, cat:'Záloha a poukaz', emoji:'💰', isDeposit:true},
+  {id:36,name:'Poukaz',             price:0,   cat:'Záloha a poukaz', emoji:'🎫', isVoucher:true},
 ];
 // ══ STORAGE ══
 const LS={g:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
@@ -1421,7 +1407,7 @@ function openCustEdit(idOrEmail){
   $('ce-email').value=c.email||'';
   $('ce-phone').value=c.phone||'';
   $('ce-info').textContent='ID: '+(c.id||'—')+' · Registrovaný: '+(c.registeredAt?new Date(c.registeredAt).toLocaleDateString('sk'):'—')+(c.lang?' · Jazyk: '+c.lang:'');
-  $('m-cust-edit').style.display='flex';
+  om('m-cust-edit');
 }
 function saveCustEdit(){
   if(!_custEditId)return;
@@ -2104,8 +2090,8 @@ function rAppSessBar(){
     const allAgencyClean=hasAgency&&agencyWbs.every(w=>agencyExtraItems(w).length===0);
     const statusIcon=hasAgency&&allAgencyClean?' ✅':'';
     const instrArr=getSessionInstructors(s);
-    const name=`${s.arena}·${(instrArr[0]||'?').split(' ')[0]}${instrArr.length>1?'+':''}`;
-    const tooltip=`${s.arena} · ${s.activity} · ${instrArr.join(', ')}${hasAgency&&!allAgencyClean?' — nezaplatené doplnky':''}`;
+    const name=`${s.arena}·${instrArr.map(n=>n.split(' ')[0]).join('+')}`;
+    const tooltip=`${s.arena} · ${s.activity} · ${instrArr.join(' + ')}${hasAgency&&!allAgencyClean?' — nezaplatené doplnky':''}`;
     return`<span class="spill ${isCur?'cur':''}" onclick="swSess('${s.key}')" title="${tooltip}">${name}${statusIcon}${isCur?' ●':''}</span>`;
   }).join('');
   // Update multi-session bottom bar
@@ -2126,7 +2112,7 @@ function rAppSessBar(){
         const actColor=s.activity?.toLowerCase().includes('airsoft')?'var(--grn)':s.activity?.toLowerCase().includes('laser')?'var(--tel)':s.activity?.toLowerCase().includes('gel')?'var(--blu)':'var(--red)';
         return`<div class="msb-item ${isCur?'active':''}" onclick="swSess('${s.key}')">
           <div class="msb-name">${escHtml(s.arena||'—')} <span style="color:${actColor};">· ${escHtml(s.activity||'—')}</span></div>
-          <div class="msb-meta">👤 ${instrArr.map(n=>n.split(' ')[0]).join(', ')} ${elapsedStr?'· ⏱'+elapsedStr:''}</div>
+          <div class="msb-meta">👤 ${instrArr.map(n=>n.split(' ')[0]).join(' + ')} ${elapsedStr?'· ⏱'+elapsedStr:''}</div>
           <div class="msb-stats">
             <span style="color:var(--grn);">👥${activePlayers}</span>
             <span style="color:var(--pur);">✓${closedCount}</span>
@@ -2141,7 +2127,7 @@ function rAppSessBar(){
   }
 }
 function swSess(k){curSid=k;selId=null;chkd=new Set();save();refUI();startSessTimer();const sg=getSess();toast('Session: '+(sg?.arena||'—')+' · '+(sg?.activity||''));}
-function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;if(!s){e.textContent='Bez session';return;}const instrArr=getSessionInstructors(s);const instrStr=instrArr.length>0?' · '+instrArr.map(n=>n.split(' ')[0]).join(', '):'';e.textContent=(s.arena||'')+(s.activity?' · '+s.activity:'')+instrStr;}
+function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;if(!s){e.textContent='Bez session';return;}const instrArr=getSessionInstructors(s);const instrStr=instrArr.length>0?' · '+instrArr.map(n=>n.split(' ')[0]).join(' + '):'';e.textContent=(s.arena||'')+(s.activity?' · '+s.activity:'')+instrStr;}
 function showSessModal(){
   const s=getSess();if(!s)return;
   const instr=getSessionInstructors(s);
@@ -2520,7 +2506,7 @@ function rProds(){
   const wbs=getWbs();const w=wbs.find(w=>w.id===selId);
   pt.textContent='PRODUKTY';
   const ap=getActProds();const allCats=[...new Set(ap.map(p=>p.cat))];
-  const CAT_ORDER=['Package','Ammo','Extras','Drinks','Pochutiny','Extra hodina'];
+  const CAT_ORDER=['Package','Ammo','Extras','Drinks','Pochutiny','Extra hodina','Záloha a poukaz'];
   const sortedCats=[...CAT_ORDER.filter(c=>allCats.includes(c)),...allCats.filter(c=>!CAT_ORDER.includes(c)&&c!=='Balík')];
   const ALPHA=['Extras','Drinks','Pochutiny'];
   g.innerHTML=sortedCats.map(cat=>{
@@ -2626,6 +2612,12 @@ function addP(pid){
       toast('🟡 +'+(p.addB||200)+' AS guličiek na účet + zarátané ako vystrelené');
       save();rBill();rWbs();rPbt();return;
     }
+  }
+  // ── POUKAZ (VOUCHER) ──
+  if(p.isVoucher){
+    if(!selId){toast('Najprv vyber hráča');return;}
+    if(!canEditWb(selId)){toast('Nemáš oprávnenie');return;}
+    $('vc-amt').value='';$('vc-num').value='';om('m-voucher');return;
   }
   // ── ŠTANDARDNÝ PRODUKT ──
   if(!selId){toast('Najprv vyber hráča');return;}
@@ -2734,19 +2726,12 @@ function rWbs(){
       <div class="wi">
         <div class="wn">${w.name}</div>
         <div class="wm">${pkB}${blB}${drkB}<span style="font-size:9px;color:var(--t3);">${w.id.startsWith('H-')?t('manual-id'):w.id}</span></div>
-        ${(pk&&pk.isPB&&selId===w.id)?`<div style="display:flex;gap:3px;margin-top:4px;" onclick="event.stopPropagation()"><button class="btn xs" style="font-size:10px;padding:2px 7px;" onclick="event.stopPropagation();selWb('${w.id}');mShot(100)">+100</button><button class="btn xs" style="font-size:10px;padding:2px 7px;" onclick="event.stopPropagation();selWb('${w.id}');mShot(200)">+200</button><button class="btn xs" style="font-size:10px;padding:2px 7px;color:var(--amb);" onclick="event.stopPropagation();selWb('${w.id}');uShot(100)">-100</button></div>`:''}
+        ${(pk&&(pk.isPB||pk.isAS||pk.isGB)&&selId===w.id)?`<div style="display:flex;gap:8px;margin-top:6px;justify-content:center;" onclick="event.stopPropagation()"><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(100);playPaySound()">+100</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(200);playPaySound()">+200</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--rbg);border:1.5px solid var(--rbd);color:var(--amb);" onclick="event.stopPropagation();selWb('${w.id}');uShot(100)">-100</button></div>`:''}
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
         <span style="font-size:12px;font-weight:600;color:${billAmt(w)>0?'var(--grn)':'var(--t3)'};">${fp(billAmt(w))}</span>
         ${billAmt(w)>0?`<button class="btn xs G" onclick="event.stopPropagation();quickPay('${w.id}')" title="Rýchla platba">💳</button>`:''}
         ${canEditWb(w.id)?`<button class="btn xs B" onclick="event.stopPropagation();openEWbFor('${w.id}')">✎</button>`:''}
-      </div>
-      <div class="hover-actions" onclick="event.stopPropagation()">
-        ${billAmt(w)>0?`<button class="btn sm G" onclick="quickPay('${w.id}')" title="Zaplatiť" style="font-size:14px;padding:6px 10px;">💰 Zaplatiť</button>`:''}
-        <button class="btn sm B" onclick="selWb('${w.id}');gT('reg')" title="Pridať produkt" style="font-size:14px;padding:6px 10px;">➕ Produkt</button>
-        ${(pk&&(pk.isPB||pk.isAS||pk.isGB))?`<button class="btn sm" style="background:var(--rbg);color:var(--red);border-color:var(--rbd);font-size:14px;padding:6px 10px;" onclick="selWb('${w.id}');mShot(100)" title="+100 guličiek">🔴 +100</button>`:''}
-        ${canEditWb(w.id)?`<button class="btn sm B" onclick="openEWbFor('${w.id}')" title="Editovať" style="font-size:14px;padding:6px 10px;">✎</button>`:''}
-        <button class="btn sm A" onclick="togChk('${w.id}')" title="Označiť" style="font-size:14px;padding:6px 10px;">${ch?'☑':'☐'}</button>
       </div>
     </div>`;
   }).join('');
@@ -2981,7 +2966,7 @@ function rBill(){
         `${d>0?`<span class="dtag">-${d}%</span><span style="font-size:10px;color:var(--t3);text-decoration:line-through;">€${o}</span>`:''}`+
         `${agBadge}</div></div>`+
         `<span class="oprice">€${f}</span>`+
-        `<div class="oib">${canEdit?`<button class="oibtn e" onclick="openEItem(${idx})">✎</button><button class="oibtn r" onclick="remItem(${idx})">✕</button>`:''}</div>`+
+        `<div class="oib">${canEdit?`<button class="oibtn e" onclick="${it.isVoucher?`openEVoucher(${idx})`:`openEItem(${idx})`}">✎</button><button class="oibtn r" onclick="remItem(${idx})">✕</button>`:''}</div>`+
         `</div>`;
     }).join('');
   }
@@ -3024,6 +3009,40 @@ function saveItem(){
   w.items[editIdx].disc=Math.min(100,Math.max(0,parseFloat($('ed').value)||0));
   editIdx=null;cm('m-item');save();rBill();rWbs();
 }
+// ══ VOUCHER ══
+function confirmVoucher(){
+  const amt=parseFloat($('vc-amt').value)||0;
+  const num=$('vc-num').value.trim();
+  if(amt<=0){toast('Zadaj sumu poukazu');return;}
+  const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
+  const vName='Poukaz'+(num?' #'+num:'');
+  w.items.push({id:36,name:vName,price:-amt,qty:1,disc:0,voucherNum:num,isVoucher:true});
+  cm('m-voucher');save();rBill();rWbs();toast('Poukaz '+fp(amt)+' pridaný');
+}
+function openEVoucher(idx){
+  const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
+  const it=w.items[idx];
+  $('vc-amt').value=Math.abs(it.price);
+  $('vc-num').value=it.voucherNum||'';
+  _voucherEditIdx=idx;
+  // Repurpose confirm button
+  $('m-voucher').querySelector('.btn.G').onclick=function(){saveVoucherEdit();};
+  om('m-voucher');
+}
+let _voucherEditIdx=null;
+function saveVoucherEdit(){
+  if(_voucherEditIdx===null)return;
+  const amt=parseFloat($('vc-amt').value)||0;
+  const num=$('vc-num').value.trim();
+  if(amt<=0){toast('Zadaj sumu poukazu');return;}
+  const wbs=getWbs();const w=wbs.find(w=>w.id===selId);if(!w)return;
+  const it=w.items[_voucherEditIdx];
+  it.price=-amt;it.name='Poukaz'+(num?' #'+num:'');it.voucherNum=num;
+  _voucherEditIdx=null;
+  // Restore confirm button for new vouchers
+  $('m-voucher').querySelector('.btn.G').onclick=function(){confirmVoucher();};
+  cm('m-voucher');save();rBill();rWbs();toast('Poukaz upravený');
+}
 // ══ MULTI-INSTRUCTOR ══
 function openAddInstructor(){
   if(!getSess()){toast('Žiadna aktívna session');return;}
@@ -3065,7 +3084,7 @@ function getSessionInstructors(sess){
 }
 function instrLabel(sess){
   const instr=getSessionInstructors(sess);
-  return instr.length>1?instr.join(', '):(instr[0]||'—');
+  return instr.length>1?instr.join(' + '):(instr[0]||'—');
 }
 // ══ DEPOSIT (ZÁLOHA) ══
 let _depositPendClose=null;
@@ -3870,7 +3889,7 @@ function openReport(key){
       <div class="rep-title">ℹ Informácie o akcii</div>
       <div class="rep-row"><span>Areál</span><span>${escHtml(si.arena||'—')}</span></div>
       <div class="rep-row"><span>Aktivita</span><span>${escHtml(si.activity||'—')}</span></div>
-      <div class="rep-row"><span>Inštruktor</span><span>${escHtml(si.instructor||'—')}</span></div>
+      <div class="rep-row"><span>Inštruktor</span><span>${escHtml(si.instructors&&si.instructors.length>1?si.instructors.join(' + '):(si.instructor||'—'))}</span></div>
       <div class="rep-row"><span>Začiatok</span><span>${escHtml(startStr)}</span></div>
       <div class="rep-row"><span>Ukončenie</span><span>${escHtml(endStr)}</span></div>
       ${note?`<div class="rep-row"><span>Poznámka</span><span style="color:var(--t2);">${escHtml(note)}</span></div>`:''}
@@ -4082,7 +4101,7 @@ function rAkcie(){
     const dl=Object.keys(dStats).length?Object.entries(dStats).map(([k,v])=>`${k}: ${v}×`).join(', '):'';
     return`<div class="ak">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;">
-        <div><div style="font-size:15px;font-weight:700;">${s.arena} – ${s.activity}</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.date||''} ${s.time||''} · ${instrLabel(s)}${s.active?' <span class="bdg bo">● aktívna</span>':''}</div></div>
+        <div><div style="font-size:15px;font-weight:700;">${s.arena} – ${s.activity} – ${instrLabel(s)}</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.date||''} ${s.time||''}${s.active?' <span class="bdg bo">● aktívna</span>':''}</div></div>
         <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
           <button class="btn sm B" onclick="openNote('${s.key}')">📝</button>
           ${cc>0?`<button class="btn sm P" onclick="openReport('${s.key}')">📊 Report</button>`:''}
@@ -4103,7 +4122,7 @@ function rAkcie(){
       <div style="display:flex;gap:12px;font-size:11px;margin-bottom:7px;"><span style="color:var(--grn);">💵 ${fp(cash)}</span><span style="color:var(--blu);">💳 ${fp(card)}</span></div>
       ${dl?`<div style="font-size:11px;color:var(--t2);margin-bottom:7px;">🥤 ${dl}</div>`:''}
       ${note?`<div style="background:var(--bg3);border-radius:var(--rs);padding:9px;font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:9px;border-left:2px solid var(--blu);">📝 ${note}</div>`:''}
-      ${pout?`<div class="pbox"><div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;margin-bottom:6px;">💰 Výplata</div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--amb);">${fp(pout.amt)}<span style="font-size:11px;color:var(--t3);">${s.instructor}</span></div>${pout.costs?`<div style="font-size:11px;color:var(--t2);margin-top:3px;">Iné náklady: ${fp(pout.costs)}</div>`:''}${pout.note?`<div style="font-size:11px;color:var(--t2);">${pout.note}</div>`:''}</div>`:''}
+      ${pout?`<div class="pbox"><div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;margin-bottom:6px;">💰 Výplata</div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--amb);">${fp(pout.amt)}<span style="font-size:11px;color:var(--t3);">${instrLabel(s)}</span></div>${pout.costs?`<div style="font-size:11px;color:var(--t2);margin-top:3px;">Iné náklady: ${fp(pout.costs)}</div>`:''}${pout.note?`<div style="font-size:11px;color:var(--t2);">${pout.note}</div>`:''}</div>`:''}
     </div>`;
   }).join('');
 }
