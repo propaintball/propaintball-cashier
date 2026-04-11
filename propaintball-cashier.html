@@ -1292,9 +1292,19 @@ function sCustomers(c){localStorage.setItem('pb_customers',JSON.stringify(c));}
 function addCustomer(name,email,phone,consent){
   const customers=lCustomers();
   const existing=customers.find(c=>c.email.toLowerCase()===email.toLowerCase());
-  if(existing){existing.name=name;if(phone)existing.phone=phone;existing.consent=consent;sCustomers(customers);return existing;}
+  if(existing){existing.name=name;if(phone)existing.phone=phone;existing.consent=consent;sCustomers(customers);pushCustomerToCloud(existing);return existing;}
   const cust={id:'cust_'+Date.now(),name,email:email.toLowerCase(),phone:phone||'',registeredAt:new Date().toISOString(),consent:!!consent};
-  customers.push(cust);sCustomers(customers);return cust;
+  customers.push(cust);sCustomers(customers);pushCustomerToCloud(cust);return cust;
+}
+async function pushCustomerToCloud(c){
+  if(!sbUrl||!sbKey||!c||!c.email)return;
+  try{
+    await fetch(`${sbUrl}/rest/v1/pb_data`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:c.id,payload:c,backup_type:'customer',backup_label:'Registrácia: '+c.name,updated_at:new Date().toISOString()})
+    });
+  }catch(e){console.error('[Customer push]',e);}
 }
 function findCustomerByEmail(email){return lCustomers().find(c=>c.email.toLowerCase()===email.toLowerCase());}
 function searchCustomers(query){
@@ -1367,11 +1377,23 @@ function copyRegLink(){
 async function syncCustomers(){
   if(!sbUrl||!sbKey)return;
   try{
+    // ✅ Push local customers to Supabase
+    const local=lCustomers();
+    for(const c of local){
+      if(!c.email)continue;
+      try{
+        await fetch(`${sbUrl}/rest/v1/pb_data`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'resolution=merge-duplicates'},
+          body:JSON.stringify({id:c.id,payload:c,backup_type:'customer',backup_label:'Registrácia: '+c.name,updated_at:c.registeredAt||new Date().toISOString()})
+        });
+      }catch(e){}
+    }
+    // ✅ Pull remote customers and merge
     const r=await fetch(`${sbUrl}/rest/v1/pb_data?backup_type=eq.customer&order=updated_at.desc`,{headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}});
     if(r.ok){
       const rows=await r.json();
       const remote=rows.map(r=>r.payload).filter(p=>p&&p.email);
-      const local=lCustomers();
       const merged=new Map();
       local.forEach(c=>merged.set(c.email.toLowerCase(),c));
       remote.forEach(c=>{if(c.email)merged.set(c.email.toLowerCase(),{...merged.get(c.email.toLowerCase())||{},...c});});
@@ -1418,14 +1440,22 @@ function saveCustEdit(){
   const email=$('ce-email').value.trim().toLowerCase();
   if(!name||!email){toast(t('toast-cust-fill'));return;}
   custs[idx].name=name;custs[idx].email=email;custs[idx].phone=$('ce-phone').value.trim();
-  sCustomers(custs);cm('m-cust-edit');renderCustList();toast(t('toast-cust-saved'));markDirty();
+  sCustomers(custs);pushCustomerToCloud(custs[idx]);cm('m-cust-edit');renderCustList();toast(t('toast-cust-saved'));markDirty();
 }
 function deleteCust(){
   if(!_custEditId)return;
   if(!confirm(t('toast-cust-confirm-del')))return;
   let custs=lCustomers();
+  const delCust=custs.find(x=>x.id===_custEditId||x.email===_custEditId);
   custs=custs.filter(x=>x.id!==_custEditId&&x.email!==_custEditId);
-  sCustomers(custs);cm('m-cust-edit');renderCustList();toast(t('toast-cust-deleted'));markDirty();
+  sCustomers(custs);
+  // ✅ Delete from Supabase too
+  if(delCust&&delCust.id&&sbUrl&&sbKey){
+    fetch(`${sbUrl}/rest/v1/pb_data?id=eq.${encodeURIComponent(delCust.id)}`,{
+      method:'DELETE',headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
+    }).catch(e=>console.error('[Customer delete]',e));
+  }
+  cm('m-cust-edit');renderCustList();toast(t('toast-cust-deleted'));markDirty();
 }
 // ══ SUPABASE ══
 function sbSt(m,c='var(--t3)'){const e=$('sb-st');if(e)e.innerHTML=`<span style="color:${c};">${escHtml(m)}</span>`;}
@@ -1441,10 +1471,11 @@ function dot(i,c){const e=$('sdot');if(e){e.textContent=i;e.style.color=c||'var(
 function plBuild(){
   const notes=lNotes();const pouts=lPouts();const de=lDE();
   const customPws=LS.g('pb_custom_pws',{});
+  const customers=lCustomers();
   return{
     prods,wbMap,closed,nextId,nfcN,arenas,instructors,activities,
     sessArr,curSid,biz,hrRate,archive,notes,pouts,de,
-    admPw,customPws,// ✅ sync passwords across devices
+    admPw,customPws,customers,// ✅ sync passwords + customers across devices
     version:3,
     ts:Date.now(),
     appVersion:'2.0'
@@ -1461,6 +1492,14 @@ function plApply(d){
   // ✅ Restore synced passwords
   if(d.customPws)LS.s('pb_custom_pws',d.customPws);
   if(d.notes)sNotes(d.notes);if(d.pouts)sPouts(d.pouts);if(d.de)sDE(d.de);
+  // ✅ Restore customers — merge with existing to avoid losing data
+  if(d.customers&&Array.isArray(d.customers)){
+    const local=lCustomers();
+    const merged=new Map();
+    local.forEach(c=>merged.set(c.email?.toLowerCase(),c));
+    d.customers.forEach(c=>{if(c.email)merged.set(c.email.toLowerCase(),{...merged.get(c.email.toLowerCase())||{},...c});});
+    sCustomers([...merged.values()]);
+  }
   saveAll();
 }
 function sbSave(){
