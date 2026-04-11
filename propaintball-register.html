@@ -356,7 +356,8 @@ function validate(){
   if(name.length<2){$('f-name').classList.add('err');valid=false;}
   else{$('f-name').classList.remove('err');}
   if(!isValidEmail(email)){$('f-email').classList.add('err');valid=false;}
-  else{$('f-email').classList.remove('err');}
+  else if(!$('f-email').classList.contains('dup')){$('f-email').classList.remove('err');}
+  else{valid=false;}
 
   submitBtn.disabled=!valid||!consent;
   return valid&&consent;
@@ -372,11 +373,16 @@ emailEl.addEventListener('blur',async function(){
     const exists=await checkExisting(email);
     if(exists){
       $('email-err').textContent=T('err_dup');
-      $('f-email').classList.add('err');
+      $('f-email').classList.add('err','dup');
+      submitBtn.disabled=true;
     }else{
       $('email-err').textContent=T('err_email');
+      $('f-email').classList.remove('dup');
     }
   }
+});
+emailEl.addEventListener('input',function(){
+  $('f-email').classList.remove('dup');
 });
 
 // ══ CHECK EXISTING ══
@@ -410,6 +416,17 @@ async function submitReg(){
 
   submitBtn.disabled=true;
   submitBtn.innerHTML='<span class="spinner"></span>'+T('submitting');
+
+  // ✅ Block duplicate registration
+  const dup=await checkExisting(email);
+  if(dup){
+    $('email-err').textContent=T('err_dup');
+    $('f-email').classList.add('err');
+    submitBtn.disabled=false;
+    submitBtn.innerHTML=T('submit');
+    toast(T('err_dup'),true);
+    return;
+  }
 
   const customer={
     id:'cust_'+Date.now(),
