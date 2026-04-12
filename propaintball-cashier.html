@@ -2448,6 +2448,13 @@ function mShot(n){
     toast('+'+n+' vystrelených (Airsoft)');
     return;
   }
+  // GELBLASTER: balls go directly to bUsed — ammo adds via products panel only
+  if(pk&&pk.isGB){
+    w.bUsed=(w.bUsed||0)+n;
+    save();rPbt();rWbs();rBill();
+    toast('+'+n+' guličiek (Gelblaster)');
+    return;
+  }
   // PAINTBALL: check against package limit, add ammo to bill if over
   const pkgBalls=pk?pk.balls:0;
   const cur=w.bUsed||0;
@@ -2811,7 +2818,7 @@ function rWbs(){
       <div class="wi">
         <div class="wn">${w.name}</div>
         <div class="wm">${pkB}${blB}${drkB}<span style="font-size:9px;color:var(--t3);">${w.id.startsWith('H-')?t('manual-id'):w.id}</span></div>
-        ${(pk&&(pk.isPB||pk.isAS||pk.isGB)&&selId===w.id)?`<div style="display:flex;gap:8px;margin-top:6px;justify-content:center;" onclick="event.stopPropagation()"><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(100);playPaySound()">+100</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(200);playPaySound()">+200</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--rbg);border:1.5px solid var(--rbd);color:var(--amb);" onclick="event.stopPropagation();selWb('${w.id}');uShot(100)">-100</button></div>`:''}
+        ${(pk&&pk.isPB&&selId===w.id)?`<div style="display:flex;gap:8px;margin-top:6px;justify-content:center;" onclick="event.stopPropagation()"><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(100);playPaySound()">+100</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--bg2);border:1.5px solid var(--b2);color:var(--t1);" onclick="event.stopPropagation();selWb('${w.id}');mShot(200);playPaySound()">+200</button><button class="btn" style="font-size:16px;padding:8px 18px;font-weight:700;background:var(--rbg);border:1.5px solid var(--rbd);color:var(--amb);" onclick="event.stopPropagation();selWb('${w.id}');uShot(100)">-100</button></div>`:''}
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
         <span style="font-size:12px;font-weight:600;color:${billAmt(w)>0?'var(--grn)':'var(--t3)'};">${fp(billAmt(w))}</span>
