@@ -223,7 +223,7 @@ textarea{resize:none;line-height:1.5;}
 .t.on{opacity:1;}
 @keyframes paySuccess{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:0}}
 .pay-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:80px;z-index:10000;pointer-events:none;animation:paySuccess .8s ease forwards;}
-.mw{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;align-items:center;justify-content:center;padding:16px;}
+.mw{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center;padding:16px;}
 .mw.op{display:flex;}
 .mb{background:var(--card);border-radius:var(--r);padding:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;}
 .mb.wide{max-width:700px;}
@@ -689,18 +689,20 @@ textarea{resize:none;line-height:1.5;}
           </div>
           <div id="gdrive-status" style="font-size:11px;color:var(--t3);min-height:16px;"></div>
         </div>
-        <!-- Google Calendar -->
+        <!-- Google Calendar — Service Account -->
         <div class="card" style="border-color:#4285f4;border-width:1px;">
           <div class="ch" style="color:#4285f4;">📅 Google Kalendár — Rezervácie</div>
           <div style="font-size:11px;color:var(--t3);margin-bottom:9px;padding:8px;background:var(--bg3);border-radius:var(--rs);line-height:1.7;">
-            Prepoj Google Kalendár pre zobrazenie dnešných rezervácií na úvodnej obrazovke.<br>
-            <strong>Postup:</strong> Rovnaký Google Client ID ako pre Drive.<br>
-            V Google Cloud Console pridaj: <strong>Google Calendar API</strong> + OAuth scope <code>calendar.events</code>.<br>
-            Calendar ID nájdeš v nastaveniach kalendára (zvyčajne <em>primary</em> alebo email).
+            Prepoj Google Kalendár cez <strong>Service Account</strong> (bez OAuth popupu).<br>
+            <strong>Postup:</strong> 1. Stiahni <code>credentials.json</code> zo Service Account v Google Cloud Console. 2. Vlož obsah JSON nižšie. 3. Nastav Calendar ID a klikni Uložiť.
           </div>
           <div class="fr"><label class="lb">Calendar ID</label><input type="text" id="cal-calendar-id" placeholder="primary alebo xyz@group.calendar.google.com" style="font-size:11px;"/></div>
+          <div style="margin-bottom:7px;">
+            <label class="lb" style="font-size:11px;margin-bottom:3px;display:block;">Service Account JSON <span style="color:var(--t3);font-weight:400;">(credentials.json)</span></label>
+            <textarea id="cal-sa-json" rows="3" placeholder='{"type":"service_account","client_email":"...","private_key":"-----BEGIN PRIVATE KEY-----\n..."}' style="width:100%;font-size:10px;font-family:monospace;resize:vertical;padding:6px;border:1px solid var(--bbd);border-radius:var(--rs);background:var(--bg3);color:var(--t1);box-sizing:border-box;"></textarea>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap;">
-            <button class="btn sm G" onclick="saveCalId()">Uložiť & Pripojiť</button>
+            <button class="btn sm G" onclick="saveCalSA()">Uložiť & Pripojiť</button>
             <button class="btn sm" onclick="gCalDisconnect()">Odpojiť</button>
             <button class="btn sm B" onclick="fetchTodayReservations(true)">🔄 Obnoviť rezervácie</button>
           </div>
@@ -1083,7 +1085,7 @@ const DEF_P=[
   {id:36,name:'Poukaz',             price:0,   cat:'Záloha a poukaz', emoji:'🎫', isVoucher:true},
 ];
 // ══ STORAGE ══
-const LS={g:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const LS={g:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.error('[LS] Save failed for',k,e);if(e.name==='QuotaExceededError'){dot('!','var(--red)');setTimeout(()=>toast('⚠️ Úložisko plné! Vymaž staré zálohy v Nastaveniach.'),100);}}}}
 function checkStorageQuota(){
   try{
     let total=0;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);total+=k.length+localStorage.getItem(k).length;}
@@ -1490,12 +1492,12 @@ function dot(i,c){const e=$('sdot');if(e){e.textContent=i;e.style.color=c||'var(
 // ══════════════════════════════════════════════════════════════════
 
 function plBuild(){
-  const notes=lNotes();const pouts=lPouts();const de=lDE();
+  const notes=lNotes();const pouts=lPouts();const de=lDE();const deposits=lDeposits();
   const customPws=LS.g('pb_custom_pws',{});
   const customers=lCustomers();
   return{
     prods,wbMap,closed,nextId,nfcN,arenas,instructors,activities,
-    sessArr,curSid,biz,hrRate,archive,notes,pouts,de,
+    sessArr,curSid,biz,hrRate,archive,notes,pouts,de,deposits,
     admPw,customPws,customers,// ✅ sync passwords + customers across devices
     version:3,
     ts:Date.now(),
@@ -1503,7 +1505,12 @@ function plBuild(){
   };
 }
 function plApply(d){
-  if(d.prods)prods=d.prods;if(d.wbMap)wbMap=d.wbMap;if(d.closed)closed=d.closed;
+  if(d.prods){
+    prods=d.prods;
+    // ✅ Vždy zachovaj DEF_P produkty ktoré chýbajú v zálohe (napr. staršia záloha bez id:35/36)
+    DEF_P.forEach(def=>{if(!prods.find(p=>p.id===def.id))prods.push({...def});});
+  }
+  if(d.wbMap)wbMap=d.wbMap;if(d.closed)closed=d.closed;
   if(d.nextId)nextId=d.nextId;if(d.nfcN)nfcN=d.nfcN;
   if(d.arenas)arenas=d.arenas;if(d.instructors)instructors=d.instructors;if(d.activities)activities=d.activities;
   if(d.sessArr){sessArr=d.sessArr;sessArr.forEach(s=>{if(!s.instructors){s.instructors=s.instructor?[s.instructor]:[];}});}if(d.curSid)curSid=d.curSid;
@@ -1512,7 +1519,7 @@ function plApply(d){
   if(d.admPw)admPw=d.admPw;
   // ✅ Restore synced passwords
   if(d.customPws)LS.s('pb_custom_pws',d.customPws);
-  if(d.notes)sNotes(d.notes);if(d.pouts)sPouts(d.pouts);if(d.de)sDE(d.de);
+  if(d.notes)sNotes(d.notes);if(d.pouts)sPouts(d.pouts);if(d.de)sDE(d.de);if(d.deposits)sDeposits(d.deposits);
   // ✅ Restore customers — merge with existing to avoid losing data
   if(d.customers&&Array.isArray(d.customers)){
     const local=lCustomers();
@@ -1530,41 +1537,178 @@ function sbSave(){
   sbSt('✓ Uložené','var(--grn)');
 }
 
-// ── LIVE SYNC (main row) ──
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE SYNC v2 — Multi-device architecture
+// Each session has its own row → Device A and Device B never overwrite each other
+// Row types:
+//   id='main'         backup_type='live'     — full snapshot (backups, legacy)
+//   id='pb_settings'  backup_type='settings' — prods, arenas, instructors, etc.
+//   id=<sessKey>      backup_type='session'  — per-session data
+// ══════════════════════════════════════════════════════════════════
+
+// Push one session as its own row — no conflict between devices
+async function sbPushSession(sessKey, sessOverride){
+  if(!sbUrl||!sbKey||!sessKey)return;
+  const sess=sessOverride||(sessArr.find(s=>s.key===sessKey));
+  if(!sess)return;
+  const deps=lDeposits(); const pouts=lPouts();
+  const payload={
+    sess,
+    wbs: wbMap[sessKey]||[],
+    bills: closed.filter(w=>w.sKey===sessKey),
+    deposit: deps[sessKey]||null,
+    pout: pouts[sessKey]||null,
+    ts: Date.now(),
+    status: sessArr.find(s=>s.key===sessKey)?'active':'closed'
+  };
+  try{
+    const r=await fetch(`${sbUrl}/rest/v1/pb_data`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:sessKey,payload,updated_at:new Date().toISOString(),backup_type:'session'})
+    });
+    if(!r.ok)console.error('[sbPushSession]',sessKey,await r.text());
+  }catch(e){console.error('[sbPushSession]',sessKey,e);}
+}
+
+// Push settings (prods, arenas, instructors…) as dedicated row
+async function sbPushSettings(){
+  if(!sbUrl||!sbKey)return;
+  const payload={
+    prods,arenas,instructors,activities,biz,hrRate,
+    admPw,customPws:LS.g('pb_custom_pws',{}),nextId,nfcN,
+    ts:Date.now()
+  };
+  try{
+    const r=await fetch(`${sbUrl}/rest/v1/pb_data`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'pb_settings',payload,updated_at:new Date().toISOString(),backup_type:'settings'})
+    });
+    if(!r.ok)console.error('[sbPushSettings]',await r.text());
+  }catch(e){console.error('[sbPushSettings]',e);}
+}
+
+// Fast auto-sync: push only current session + settings (no conflicts)
+async function sbSync(){
+  if(!sbUrl||!sbKey)return;
+  dot('⟳','var(--amb)');
+  try{
+    const tasks=[];
+    if(curSid)tasks.push(sbPushSession(curSid));
+    tasks.push(sbPushSettings());
+    await Promise.all(tasks);
+    dot('✓','var(--grn)');
+    LS.s('pb_last_sync',Date.now());
+    autoBackupCheck();
+    syncCustomers();
+    setTimeout(()=>dot('●','var(--t3)'),3000);
+  }catch(e){console.error('[sbSync]',e);dot('!','var(--red)');}
+}
+
+// Full push — writes id='main' full snapshot + per-session rows (manual button / backups)
 async function sbPush(){
   if(!sbUrl||!sbKey){sbSt('Zadaj URL a kľúč','var(--red)');return;}
   dot('⟳','var(--amb)');
   try{
+    // Full snapshot for backward compat
     const r=await fetch(`${sbUrl}/rest/v1/pb_data`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'resolution=merge-duplicates'},
       body:JSON.stringify({id:'main',payload:plBuild(),updated_at:new Date().toISOString(),backup_type:'live'})
     });
     if(!r.ok)throw new Error(await r.text());
+    // Also push per-session rows + settings
+    const tasks=sessArr.map(s=>sbPushSession(s.key));
+    tasks.push(sbPushSettings());
+    await Promise.all(tasks);
     dot('✓','var(--grn)');
     sbSt('✓ Sync '+fT(new Date().toISOString()),'var(--grn)');
     LS.s('pb_last_sync',Date.now());
-    // Auto-create backup if needed
     autoBackupCheck();
     syncCustomers();
     setTimeout(()=>dot('●','var(--t3)'),3000);
   }catch(e){console.error('[Supabase push]',e);dot('!','var(--red)');sbSt('Chyba sync','var(--red)');}
 }
+
+// Apply settings-only from cloud row (no sessions/bills touched)
+function _applySettings(d){
+  if(d.prods)prods=d.prods;
+  if(d.arenas)arenas=d.arenas;
+  if(d.instructors)instructors=d.instructors;
+  if(d.activities)activities=d.activities;
+  if(d.biz)biz=d.biz;
+  if(d.hrRate)hrRate=d.hrRate;
+  if(d.admPw)admPw=d.admPw;
+  if(d.customPws)LS.s('pb_custom_pws',d.customPws);
+  if(d.nextId&&d.nextId>nextId)nextId=d.nextId;
+  if(d.nfcN&&d.nfcN>nfcN)nfcN=d.nfcN;
+}
+
+// Merge one session row from cloud into local state (no overwrites, only adds missing)
+function _mergeSessFromCloud(d){
+  if(!d||!d.sess||!d.sess.key)return;
+  const key=d.sess.key;
+  if(d.status==='active'){
+    const existIdx=sessArr.findIndex(s=>s.key===key);
+    if(existIdx<0){
+      // New session from another device — add it
+      sessArr.push(d.sess);
+      wbMap[key]=d.wbs||[];
+    } else {
+      // Merge players: add remote players not present locally
+      const localWbs=wbMap[key]||[];
+      const localIds=new Set(localWbs.map(w=>w.id));
+      (d.wbs||[]).forEach(rw=>{if(!localIds.has(rw.id)){localWbs.push(rw);localIds.add(rw.id);}});
+      wbMap[key]=localWbs;
+    }
+  }
+  // Merge closed bills — deduplicate by id (never lose a closed account)
+  const existBillIds=new Set(closed.map(w=>w.id));
+  (d.bills||[]).forEach(b=>{if(!existBillIds.has(b.id)){closed.push(b);existBillIds.add(b.id);}});
+  // Merge deposit (first one wins)
+  if(d.deposit){const deps=lDeposits();if(!deps[key]){deps[key]=d.deposit;sDeposits(deps);}}
+  // Merge pout (first one wins)
+  if(d.pout){const pouts=lPouts();if(!pouts[key]){pouts[key]=d.pout;sPouts(pouts);}}
+}
+
+// Merge pull — pulls settings + all session rows, merges without data loss
 async function sbPull(){
   if(!sbUrl||!sbKey){sbSt('Zadaj URL a kľúč','var(--red)');return;}
   dot('⟳','var(--amb)');
   try{
-    const r=await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.main&select=payload`,{
+    // 1. Pull settings row
+    const sr=await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.pb_settings&select=payload`,{
       headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
     });
-    if(!r.ok)throw new Error(await r.text());
-    const rows=await r.json();
-    if(!rows.length){sbSt('Žiadne dáta','var(--amb)');dot('—');return;}
-    plApply(rows[0].payload);
-    selId=null;chkd=new Set();refUI();
-    dot('✓','var(--grn)');
-    sbSt('✓ Pull '+fT(new Date().toISOString()),'var(--grn)');
-    toast('Synced!');
+    if(sr.ok){const srows=await sr.json();if(srows.length)_applySettings(srows[0].payload);}
+    // 2. Pull all session rows
+    const sessR=await fetch(`${sbUrl}/rest/v1/pb_data?backup_type=eq.session&select=id,payload,updated_at&order=updated_at.desc`,{
+      headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
+    });
+    let sessRows=[];
+    if(sessR.ok)sessRows=await sessR.json();
+    if(sessRows.length){
+      sessRows.forEach(row=>_mergeSessFromCloud(row.payload));
+      saveAll();
+      selId=null;chkd=new Set();refUI();
+      dot('✓','var(--grn)');
+      sbSt('✓ Pull '+fT(new Date().toISOString()),'var(--grn)');
+      toast('Synced! ('+sessRows.length+' sessions)');
+    } else {
+      // Fallback: pull legacy main row
+      const r=await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.main&select=payload`,{
+        headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
+      });
+      if(!r.ok)throw new Error(await r.text());
+      const rows=await r.json();
+      if(!rows.length){sbSt('Žiadne dáta','var(--amb)');dot('—');return;}
+      plApply(rows[0].payload);
+      selId=null;chkd=new Set();refUI();
+      dot('✓','var(--grn)');
+      sbSt('✓ Pull (legacy) '+fT(new Date().toISOString()),'var(--grn)');
+      toast('Synced!');
+    }
     syncCustomers();
     setTimeout(()=>dot('●','var(--t3)'),3000);
   }catch(e){console.error('[Supabase pull]',e);dot('!','var(--red)');sbSt('Chyba sync','var(--red)');}
@@ -1618,8 +1762,8 @@ async function sbCreateBackup(type,label){
 async function pruneOldBackups(){
   if(!sbUrl||!sbKey)return;
   try{
-    // Get all backups sorted by date
-    const r=await fetch(`${sbUrl}/rest/v1/pb_data?id=neq.main&select=id,updated_at,backup_type&order=updated_at.desc`,{
+    // Only prune versioned auto-backups, never touch session/settings/live rows
+    const r=await fetch(`${sbUrl}/rest/v1/pb_data?backup_type=in.(auto-weekly,auto-monthly)&select=id,updated_at,backup_type&order=updated_at.desc`,{
       headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
     });
     if(!r.ok)return;
@@ -1628,7 +1772,7 @@ async function pruneOldBackups(){
     if(rows.length>24){
       const toDelete=rows.slice(24);
       for(const row of toDelete){
-        await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.${row.id}`,{
+        await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.${encodeURIComponent(row.id)}`,{
           method:'DELETE',
           headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
         });
@@ -1837,7 +1981,8 @@ function bkImportConfirm(){
   om('m-restore-confirm');
 }
 let pTimer;
-function save(){saveAll();if(sbUrl&&sbKey){dot('…','var(--t3)');clearTimeout(pTimer);pTimer=setTimeout(()=>sbPush(),4000);}}
+function save(){saveAll();if(sbUrl&&sbKey){dot('…','var(--t3)');clearTimeout(pTimer);pTimer=setTimeout(()=>sbSync(),4000);}}
+function markDirty(){save();}
 function refUI(){rProds();rWbs();rBill();rPbt();rDrk();updSessBadge();rAppSessBar();updInvBadge();if($('p-spravca')?.classList.contains('on'))rSpravca();if($('p-analyzy')?.classList.contains('on'))rAnalyzy();if($('p-moje')?.classList.contains('on'))rMoje();if($('p-sett').classList.contains('on')&&admUnlocked){rPM();rSL('al-l',arenas,'arena');rSL('il-l',instructors,'instructor');rSL('acl-l',activities,'activity');fillSett();}}
 // ══ OFFLINE INDICATOR ══
 function updateOnlineStatus(){
@@ -2133,21 +2278,51 @@ function startSess(){
   // Attach calendar reservation metadata if starting from reservation
   if(_pendingReservation){
     sessObj.calEventId=_pendingReservation.eventId;
+    sessObj.calRunNumber=getCalEventRunNumber(_pendingReservation.eventId);
     sessObj.reservation={custName:_pendingReservation.custName,custEmail:_pendingReservation.custEmail,custPhone:_pendingReservation.custPhone,players:_pendingReservation.players,lang:_pendingReservation.lang,zfa:_pendingReservation.zfa};
   }
   sessArr.push(sessObj);
   if(!wbMap[key])wbMap[key]=[];curSid=key;save();
-  // Auto-add players from reservation
-  if(_pendingReservation&&_pendingReservation.players>0){
+
+  // ── Import z pb_event_signups (registrovaní hráči cez web) ──────────
+  if(_pendingReservation&&_pendingReservation._signups&&_pendingReservation._signups.length>0){
+    const signups=_pendingReservation._signups;
+    const sess=sessArr.find(s=>s.key===key)||{};
+    const now=new Date().toISOString();
+    signups.forEach((su,idx)=>{
+      const c=su.pb_customers||{};
+      const pid='SI'+(Date.now()%100000)+'-'+(idx+1);
+      const pname=c.nick||c.fullname||('Hráč '+(idx+1));
+      const pemail=c.email||'';
+      wbMap[key].push({
+        id:pid,name:pname,email:pemail,items:[],
+        sKey:key,sArena:sess.arena,sInstr:sess.instructor,sAct:sess.activity,
+        openedAt:now,bUsed:0,bLoad:0,dG:[],pkgDone:false,
+        customerId:c.id||null,  // prepojenie na pb_customers
+        signupId:su.id||null    // prepojenie na pb_event_signups
+      });
+    });
+    // Označ signups ako checked_in v Supabase (non-blocking)
+    const signupIds=signups.map(s=>s.id).filter(Boolean);
+    if(signupIds.length){
+      sbPubFetch(`/pb_event_signups?id=in.(${signupIds.join(',')})`,{
+        method:'PATCH',headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({status:'checked_in',session_key:key})
+      }).catch(e=>console.warn('[signup patch]',e));
+    }
+    toast('✅ '+signups.length+' hráčov importovaných z registrácie');
+    save();
+  }
+  // ── Auto-add anonymous players from reservation (ak nie sú importovaní) ──
+  else if(_pendingReservation&&_pendingReservation.players>0){
     const res=_pendingReservation;
-    const count=Math.min(res.players,30);// safety cap
+    const count=Math.min(res.players,30);
     for(let i=0;i<count;i++){
       const pid='R'+(Date.now()%100000)+'-'+(i+1);
       const pname=i===0&&res.custName?res.custName:((currentLang==='en'?'Player':'Hráč')+' '+(i+1));
       const pemail=i===0?res.custEmail||'':'';
-      const sess=sessArr.find(s=>s.key===key);
-      const s=sess||{};
-      wbMap[key].push({id:pid,name:pname,email:pemail,items:[],sKey:key,sArena:s.arena,sInstr:s.instructor,sAct:s.activity,openedAt:new Date().toISOString(),bUsed:0,bLoad:0,dG:[],pkgDone:false});
+      const sess=sessArr.find(s=>s.key===key)||{};
+      wbMap[key].push({id:pid,name:pname,email:pemail,items:[],sKey:key,sArena:sess.arena,sInstr:sess.instructor,sAct:sess.activity,openedAt:new Date().toISOString(),bUsed:0,bLoad:0,dG:[],pkgDone:false});
     }
     toast(count+' '+t('cal-players-auto'));
     save();
@@ -2175,8 +2350,8 @@ function rAppSessBar(){
     const allAgencyClean=hasAgency&&agencyWbs.every(w=>agencyExtraItems(w).length===0);
     const statusIcon=hasAgency&&allAgencyClean?' ✅':'';
     const instrArr=getSessionInstructors(s);
-    const name=`${s.arena}·${instrArr.map(n=>n.split(' ')[0]).join('+')}`;
-    const tooltip=`${s.arena} · ${s.activity} · ${instrArr.join(' + ')}${hasAgency&&!allAgencyClean?' — nezaplatené doplnky':''}`;
+    const name=`${s.arena}·${instrArr.map(n=>n.split(' ')[0]).join('+')}${sessRunSuffix(s)}`;
+    const tooltip=`${s.arena} · ${s.activity} · ${instrArr.join(' + ')}${sessRunSuffix(s)}${hasAgency&&!allAgencyClean?' — nezaplatené doplnky':''}`;
     return`<span class="spill ${isCur?'cur':''}" onclick="swSess('${s.key}')" title="${tooltip}">${name}${statusIcon}${isCur?' ●':''}</span>`;
   }).join('');
   // Update multi-session bottom bar
@@ -2184,7 +2359,11 @@ function rAppSessBar(){
   if(msBar&&msItems){
     if(sessArr.length>1){
       msBar.style.display='block';
-      document.querySelector('.content')?.style.setProperty('padding-bottom','70px');
+      // Push ALL page content up so session bar never covers buttons
+      const barH=(msBar.offsetHeight||52)+4;
+      document.querySelector('.content')?.style.setProperty('padding-bottom',barH+'px');
+      document.querySelectorAll('.page').forEach(p=>p.style.paddingBottom=(barH+11)+'px');
+      const startEl=$('start');if(startEl)startEl.style.paddingBottom=(barH+16)+'px';
       msItems.innerHTML=sessArr.map(s=>{
         const wbs=wbMap[s.key]||[];
         const isCur=s.key===curSid;
@@ -2196,7 +2375,7 @@ function rAppSessBar(){
         const elapsedStr=elapsed>0?Math.floor(elapsed/60)+'h'+String(elapsed%60).padStart(2,'0')+'m':'';
         const actColor=s.activity?.toLowerCase().includes('airsoft')?'var(--grn)':s.activity?.toLowerCase().includes('laser')?'var(--tel)':s.activity?.toLowerCase().includes('gel')?'var(--blu)':'var(--red)';
         return`<div class="msb-item ${isCur?'active':''}" onclick="swSess('${s.key}')">
-          <div class="msb-name">${escHtml(s.arena||'—')} <span style="color:${actColor};">· ${escHtml(s.activity||'—')}</span></div>
+          <div class="msb-name">${escHtml(s.arena||'—')} <span style="color:${actColor};">· ${escHtml(s.activity||'—')}</span>${sessRunSuffix(s)?`<span style="color:var(--amb);font-size:10px;">${sessRunSuffix(s)}</span>`:''}</div>
           <div class="msb-meta">👤 ${instrArr.map(n=>n.split(' ')[0]).join(' + ')} ${elapsedStr?'· ⏱'+elapsedStr:''}</div>
           <div class="msb-stats">
             <span style="color:var(--grn);">👥${activePlayers}</span>
@@ -2208,11 +2387,13 @@ function rAppSessBar(){
     }else{
       msBar.style.display='none';
       document.querySelector('.content')?.style.setProperty('padding-bottom','0');
+      document.querySelectorAll('.page').forEach(p=>p.style.paddingBottom='');
+      const startEl=$('start');if(startEl)startEl.style.paddingBottom='';
     }
   }
 }
 function swSess(k){curSid=k;selId=null;chkd=new Set();save();refUI();startSessTimer();const sg=getSess();toast('Session: '+(sg?.arena||'—')+' · '+(sg?.activity||''));}
-function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;if(!s){e.textContent='Bez session';return;}const instrArr=getSessionInstructors(s);const instrStr=instrArr.length>0?' · '+instrArr.map(n=>n.split(' ')[0]).join(' + '):'';e.textContent=(s.arena||'')+(s.activity?' · '+s.activity:'')+instrStr;}
+function updSessBadge(){const s=getSess();const e=$('sbadge');if(!e)return;if(!s){e.textContent='Bez session';return;}const instrArr=getSessionInstructors(s);const instrStr=instrArr.length>0?' · '+instrArr.map(n=>n.split(' ')[0]).join(' + '):'';e.textContent=(s.arena||'')+(s.activity?' · '+s.activity:'')+instrStr+sessRunSuffix(s);}
 function showSessModal(){
   const s=getSess();if(!s)return;
   const instr=getSessionInstructors(s);
@@ -2220,7 +2401,7 @@ function showSessModal(){
   $('m-sess-b').innerHTML=`<div style="display:grid;gap:5px;">
     <div class="rr"><span>Dátum</span><span>${s.date||'—'} ${s.time||''}</span></div>
     <div class="rr"><span>Areál</span><span>${s.arena||'—'}</span></div>
-    <div class="rr"><span>Aktivita</span><span>${s.activity||'—'}</span></div>
+    <div class="rr"><span>Aktivita</span><span>${s.activity||'—'}${sessRunSuffix(s)?`<span style="color:var(--amb);margin-left:4px;font-size:11px;">${sessRunSuffix(s)}</span>`:''}</span></div>
     <div class="rr" style="align-items:flex-start;"><span>Inštruktori</span>
       <div style="text-align:right;">
         ${instr.map(i=>`<div style="font-size:12px;font-weight:600;">${escHtml(i)}</div>`).join('')}
@@ -3357,7 +3538,7 @@ function confirmAgencyPay(){
 function confirmPay(){
   if(!payM)return;const wbs=getWbs();const w=wbs.find(w=>w.id===pendClose);if(!w)return;
   const s=getSess();const snapSid=curSid; // capture before any possible switch
-  w.closedAt=new Date().toISOString();w.orderIdx=closed.filter(x=>x.sKey===actKey()).length;w.payM=payM;w.justClosed=true;w.sKey=actKey();w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;
+  w.closedAt=new Date().toISOString();w.orderIdx=closed.filter(x=>x.sKey===actKey()).length;w.payM=payM;w.justClosed=true;w.sKey=actKey();w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;if(s?.calRunNumber)w.sCalRunNumber=s.calRunNumber;
   closed.unshift(w);const newWbs=wbs.filter(x=>x.id!==pendClose);setWbs(newWbs);
   if(chkd.has(pendClose))chkd.delete(pendClose);if(selId===pendClose)selId=null;
   auditLog('bill-close',w.name+' '+payM+' '+fp(billAmt(w)));
@@ -3406,7 +3587,7 @@ function openCloseSess(key,bills){
     const agBaseIdx=closed.filter(x=>x.sKey===key).length;
     agencyPending.forEach((w,idx)=>{
       w.closedAt=now;w.orderIdx=agBaseIdx+idx;w.payM='invoice';w.justClosed=true;
-      w.sKey=key;w.sArena=sess?.arena;w.sInstr=sess?.instructor;w.sAct=sess?.activity;w.sDate=sess?.date;w.sTime=sess?.time;
+      w.sKey=key;w.sArena=sess?.arena;w.sInstr=sess?.instructor;w.sAct=sess?.activity;w.sDate=sess?.date;w.sTime=sess?.time;if(sess?.calRunNumber)w.sCalRunNumber=sess.calRunNumber;
       closed.unshift(w);
     });
     wbMap[key]=(curWbs.filter(w=>!isAgencyWb(w)));
@@ -3515,8 +3696,8 @@ function confirmCloseSess(){
     createLocalBackup('post-game');
     // 2. JSON backup — direct download, no showSaveFilePicker to avoid blocking XLS
     autoDownloadBackup(backupKey,savedSess);
-    // 3. Cloud backup
-    if(sbUrl&&sbKey)sbPush();
+    // 3. Cloud backup — push closed session row FIRST (session already removed from sessArr)
+    if(sbUrl&&sbKey){sbPushSession(backupKey,savedSess);sbPush();}
     if(LS.g('pb_gdrive_token',null))gDriveAutoBackup(backupKey);
   },500);
   // 4. XLS download with separate delay to avoid browser popup blocking
@@ -3524,7 +3705,7 @@ function confirmCloseSess(){
   setTimeout(()=>openReport(savedKey),300);
   toast('Akcia uzavretá ✓ · Záloha sa sťahuje...');
   // Calendar sync-back
-  if(savedSess.calEventId){setTimeout(()=>syncBackToCalendar(savedKey,'done'),2000);}
+  if(savedSess.calEventId){const _calEid=savedSess.calEventId;setTimeout(()=>syncBackToCalendar(savedKey,'done',_calEid),2000);}
   askLogoutAfterSess();
 }
 function selGPay(m){gPayM=m;$('gpo-c').className='po'+(m==='cash'?' cash':'');$('gpo-k').className='po'+(m==='card'?' card':'');$('gpo-f').className='po'+(m==='invoice'?' invoice':'');const b=$('grp-btn');b.disabled=false;b.style.opacity='1';}
@@ -3557,7 +3738,7 @@ function _doConfirmGrp(){
     if(nonAgency.length>0){toast('❌ Len Agentúra PB môže platiť faktúrou');return;}
   }
   const grpBaseIdx=closed.filter(x=>x.sKey===sk).length;
-  sel.forEach((w,idx)=>{w.closedAt=new Date().toISOString();w.orderIdx=grpBaseIdx+idx;w.payM=gPayM;w.justClosed=true;w.sKey=sk;w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;closed.unshift(w);if(w.email){const cust=findCustomerByEmail(w.email);if(!cust)addCustomer(w.name,w.email,'',false);}});
+  sel.forEach((w,idx)=>{w.closedAt=new Date().toISOString();w.orderIdx=grpBaseIdx+idx;w.payM=gPayM;w.justClosed=true;w.sKey=sk;w.sArena=s?.arena;w.sInstr=s?.instructor;w.sAct=s?.activity;w.sDate=s?.date;w.sTime=s?.time;if(s?.calRunNumber)w.sCalRunNumber=s.calRunNumber;closed.unshift(w);if(w.email){const cust=findCustomerByEmail(w.email);if(!cust)addCustomer(w.name,w.email,'',false);}});
   const newWbs=wbs.filter(w=>!pendGrp.includes(w.id));setWbs(newWbs);
   pendGrp.forEach(id=>{if(chkd.has(id))chkd.delete(id);});if(pendGrp.includes(selId))selId=null;
   cm('m-grp');save();rWbs();rBill();rPbt();rDrk();
@@ -4170,8 +4351,10 @@ function buildSessMap(){
     const k=w.sKey||'unknown';
     if(!m[k]){
       const instrs=w.sInstr?[w.sInstr]:[];
-      m[k]={key:k,arena:w.sArena||'—',instructor:w.sInstr||'—',instructors:instrs,activity:w.sAct||'—',date:w.closedAt?fD(w.closedAt):'',startedAt:w.closedAt,active:false,bills:[],openB:[]};
+      m[k]={key:k,arena:w.sArena||'—',instructor:w.sInstr||'—',instructors:instrs,activity:w.sAct||'—',date:w.closedAt?fD(w.closedAt):'',startedAt:w.closedAt,active:false,bills:[],openB:[],calRunNumber:w.sCalRunNumber||null};
     }
+    // Propagate calRunNumber from any bill that has it
+    if(w.sCalRunNumber&&!m[k].calRunNumber)m[k].calRunNumber=w.sCalRunNumber;
     m[k].bills.push(w);
   });
   return m;
@@ -4195,7 +4378,7 @@ function rAkcie(){
     const dl=Object.keys(dStats).length?Object.entries(dStats).map(([k,v])=>`${k}: ${v}×`).join(', '):'';
     return`<div class="ak">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;">
-        <div><div style="font-size:15px;font-weight:700;">${s.arena} – ${s.activity} – ${instrLabel(s)}</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.date||''} ${s.time||''}${s.active?' <span class="bdg bo">● aktívna</span>':''}</div></div>
+        <div><div style="font-size:15px;font-weight:700;">${s.arena} – ${s.activity} – ${instrLabel(s)}${sessRunSuffix(s)}</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.date||''} ${s.time||''}${s.active?' <span class="bdg bo">● aktívna</span>':''}</div></div>
         <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
           <button class="btn sm B" onclick="openNote('${s.key}')">📝</button>
           ${cc>0?`<button class="btn sm P" onclick="openReport('${s.key}')">📊 Report</button>`:''}
@@ -4621,7 +4804,8 @@ function rMoje(){
     const grp=groups[key];const fw=grp[0];
     const ded=de[key];const sess=sessArr.find(s=>s.key===key);
     const {startStr,endStr}=buildTimeStr(ded,sess,grp);
-    const lbl=(fw.sArena&&fw.sArena!=='—')?`${fw.sArena} · ${fw.sAct||'?'}`:`Akcia ${gi+1}`;
+    const sessRun=sess?sessRunSuffix(sess):(fw.sCalRunNumber&&fw.sCalRunNumber>1?' ('+fw.sCalRunNumber+')':'');
+    const lbl=(fw.sArena&&fw.sArena!=='—')?`${fw.sArena} · ${fw.sAct||'?'}${sessRun}`:`Akcia ${gi+1}${sessRun}`;
     const pout=pouts[key];const note=notes[key]||'';
     const shot=grp.reduce((t,w)=>t+Math.min(w.bUsed||0,totBalls(w)),0);
     const distrib=grp.reduce((t,w)=>t+totBalls(w),0);
@@ -5393,6 +5577,9 @@ function om(id){
   // Hide floating button when any modal is open
   const fb=$('float-backup-btn');
   if(fb)fb.style.opacity='0';
+  // Dim session bar so it doesn't distract (still below z-index:1000)
+  const bar=$('multi-sess-bar');
+  if(bar)bar.style.opacity='0.15';
 }
 function cm(id){
   $(id).classList.remove('op');
@@ -5400,6 +5587,8 @@ function cm(id){
   const anyOpen=document.querySelector('.mw.op');
   const fb=$('float-backup-btn');
   if(fb)fb.style.opacity=anyOpen?'0':'1';
+  // Restore session bar when no modal is open
+  if(!anyOpen){const bar=$('multi-sess-bar');if(bar)bar.style.opacity='1';}
 }
 ['m-pay','m-epay','m-grp','m-adm','m-item','m-wb','m-sess','m-vrp','m-reopen','m-drink','m-xh','m-pout','m-note','m-chart','m-edates','m-report','m-del-sess','m-backup','m-restore-confirm','m-agency-pay'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',function(e){if(e.target===this){cm(id);if(id==='m-close-sess')closeSessKey=null;if(id==='m-del-sess')delSessKey=null;}});});
 // ══ SOUND EFFECTS ══
@@ -5513,7 +5702,7 @@ function showLanding(){
   rLandingSessions();
   populateLandingUsers();
   // Load calendar reservations
-  if(gCalGetValidToken()&&LS.g('pb_cal_id','')){
+  if(LS.g('pb_cal_sa_creds',null)&&LS.g('pb_cal_id','')){
     if(_calReservations.length)rLandingReservations();
     else fetchTodayReservations(false);
   }else{
@@ -5543,7 +5732,7 @@ function rLandingSessions(){
     sessArr.map(s=>{const ww=wbMap[s.key]||[];
       return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:var(--rs);border:.5px solid var(--b1);margin-bottom:6px;">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:600;">${escHtml(s.arena)} · ${escHtml(s.activity)}</div>
+          <div style="font-size:13px;font-weight:600;">${escHtml(s.arena)} · ${escHtml(s.activity)}${sessRunSuffix(s)}</div>
           <div style="font-size:10px;color:var(--t3);">${s.date} ${s.time} · ${escHtml(s.instructor)} · ${ww.length} hráčov</div>
         </div>
         <button class="btn sm B" onclick="resumeFromLanding('${s.key}')">Pokračovať →</button>
@@ -5766,53 +5955,184 @@ async function gDriveAutoBackup(sessKey){
 const GCAL_SCOPE='https://www.googleapis.com/auth/calendar.events';
 let gCalTokenClient=null;
 let _calReservations=[];
+let _calSAToken=null; // {token, exp}
+let _calViewDate=new Date(); // which day is shown in reservations panel
+let _calSignupCounts={}; // eventId → count (cache)
 
-function gCalInit(){
-  const clientId=LS.g('pb_gdrive_client_id','');
-  const calId=LS.g('pb_cal_id','');
-  if(!clientId||!calId)return;
-  if(typeof google==='undefined'||!google.accounts){
-    const script=document.createElement('script');
-    script.src='https://accounts.google.com/gsi/client';
-    script.onload=()=>gCalInitClient(clientId);
-    document.head.appendChild(script);
-  }else{
-    gCalInitClient(clientId);
+// ── Public Supabase (pb_customers + pb_event_signups) ────────────────────
+const SB_PUB_URL='https://zpwzkmipexviyjikhxdc.supabase.co';
+const SB_PUB_KEY='sb_publishable_TuLz5ETI9MpzE9YZz-vhsA_JLr9Sxqi';
+
+async function sbPubFetch(path,opts={}){
+  try{
+    const res=await fetch(SB_PUB_URL+'/rest/v1'+path,{
+      ...opts,
+      headers:{'apikey':SB_PUB_KEY,'Authorization':'Bearer '+SB_PUB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}
+    });
+    if(!res.ok)return null;
+    return await res.json().catch(()=>null);
+  }catch(e){console.warn('[sbPub]',e);return null;}
+}
+
+// Načíta počty prihlásených pre zoznam event IDčiek naraz
+async function fetchSignupCounts(eventIds){
+  if(!eventIds||!eventIds.length)return;
+  const ids=eventIds.filter(Boolean);
+  if(!ids.length)return;
+  const q=ids.map(id=>`event_id.eq.${id}`).join(',');
+  const rows=await sbPubFetch(`/pb_event_signups?or=(${encodeURIComponent(q)})&status=neq.no_show&select=event_id`);
+  if(!rows)return;
+  const counts={};
+  rows.forEach(r=>{counts[r.event_id]=(counts[r.event_id]||0)+1;});
+  _calSignupCounts={..._calSignupCounts,...counts};
+  // Nastav 0 pre tie čo nemajú žiadne záznamy
+  ids.forEach(id=>{if(counts[id]===undefined)_calSignupCounts[id]=0;});
+}
+
+// Načíta detail prihlásených (nick + email) pre konkrétnu akciu — pre inštruktora
+async function fetchSignupList(eventId){
+  const rows=await sbPubFetch(`/pb_event_signups?event_id=eq.${encodeURIComponent(eventId)}&status=neq.no_show&select=id,customer_id,status,signed_up_at,pb_customers(id,nick,fullname,email,phone)&order=signed_up_at.asc`);
+  return rows||[];
+}
+
+// Vygeneruje link pre zákazníka na event-signup stránku
+function genEventSignupLink(r){
+  const startTime=r.start?new Date(r.start):null;
+  const d=startTime?startTime.toISOString().split('T')[0].replace(/-/g,''):'';
+  const t=startTime?startTime.toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}).replace(':',''):'';
+  const tStr=t?t.slice(0,2)+':'+t.slice(2):'';
+  const label=encodeURIComponent(`${r.arenaCode||r.arena||''} ${r.activity||''} ${startTime?startTime.toLocaleDateString('sk',{day:'2-digit',month:'2-digit'}):''}${tStr?' '+tStr:''}`);
+  return `https://propaintball.github.io/registration/event-signup.html?event=${encodeURIComponent(r.eventId||'')}&d=${d}&t=${encodeURIComponent(tStr)}&arena=${encodeURIComponent(r.arenaCode||r.arena||'')}&act=${encodeURIComponent(r.activity||'')}&n=${r.players||0}&label=${label}`;
+}
+
+function copyEventSignupLink(r){
+  const link=genEventSignupLink(r);
+  navigator.clipboard?.writeText(link).then(()=>toast('🔗 Link skopírovaný!')).catch(()=>{
+    prompt('Skopíruj link:',link);
+  });
+}
+
+// ── Calendar run number tracking (re-runs of the same calendar event) ────────
+// Returns the run number for this event (1 = first time, 2 = second, …)
+// and immediately increments the counter so next call gets the next number.
+function getCalEventRunNumber(eventId){
+  if(!eventId)return 1;
+  const runs=LS.g('pb_cal_runs',{});
+  const n=(runs[eventId]||0)+1;
+  runs[eventId]=n;
+  LS.s('pb_cal_runs',runs);
+  return n;
+}
+// Returns display suffix: '' for run 1, ' (2)' for run 2, etc.
+function sessRunSuffix(s){
+  if(!s||!s.calRunNumber||s.calRunNumber<=1)return '';
+  return ' ('+s.calRunNumber+')';
+}
+
+// ── Service Account JWT helpers ──────────────────────────────────────────────
+
+function _b64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+async function _signJWT(header, payload, pemKey){
+  // Strip PEM wrapper and decode base64
+  const pem=pemKey.replace(/-----[^-]+-----/g,'').replace(/\s/g,'');
+  const derBuf=Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
+  const cryptoKey=await crypto.subtle.importKey(
+    'pkcs8', derBuf.buffer,
+    {name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},
+    false, ['sign']
+  );
+  const enc=new TextEncoder();
+  const h=_b64url(enc.encode(JSON.stringify(header)));
+  const p=_b64url(enc.encode(JSON.stringify(payload)));
+  const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,enc.encode(h+'.'+p));
+  return h+'.'+p+'.'+_b64url(sigBuf);
+}
+
+async function gCalSAGetToken(){
+  // Return cached token if still valid
+  if(_calSAToken&&Date.now()<_calSAToken.exp-60000)return _calSAToken.token;
+
+  const creds=LS.g('pb_cal_sa_creds',null);
+  if(!creds||!creds.private_key||!creds.client_email)return null;
+
+  const now=Math.floor(Date.now()/1000);
+  const header={alg:'RS256',typ:'JWT'};
+  const payload={
+    iss: creds.client_email,
+    scope: 'https://www.googleapis.com/auth/calendar.events',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now, exp: now+3600
+  };
+
+  try{
+    const jwt=await _signJWT(header,payload,creds.private_key);
+    const resp=await fetch('https://oauth2.googleapis.com/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
+    });
+    const data=await resp.json();
+    if(data.access_token){
+      _calSAToken={token:data.access_token, exp:Date.now()+(data.expires_in||3600)*1000};
+      return _calSAToken.token;
+    }
+    console.error('[GCal SA] Token error:',data);
+    return null;
+  }catch(e){
+    console.error('[GCal SA] JWT error:',e);
+    return null;
   }
 }
 
-function gCalInitClient(clientId){
-  try{
-    gCalTokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:clientId,
-      scope:GCAL_SCOPE,
-      callback:(resp)=>{
-        if(resp.error){toast('Google Calendar: '+resp.error);return;}
-        LS.s('pb_cal_token',resp.access_token);
-        LS.s('pb_cal_token_exp',Date.now()+(resp.expires_in||3600)*1000);
-        toast(t('toast-cal-connected'));
-        updateCalStatus();
-        fetchTodayReservations(true);
-      }
-    });
-    updateCalStatus();
-    // Try fetching with cached token
-    if(gCalGetValidToken())fetchTodayReservations(false);
-  }catch(e){console.log('GCal init failed:',e);}
+// Compatibility shim — synchronous check if SA is configured & token cached
+function gCalGetValidToken(){
+  if(_calSAToken&&Date.now()<_calSAToken.exp-60000)return _calSAToken.token;
+  return null; // async fetch needed; callers that need a fresh token use gCalSAGetToken()
 }
 
-function gCalConnect(){
-  const clientId=LS.g('pb_gdrive_client_id','');
-  if(!clientId){toast('Najprv zadaj Google Client ID v Nastaveniach');gT('sett');return;}
-  const calId=LS.g('pb_cal_id','');
+// ── UI functions ─────────────────────────────────────────────────────────────
+
+function saveCalSA(){
+  const calId=$('cal-calendar-id')?.value.trim();
   if(!calId){toast(t('toast-cal-no-id'));return;}
-  if(!gCalTokenClient){gCalInit();setTimeout(()=>{if(gCalTokenClient)gCalTokenClient.requestAccessToken();},1000);}
-  else{gCalTokenClient.requestAccessToken();}
+  LS.s('pb_cal_id',calId);
+
+  const raw=$('cal-sa-json')?.value.trim();
+  if(raw){
+    try{
+      const creds=JSON.parse(raw);
+      if(!creds.private_key||!creds.client_email){toast('JSON neobsahuje private_key alebo client_email');return;}
+      LS.s('pb_cal_sa_creds',creds);
+    }catch(e){toast('Neplatný JSON: '+e.message);return;}
+  }
+
+  const creds=LS.g('pb_cal_sa_creds',null);
+  if(!creds){toast('Vlož Service Account JSON');return;}
+
+  _calSAToken=null; // force re-auth
+  toast('🔄 Pripájam Google Kalendár...');
+  gCalSAGetToken().then(tok=>{
+    if(tok){
+      toast(t('toast-cal-connected'));
+      updateCalStatus();
+      fetchTodayReservations(true);
+    }else{
+      toast('❌ Nepodarilo sa pripojiť. Skontroluj credentials JSON a Calendar API.');
+      updateCalStatus();
+    }
+  });
 }
+
+// Legacy alias so old onclick references don't break
+function saveCalId(){saveCalSA();}
+function gCalConnect(){saveCalSA();}
 
 function gCalDisconnect(){
-  const token=LS.g('pb_cal_token',null);
-  if(token&&typeof google!=='undefined'){google.accounts.oauth2.revoke(token,()=>{});}
+  _calSAToken=null;
   LS.s('pb_cal_token',null);LS.s('pb_cal_token_exp',null);
   _calReservations=[];
   updateCalStatus();
@@ -5820,30 +6140,30 @@ function gCalDisconnect(){
   toast(t('toast-cal-disconnected'));
 }
 
-function gCalGetValidToken(){
-  const token=LS.g('pb_cal_token',null);
-  const exp=LS.g('pb_cal_token_exp',0);
-  if(!token||Date.now()>exp-60000)return null;
-  return token;
-}
-
-function saveCalId(){
-  const id=$('cal-calendar-id')?.value.trim();
-  if(!id){toast(t('toast-cal-no-id'));return;}
-  LS.s('pb_cal_id',id);
-  gCalConnect();
+function gCalInit(){
+  const creds=LS.g('pb_cal_sa_creds',null);
+  const calId=LS.g('pb_cal_id','');
+  if(!creds||!calId)return;
+  // Pre-fetch token in background
+  gCalSAGetToken().then(tok=>{
+    if(tok){updateCalStatus();fetchTodayReservations(false);}
+  });
 }
 
 function updateCalStatus(){
   const el=$('cal-status');if(!el)return;
-  const token=gCalGetValidToken();
+  const creds=LS.g('pb_cal_sa_creds',null);
   const calId=LS.g('pb_cal_id','');
-  if(token&&calId){
-    el.innerHTML=`<span style="color:var(--grn);">✅ Pripojený</span> · <span style="color:var(--t2);">${escHtml(calId)}</span>
+  const hasSA=creds&&creds.client_email;
+  const connected=hasSA&&(_calSAToken&&Date.now()<_calSAToken.exp-60000);
+  if(hasSA&&calId){
+    el.innerHTML=`<span style="color:${connected?'var(--grn)':'var(--amb)'};">${connected?'✅ Pripojený':'⏳ Service Account nakonfigurovaný'}</span> · <span style="color:var(--t3);font-size:10px;">${escHtml(creds.client_email)}</span><br>
+      <span style="color:var(--t2);">Kalendár: ${escHtml(calId)}</span>
       <button class="btn xs R" onclick="gCalDisconnect()" style="margin-left:6px;">Odpojiť</button>`;
+    // Populate UI fields
+    if($('cal-calendar-id')&&!$('cal-calendar-id').value)$('cal-calendar-id').value=calId;
   }else{
-    el.innerHTML=`<span style="color:var(--t3);">Nepripojený</span>
-      <button class="btn xs G" onclick="gCalConnect()" style="margin-left:6px;">Pripojiť Google Kalendár</button>`;
+    el.innerHTML=`<span style="color:var(--t3);">Nepripojený — vlož Service Account JSON a Calendar ID</span>`;
   }
 }
 
@@ -5856,21 +6176,39 @@ function parseCalEvent(ev){
   const start=ev.start?.dateTime||ev.start?.date||'';
   const end=ev.end?.dateTime||ev.end?.date||'';
   const eventId=ev.id||'';
-  // Status from colorId: 9=basil/green=confirmed, 11=tomato/red=cancelled, 3=grape/purple=pending
+  // Status from colorId: 2=sage/green, 9=basil/dark-green=confirmed, 10=tomato/red=cancelled, 11=graphite
   let status='pending';
-  if(colorId==='9')status='confirmed';
-  else if(colorId==='11')status='cancelled';
-  // Arena: first word
+  if(colorId==='9'||colorId==='2')status='confirmed';
+  else if(colorId==='10')status='cancelled';
+  // ── Záloha zaplatená: zelená farba ALEBO kľúčové slovo v popise/názve ──
+  const isGreen=(colorId==='2'||colorId==='9');
+  const fullText=(summary+' '+description).toLowerCase();
+  const depositKeywords=/záloha\s*(zaplatená|uhradená|zapl\.?)|zaplatená\s*záloha|deposit\s*paid|zapl\.\s*záloha|\d+[€e]\s*záloha/i;
+  const depositPaid=isGreen||depositKeywords.test(fullText);
+  // ── POZOR: poznámka v názve alebo popise ──
+  const noteKeywords=/\bpozn\.?\b|poznámka|poznamka|čítaj|citaj/i;
+  const hasNote=noteKeywords.test(fullText);
+  // Arena: first word — map shortcodes to exact arena names from settings
   const parts=summary.trim().split(/\s+/);
-  if(!parts.length)return{eventId,summary,description,start,end,status,colorId,isNonStandard:true,parsed:false,arena:'',activity:'',players:0,lang:'sk',zfa:null,instructor:'',custName:'',custEmail:'',custPhone:''};
+  if(!parts.length)return{eventId,summary,description,start,end,status,colorId,depositPaid,hasNote,isNonStandard:true,parsed:false,arena:'',arenaCode:'',activity:'',players:0,lang:'sk',zfa:null,instructor:'',custName:'',custEmail:'',custPhone:''};
   const arenaRaw=parts[0];
-  let arena='';
-  if(/^(RC|Racoon)/i.test(arenaRaw))arena='RC';
-  else if(/^(Out|Outdoor)/i.test(arenaRaw))arena='Outdoor';
-  else arena=arenaRaw;
+  let arena='',arenaCode='';
+  if(/^(RC|Racoon|Raccoon)/i.test(arenaRaw)){
+    // Find exact match from arenas array, fallback to 'Raccoon City'
+    arena=(arenas||[]).find(a=>/raccoon/i.test(a))||'Raccoon City';
+    arenaCode='RC';
+  }else if(/^(Out|Outdoor)/i.test(arenaRaw)){
+    arena=(arenas||[]).find(a=>/outdoor/i.test(a))||'Outdoor';
+    arenaCode='OUT';
+  }else if(/^(SA|Small)/i.test(arenaRaw)){
+    arena=(arenas||[]).find(a=>/small/i.test(a))||'Small arena';
+    arenaCode='SA';
+  }else{
+    arena=arenaRaw;arenaCode=arenaRaw;
+  }
   // Activity+players+lang: e.g. PB8sk
   const afterArena=parts.slice(1).join(' ');
-  const actRe=/^(PB|AS|LG|GEL|NERF)(\d+)(sk|de|en|fr)?/i;
+  const actRe=/^(PB|AS|LG|GEL|NERF)(\d+)(sk|de|en|fr|cs|tr)?/i;
   const actMatch=afterArena.match(actRe);
   let activity='',players=0,lang='sk';
   let afterAct=afterArena;
@@ -5881,22 +6219,34 @@ function parseCalEvent(ev){
     lang=(actMatch[3]||'sk').toLowerCase();
     afterAct=afterArena.slice(actMatch[0].length).trim();
   }else{
-    return{eventId,summary,description,start,end,status,colorId,isNonStandard:true,parsed:false,arena,activity:'',players:0,lang:'sk',zfa:null,instructor:'',custName:'',custEmail:'',custPhone:''};
+    return{eventId,summary,description,start,end,status,colorId,depositPaid,hasNote,isNonStandard:true,parsed:false,arena,arenaCode,activity:'',players:0,lang:'sk',zfa:null,instructor:'',custName:'',custEmail:'',custPhone:''};
   }
   // ZFA
   let zfa=null;
   const zfaMatch=afterAct.match(/\b(zfa\d+|bezzfa)\b/i);
   if(zfaMatch){const raw=zfaMatch[1].toLowerCase();zfa=raw==='bezzfa'?'bezzfa':raw.replace('zfa','');afterAct=afterAct.replace(zfaMatch[0],'').trim();}
   // Instructor: last word(s), match against known instructors
+  // Supports full names ("Michal Jacmenik"), first names ("Michal"), and abbreviated ("Michal J.")
   const remParts=afterAct.trim().split(/\s+/).filter(Boolean);
   let instructor='';
   if(remParts.length>0){
     const last2=remParts.slice(-2).join(' ');
     const last1=remParts[remParts.length-1];
     const knownInstr=instructors||[];
+    // Exact full match
     const m2=knownInstr.find(i=>i.toLowerCase()===last2.toLowerCase());
+    // First name or full first name match
     const m1=knownInstr.find(i=>i.toLowerCase()===last1.toLowerCase()||i.split(' ')[0].toLowerCase()===last1.toLowerCase());
-    if(m2)instructor=m2;else if(m1)instructor=m1;else instructor=last1;
+    // Fuzzy: "Michal J." → "Michal Jacmenik" (first name + initial of last name)
+    const mFuzzy=!m2&&!m1?knownInstr.find(i=>{
+      const iP=i.split(/\s+/);if(iP.length<2)return false;
+      const p2=last2.split(/\s+/);if(p2.length<2)return false;
+      const firstMatch=iP[0].toLowerCase()===p2[0].toLowerCase();
+      const init=p2[1].replace(/\.$/,'');
+      const initMatch=iP[1][0].toLowerCase()===init[0]?.toLowerCase();
+      return firstMatch&&initMatch;
+    }):null;
+    if(m2)instructor=m2;else if(m1)instructor=m1;else if(mFuzzy)instructor=mFuzzy;else instructor=last2||last1;
   }
   // Parse description for customer data
   const descText=description.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'');
@@ -5907,41 +6257,53 @@ function parseCalEvent(ev){
     else if(!custPhone&&/^[\+\d\s\-\(\)]{6,}$/.test(line.trim()))custPhone=line.trim();
     else if(!custName&&line.length>1)custName=line.trim();
   }
-  return{eventId,summary,description,start,end,status,colorId,isNonStandard:false,parsed:true,arena,activity,players,lang,zfa,instructor,custName,custEmail,custPhone};
+  return{eventId,summary,description,start,end,status,colorId,depositPaid,hasNote,isNonStandard:false,parsed:true,arena,arenaCode,activity,players,lang,zfa,instructor,custName,custEmail,custPhone};
 }
 
 async function fetchTodayReservations(forceRefresh=false){
-  const token=gCalGetValidToken();
+  _calViewDate=new Date();
+  await fetchReservationsForDate(_calViewDate,forceRefresh);
+}
+
+async function fetchReservationsForDate(date,forceRefresh=false){
   const calId=LS.g('pb_cal_id','');
-  if(!token||!calId){
-    // Try from cache
-    const cache=LS.g('pb_cal_cache',null);
-    if(cache&&Date.now()-cache.ts<3600000){_calReservations=cache.data||[];rLandingReservations();}
-    return;
+  const token=await gCalSAGetToken();
+  const isToday=date.toDateString()===new Date().toDateString();
+  if(!calId||!token){
+    if(isToday){const cache=LS.g('pb_cal_cache',null);if(cache&&Date.now()-cache.ts<3600000){_calReservations=cache.data||[];}}
+    rLandingReservations();return;
   }
-  const now=new Date();
-  const dayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString();
-  const dayEnd=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59).toISOString();
+  const dayStart=new Date(date.getFullYear(),date.getMonth(),date.getDate()).toISOString();
+  const dayEnd=new Date(date.getFullYear(),date.getMonth(),date.getDate(),23,59,59).toISOString();
   try{
-    const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(dayStart)}&timeMax=${encodeURIComponent(dayEnd)}&singleEvents=true&orderBy=startTime&maxResults=20`;
+    const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(dayStart)}&timeMax=${encodeURIComponent(dayEnd)}&singleEvents=true&orderBy=startTime&maxResults=30`;
     const r=await fetch(url,{headers:{Authorization:'Bearer '+token}});
     if(!r.ok){
-      if(r.status===401){LS.s('pb_cal_token',null);updateCalStatus();toast(t('toast-cal-token-expired'));}
-      const cache=LS.g('pb_cal_cache',null);
-      if(cache&&Date.now()-cache.ts<3600000){_calReservations=cache.data||[];rLandingReservations();}
-      return;
+      if(r.status===401){_calSAToken=null;updateCalStatus();}
+      rLandingReservations();return;
     }
     const data=await r.json();
     const events=(data.items||[]).filter(ev=>ev.status!=='cancelled');
     _calReservations=events.map(ev=>parseCalEvent(ev));
     updateCalWarnings(events);
-    rLandingReservations();
-    LS.s('pb_cal_cache',{ts:Date.now(),data:_calReservations});
-  }catch(e){
-    console.error('[Calendar fetch]',e);
-    const cache=LS.g('pb_cal_cache',null);
-    if(cache&&Date.now()-cache.ts<3600000){_calReservations=cache.data||[];rLandingReservations();}
-  }
+    if(isToday)LS.s('pb_cal_cache',{ts:Date.now(),data:_calReservations});
+    // Načítaj počty prihlásených pre všetky eventy naraz (1 API call)
+    const eventIds=_calReservations.map(r=>r.eventId).filter(Boolean);
+    if(eventIds.length)fetchSignupCounts(eventIds).then(()=>rLandingReservations());
+  }catch(e){console.error('[Calendar]',e);}
+  rLandingReservations();
+}
+
+function calNavDate(delta){
+  const today=new Date();today.setHours(0,0,0,0);
+  const next=new Date(_calViewDate);next.setHours(0,0,0,0);
+  next.setDate(next.getDate()+delta);
+  const minD=new Date(today);minD.setDate(today.getDate()-7);
+  const maxD=new Date(today);maxD.setDate(today.getDate()+7);
+  if(next<minD||next>maxD)return;
+  _calViewDate=next;_calReservations=[];
+  rLandingReservations();
+  fetchReservationsForDate(_calViewDate,true);
 }
 
 function updateCalWarnings(events){
@@ -5967,79 +6329,203 @@ function getWarnCount(){
 
 function rLandingReservations(){
   const el=$('landing-reservations');if(!el)return;
-  const token=gCalGetValidToken();
   const calId=LS.g('pb_cal_id','');
-  if(!token&&!_calReservations.length){el.style.display='none';return;}
+  const hasSA=!!LS.g('pb_cal_sa_creds',null);
+  if(!hasSA){el.style.display='none';return;}
+
+  el.style.display='block';
+
+  // Date helpers
+  const today=new Date();today.setHours(0,0,0,0);
+  const viewDay=new Date(_calViewDate);viewDay.setHours(0,0,0,0);
+  const isToday=viewDay.getTime()===today.getTime();
+  const minD=new Date(today);minD.setDate(today.getDate()-7);
+  const maxD=new Date(today);maxD.setDate(today.getDate()+7);
+  const canPrev=viewDay>minD;const canNext=viewDay<maxD;
+
+  const dateLabel=isToday?'Dnes':viewDay.toLocaleDateString('sk',{weekday:'short',day:'numeric',month:'short'});
+
+  const header=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 2px;">
+    <div style="display:flex;align-items:center;gap:2px;">
+      <button onclick="calNavDate(-1)" style="background:none;border:none;width:28px;height:28px;cursor:${canPrev?'pointer':'default'};color:${canPrev?'var(--t2)':'var(--t3)'};font-size:18px;line-height:1;border-radius:6px;"${canPrev?'':' disabled'}>‹</button>
+      <span style="font-size:11px;font-weight:700;color:${isToday?'var(--t1)':'var(--amb)'};letter-spacing:.03em;min-width:70px;text-align:center;">${dateLabel}</span>
+      <button onclick="calNavDate(1)" style="background:none;border:none;width:28px;height:28px;cursor:${canNext?'pointer':'default'};color:${canNext?'var(--t2)':'var(--t3)'};font-size:18px;line-height:1;border-radius:6px;"${canNext?'':' disabled'}>›</button>
+    </div>
+    <button onclick="fetchReservationsForDate(_calViewDate,true)" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--t3);padding:4px 6px;border-radius:6px;" title="Obnoviť">↻</button>
+  </div>`;
+
   if(!_calReservations.length){
-    if(token&&calId){
-      el.style.display='block';
-      el.innerHTML=`<div style="font-size:11px;color:var(--t3);padding:10px 0;text-align:center;">${t('cal-no-reservations')}</div>`;
-    }else{el.style.display='none';}
+    el.innerHTML=header+`<div style="font-size:11px;color:var(--t3);padding:10px 4px 4px;text-align:center;">Žiadne rezervácie</div>`;
     return;
   }
-  const warnCount=getWarnCount();
-  const warnBadge=warnCount>0?`<span style="background:${warnCount>=2?'var(--red)':'var(--amb)'};color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px;" title="${t('cal-warn-badge-title')}">${warnCount} ⚠</span>`:'';
-  el.style.display='block';
+
   const now=new Date();
-  const items=_calReservations.map(r=>{
+  const items=_calReservations.map((r,i)=>{
     const startTime=r.start?new Date(r.start):null;
     const endTime=r.end?new Date(r.end):null;
-    const isPast=startTime&&now>startTime&&(!endTime||now>endTime);
-    const statusColor=r.status==='confirmed'?'var(--grn)':r.status==='cancelled'?'var(--red)':'var(--amb)';
-    const statusLabel=t('cal-status-'+r.status)||r.status;
-    const timeStr=startTime?startTime.toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'?';
+    const isRunning=startTime&&endTime&&now>=startTime&&now<=endTime;
+    const isPastEvent=endTime?now>endTime:(startTime?now>startTime:false);
     const existingSess=sessArr.find(s=>s.calEventId===r.eventId);
-    let actionBtn='';
-    if(r.status!=='cancelled'){
-      if(existingSess){
-        actionBtn=`<button class="btn sm B" onclick="resumeFromLanding('${existingSess.key}')" style="font-size:11px;white-space:nowrap;">${t('cal-continue')}</button>`;
-      }else if(!isPast){
-        const rJson=JSON.stringify(r).replace(/\\/g,'\\\\').replace(/"/g,'&quot;');
-        actionBtn=`<button class="btn sm G" onclick="startSessFromReservation(JSON.parse(this.dataset.r))" data-r="${rJson}" style="font-size:11px;white-space:nowrap;">${t('cal-start-game')}</button>`;
-      }else{
-        actionBtn=`<button class="btn sm R" onclick="markCalNoShow('${r.eventId}')" style="font-size:11px;white-space:nowrap;">${t('cal-no-show')}</button>`;
-      }
-    }
-    const actIcon=r.activity==='Paintball'?'🎯':r.activity==='Airsoft'?'🔫':r.activity==='Laser Game'?'🔦':r.activity==='Gel Blaster'?'💧':r.activity==='Nerf'?'🎮':'📅';
-    const nonStdBadge=r.isNonStandard?`<span style="background:var(--abg);color:var(--amb);border-radius:4px;padding:1px 5px;font-size:10px;margin-left:4px;">${t('cal-non-standard')}</span>`:'';
-    const custInfo=r.custName?`<span style="color:var(--t2);">👤 ${escHtml(r.custName)}</span>`:'';
-    const instrInfo=r.instructor?`<span style="color:#4285f4;">· ${escHtml(r.instructor)}</span>`:'';
-    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:var(--rs);border:.5px solid ${r.status==='confirmed'?'var(--gbd)':'var(--b1)'};margin-bottom:6px;${r.status==='cancelled'?'opacity:.6;':''}">
-      <div style="font-size:20px;min-width:28px;text-align:center;">${actIcon}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-          <span>${timeStr}</span>
-          ${r.parsed?`<span style="color:var(--t3);">·</span><span>${escHtml(r.arena)}</span><span style="color:var(--t3);">·</span><span>${escHtml(r.activity)}</span><span style="color:var(--t3);">·</span><span style="color:var(--pur);">👥${r.players}</span>`:`<span>${escHtml(r.summary)}</span>`}
-          ${nonStdBadge}
-        </div>
-        <div style="font-size:10px;color:var(--t3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">
-          <span style="color:${statusColor};">${statusLabel}</span>${custInfo}${instrInfo}
+
+    const timeStr=startTime?startTime.toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'—';
+    const endStr=endTime?endTime.toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+
+    // Subtle status dot
+    const dotC=existingSess?'var(--grn)':isRunning?'var(--amb)':isPastEvent?'var(--t3)':'var(--t2)';
+
+    // Run count for this calendar event
+    const calRuns=LS.g('pb_cal_runs',{});
+    const runsDone=calRuns[r.eventId]||0;
+    const runBadge=runsDone>0?` <span style="font-size:9px;background:var(--abg);color:var(--amb);border-radius:99px;padding:1px 5px;font-weight:700;">${runsDone}×</span>`:'';
+    // Right side indicator
+    let rightEl='<span style="color:var(--t3);font-size:16px;font-weight:300;">›</span>';
+    if(existingSess)rightEl=`<span style="font-size:10px;color:var(--grn);font-weight:600;white-space:nowrap;">● Prebieha${sessRunSuffix(existingSess)}</span>`;
+    else if(isPastEvent&&isToday)rightEl=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">${runsDone>0?runBadge:''}<button onclick="event.stopPropagation();markCalNoShow('${r.eventId}')" style="background:none;border:.5px solid var(--b2);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--t3);cursor:pointer;">No-show</button></div>`;
+    else if(runsDone>0)rightEl=`<span style="color:var(--t3);font-size:16px;font-weight:300;">›</span>${runBadge}`;
+
+    // Info line — use arenaCode (RC, OUT, SA) for compact display
+    const arenaDisp=r.arenaCode||r.arena||'';
+    const mainLine=r.parsed
+      ?`${escHtml(arenaDisp)} · ${escHtml(r.activity)} · <span style="color:var(--t2);">${r.players}×</span>${r.instructor?` · <span style="color:var(--t2);">${escHtml(r.instructor)}</span>`:''}`
+      :`${escHtml(r.summary)}`;
+    // Badges: záloha zaplatená + poznámka
+    const depBadge=r.depositPaid?`<span style="font-size:9px;background:#0d2e1a;color:var(--grn);border-radius:99px;padding:1px 5px;font-weight:700;margin-left:3px;">💰 záloha</span>`:'';
+    const noteBadge=r.hasNote?`<span style="font-size:9px;background:var(--abg);color:var(--amb);border-radius:99px;padding:1px 5px;font-weight:700;margin-left:3px;">⚠️ pozn.</span>`:'';
+
+    const cardStyle=`display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);border:.5px solid ${r.depositPaid?'var(--gbd)':r.hasNote?'var(--abd)':'var(--b1)'};margin-bottom:5px;cursor:pointer;${isPastEvent?'opacity:.55;':''}`;
+
+    return`<div style="${cardStyle}" onclick="startSessFromReservation(_calReservations[${i}])" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg3)'">
+      <span style="width:7px;height:7px;border-radius:50%;background:${dotC};flex-shrink:0;"></span>
+      <span style="font-size:13px;font-weight:700;color:var(--t1);min-width:38px;">${timeStr}</span>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${mainLine}${depBadge}${noteBadge}</div>
+        <div style="display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap;">
+          ${r.custName?`<span style="font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(r.custName)}</span>`:''}
+          ${(()=>{const cnt=_calSignupCounts[r.eventId];return cnt>0?`<span style="font-size:9px;background:var(--gbg);color:var(--grn);border-radius:99px;padding:1px 6px;font-weight:700;white-space:nowrap;">📋 ${cnt} prihlásených</span>`:cnt===0?'':``;})()}
         </div>
       </div>
-      ${actionBtn}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+        ${rightEl}
+        ${r.eventId?`<button onclick="event.stopPropagation();copyEventSignupLink(_calReservations[${i}])" style="background:none;border:.5px solid var(--b2);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--t3);cursor:pointer;white-space:nowrap;" title="Kopírovať link na prihlásenie">🔗</button>`:''}
+      </div>
     </div>`;
   }).join('');
-  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;">📅 ${t('cal-reservations')}${warnBadge}</div>
-    <button onclick="fetchTodayReservations(true)" style="background:none;border:none;font-size:15px;cursor:pointer;color:var(--t3);" title="${t('cal-refresh')}">↻</button>
-  </div>${items}`;
+
+  el.innerHTML=header+items;
 }
 
 let _pendingReservation=null;
 
-function startSessFromReservation(reservation){
+async function startSessFromReservation(reservation){
+  if(!reservation)return;
   if(!currentUser){
-    showLandingLogin(t('cal-start-from-res'),()=>startSessFromReservation(reservation));
+    showLandingLogin(t('cal-start-from-res')||'Prihláste sa pre spustenie akcie',()=>startSessFromReservation(reservation));
     return;
   }
+  // Ak sú prihlásení hráči, zobraz import screen (Option B) pred spustením
+  if(reservation.eventId){
+    const cnt=_calSignupCounts[reservation.eventId];
+    if(cnt===undefined||cnt>0){
+      // Načítaj zoznam
+      const list=await fetchSignupList(reservation.eventId);
+      if(list.length>0){
+        _showImportScreen(reservation,list);
+        return;
+      }
+    }
+  }
+  _startSessFromReservationDirect(reservation);
+}
+
+function _showImportScreen(reservation,signups){
+  // Vytvor modal pre import hráčov
+  const existing=document.getElementById('m-import-signups');
+  if(existing)existing.remove();
+  const modal=document.createElement('div');
+  modal.id='m-import-signups';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  const startStr=reservation.start?new Date(reservation.start).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+  const endStr=reservation.end?new Date(reservation.end).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+  const timeR=startStr?`${startStr}${endStr?' – '+endStr:''}`:'';
+  const rows=signups.map(s=>{
+    const c=s.pb_customers||{};
+    const nick=escHtml(c.nick||'—');
+    const email=escHtml(c.email||'');
+    const fullname=escHtml(c.fullname||'');
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--b1);">
+      <span style="font-size:18px;">👤</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${nick}</div>
+        <div style="font-size:10px;color:var(--t3);">${fullname}${email?` · ${email}`:''}</div>
+      </div>
+      <span style="font-size:9px;background:var(--gbg);color:var(--grn);border-radius:99px;padding:2px 6px;">✓</span>
+    </div>`;
+  }).join('');
+  modal.innerHTML=`<div style="background:var(--card);border-radius:var(--r);padding:20px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;border:.5px solid var(--b2);">
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px;">📋 Prihlásení hráči</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;">${escHtml(reservation.arenaCode||reservation.arena||'')} · ${escHtml(reservation.activity||'')}${timeR?' · '+timeR:''}</div>
+    <div style="margin-bottom:16px;">${rows}</div>
+    <div style="display:grid;gap:8px;">
+      <button onclick="document.getElementById('m-import-signups').remove();_importAndStartSess(_pendingReservationImport,_importSignupsList)" style="padding:12px;background:var(--grn);color:#000;border:none;border-radius:var(--rs);font-size:14px;font-weight:700;cursor:pointer;">✅ Importovať ${signups.length} hráčov a spustiť</button>
+      <button onclick="document.getElementById('m-import-signups').remove();_startSessFromReservationDirect(_pendingReservationImport)" style="padding:12px;background:var(--bg2);color:var(--t2);border:.5px solid var(--b2);border-radius:var(--rs);font-size:13px;cursor:pointer;">▶ Spustiť bez importu (manuálne)</button>
+      <button onclick="document.getElementById('m-import-signups').remove()" style="padding:10px;background:none;color:var(--t3);border:none;font-size:12px;cursor:pointer;">Zrušiť</button>
+    </div>
+  </div>`;
+  window._pendingReservationImport=reservation;
+  window._importSignupsList=signups;
+  document.body.appendChild(modal);
+}
+
+async function _importAndStartSess(reservation,signups){
+  _pendingReservation=reservation;
+  // Override auto-player count — budeme importovať z pb_customers
+  const savedSignups=signups;
+  hideLanding();initStart();
+  await new Promise(r=>setTimeout(r,250));
+  // Pre-select arena + activity
+  if(reservation.arena){
+    document.querySelectorAll('.pill[data-g="arena"]').forEach(pill=>{
+      if(pill.dataset.v===reservation.arena&&!document.querySelector('.pill[data-g="arena"].on'))pickP(pill,'arena');
+    });
+  }
+  if(reservation.activity){
+    document.querySelectorAll('.pill[data-g="activity"]').forEach(pill=>{
+      if(pill.dataset.v&&pill.dataset.v.toLowerCase()===reservation.activity.toLowerCase()&&!document.querySelector('.pill[data-g="activity"].on'))pickP(pill,'activity');
+    });
+  }
+  if(reservation.instructor&&currentUser){
+    const instrPill=document.querySelector(`.pill[data-g="instructor"][data-v="${reservation.instructor}"]`);
+    if(instrPill&&currentUser.name===reservation.instructor&&!document.querySelector('.pill[data-g="instructor"].on')){instrPill.classList.add('on');setAV('instructor',reservation.instructor);}
+  }
+  // Nastav počet hráčov na 0 — nebudeme generovať anonymous
+  const countEl=$('sess-player-count')||document.querySelector('input[id*="count"]');
+  if(countEl){countEl.value=0;countEl.dispatchEvent(new Event('input'));}
+  // Zobraz banner
+  const banner=$('start-reservation-banner');
+  if(banner){
+    banner.style.display='block';
+    const startStr=reservation.start?new Date(reservation.start).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+    const endStr=reservation.end?new Date(reservation.end).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+    const timeRange=startStr?`${startStr}${endStr?' – '+endStr:''}`:'';
+    banner.innerHTML=`<div style="background:var(--gbg);border:.5px solid var(--gbd);border-radius:var(--rs);padding:10px 12px;font-size:12px;margin-bottom:10px;">
+      <div style="font-weight:700;color:var(--grn);margin-bottom:4px;">✅ Import ${savedSignups.length} registrovaných hráčov</div>
+      <div style="color:var(--t2);">📅 Rezervácia${timeRange?' · '+timeRange:''}</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px;">Hráči budú pridaní po spustení akcie s ich menami a kontami.</div>
+    </div>`;
+  }
+  // Uložíme signups do _pendingReservation pre použitie v startSess()
+  _pendingReservation._signups=savedSignups;
+}
+
+function _startSessFromReservationDirect(reservation){
   _pendingReservation=reservation;
   hideLanding();
   initStart();
   setTimeout(()=>{
-    // Pre-select arena pill
+    // Pre-select arena pill — exact match on full arena name (Raccoon City, Outdoor, Small arena)
     if(reservation.arena){
       document.querySelectorAll('.pill[data-g="arena"]').forEach(pill=>{
-        if(pill.dataset.v===reservation.arena||(reservation.arena==='RC'&&pill.dataset.v&&pill.dataset.v.toLowerCase().includes('rc'))||(reservation.arena==='Outdoor'&&pill.dataset.v&&pill.dataset.v.toLowerCase().includes('out'))){
+        if(pill.dataset.v===reservation.arena){
           if(!document.querySelector('.pill[data-g="arena"].on')){pickP(pill,'arena');}
         }
       });
@@ -6059,16 +6545,30 @@ function startSessFromReservation(reservation){
         if(!document.querySelector('.pill[data-g="instructor"].on')){instrPill.classList.add('on');setAV('instructor',reservation.instructor);}
       }
     }
+    // Pre-fill player count input if available
+    if(reservation.players&&reservation.players>0){
+      const countEl=$('sess-player-count')||document.querySelector('input[id*="count"],input[placeholder*="počet"],input[placeholder*="8"]');
+      if(countEl){countEl.value=reservation.players;countEl.dispatchEvent(new Event('input'));}
+    }
     // Show reservation info banner
     const banner=$('start-reservation-banner');
     if(banner){
       banner.style.display='block';
-      const phoneStr=reservation.custPhone?` · 📞 ${escHtml(reservation.custPhone)}`:'';
-      const emailStr=reservation.custEmail?` · ✉ ${escHtml(reservation.custEmail)}`:'';
-      banner.innerHTML=`<div style="background:rgba(66,133,244,.12);border:.5px solid rgba(66,133,244,.4);border-radius:var(--rs);padding:8px 12px;font-size:12px;margin-bottom:10px;line-height:1.7;">
-        📅 <strong>${t('cal-start-from-res')}</strong><br>
-        ${reservation.custName?`👤 <strong>${escHtml(reservation.custName)}</strong>`:''}${reservation.players?` · 👥 ${reservation.players} hráčov`:''}${reservation.activity?` · ${escHtml(reservation.activity)}`:''}${phoneStr}${emailStr}
-        <button onclick="this.parentElement.parentElement.style.display='none';_pendingReservation=null;" style="background:none;border:none;font-size:11px;color:var(--t3);cursor:pointer;float:right;">✕</button>
+      const startStr=reservation.start?new Date(reservation.start).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+      const endStr=reservation.end?new Date(reservation.end).toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}):'';
+      const timeRange=startStr?`${startStr}${endStr?' – '+endStr:''}`:'';
+      const phoneStr=reservation.custPhone?`<br>📞 ${escHtml(reservation.custPhone)}`:'';
+      const emailStr=reservation.custEmail?`<br>✉ ${escHtml(reservation.custEmail)}`:'';
+      const depBanner=reservation.depositPaid?`<div style="background:#0d2e1a;border:.5px solid var(--gbd);border-radius:6px;padding:5px 9px;margin-top:6px;font-size:11px;color:var(--grn);font-weight:600;">💰 Záloha zaplatená</div>`:'';
+      const noteBanner=reservation.hasNote?`<div style="background:var(--abg);border:.5px solid var(--abd);border-radius:6px;padding:5px 9px;margin-top:5px;font-size:11px;color:var(--amb);font-weight:700;">⚠️ POZOR — prečítaj popis v kalendári!</div>`:'';
+      banner.innerHTML=`<div style="background:var(--bbg);border:.5px solid var(--bbd);border-radius:var(--rs);padding:10px 12px;font-size:12px;margin-bottom:10px;line-height:1.8;position:relative;">
+        <button onclick="this.closest('[style]').style.display='none';_pendingReservation=null;" style="position:absolute;top:6px;right:8px;background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;line-height:1;">✕</button>
+        <div style="font-weight:700;color:var(--blu);margin-bottom:2px;">📅 Rezervácia${timeRange?' · '+timeRange:''}</div>
+        ${reservation.summary?`<div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:monospace;">${escHtml(reservation.summary)}</div>`:''}
+        ${reservation.custName?`<div>👤 <strong>${escHtml(reservation.custName)}</strong></div>`:''}
+        ${reservation.players?`<div style="color:var(--t2);">👥 ${reservation.players} hráčov${reservation.activity?' · '+escHtml(reservation.activity):''}</div>`:''}
+        ${phoneStr}${emailStr}
+        ${depBanner}${noteBanner}
       </div>`;
     }
   },200);
@@ -6076,7 +6576,7 @@ function startSessFromReservation(reservation){
 
 async function markCalNoShow(eventId){
   if(!confirm('Označiť ako no-show v Google Kalendári?'))return;
-  const token=gCalGetValidToken();
+  const token=await gCalSAGetToken();
   const calId=LS.g('pb_cal_id','');
   if(!token||!calId){toast(t('toast-cal-token-expired'));return;}
   try{
@@ -6098,13 +6598,14 @@ async function markCalNoShow(eventId){
   }catch(e){console.error('[Cal no-show]',e);toast('Chyba pri sync');}
 }
 
-async function syncBackToCalendar(sessKey,status){
+async function syncBackToCalendar(sessKey,status,calEventIdOverride){
   // status: 'done' or 'noshow'
-  const token=gCalGetValidToken();
+  // calEventIdOverride: pass when session is already removed from sessArr (e.g. after confirmCloseSess)
+  const token=await gCalSAGetToken();
   const calId=LS.g('pb_cal_id','');
   if(!token||!calId)return;
   const sess=sessArr.find(s=>s.key===sessKey)||{};
-  const eventId=sess.calEventId;if(!eventId)return;
+  const eventId=calEventIdOverride||sess.calEventId;if(!eventId)return;
   try{
     const r=await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${eventId}`,{headers:{Authorization:'Bearer '+token}});
     if(!r.ok)return;
@@ -6149,16 +6650,23 @@ function deleteWbConfirm(){
 }
 
 function clearCalWarning(key){
+  const pw=prompt('Zadaj admin heslo pre potvrdenie zmazania:');
+  if(pw===null)return;
+  if(pw!==admPw){toast('❌ Nesprávne heslo',true);return;}
   const warnings=LS.g('pb_cal_warnings',{});
   delete warnings[key];
   LS.s('pb_cal_warnings',warnings);
   if($('p-spravca')?.classList.contains('on'))rSpravca();
+  toast('Varovanie zmazané');
 }
 
 function clearAllCalWarnings(){
+  const pw=prompt('Zadaj admin heslo pre zmazanie VŠETKÝCH varovaní:');
+  if(pw===null)return;
+  if(pw!==admPw){toast('❌ Nesprávne heslo',true);return;}
   LS.s('pb_cal_warnings',{});
   if($('p-spravca')?.classList.contains('on'))rSpravca();
-  toast('Varovania vymazané');
+  toast('Všetky varovania vymazané');
 }
 
 function updateGDriveStatus(){
@@ -6785,38 +7293,13 @@ function buildTimeStr(ded, sess, grpBills){
 
   // Connect to Supabase if configured — auto-pull latest data for multi-device sync
   if(sbUrl&&sbKey){
-    dot('⟳','var(--amb)');
-    // Auto-pull on startup to get latest data from other devices
-    setTimeout(async()=>{
-      try{
-        const r=await fetch(`${sbUrl}/rest/v1/pb_data?id=eq.main&select=payload`,{
-          headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}
-        });
-        if(r.ok){
-          const rows=await r.json();
-          if(rows.length){
-            const remote=rows[0].payload;
-            // Only apply if remote is newer
-            if(remote&&remote.ts&&remote.ts>Date.now()-5*60*1000){
-              plApply(remote);selId=null;chkd=new Set();
-              dot('✓','var(--grn)');
-              setTimeout(()=>dot('●','var(--t3)'),3000);
-            }else{
-              // Local is fresh enough — just push
-              sbPush();
-            }
-          }else{
-            // No remote data yet — push local
-            sbPush();
-          }
-        }else{dot('!','var(--red)');}
-      }catch(e){dot('!','var(--red)');console.warn('Supabase auto-pull:',e);}
-    },1500);
+    // Auto-pull on startup — merge all session rows from other devices
+    setTimeout(()=>sbPull(),1500);
   }
   // Init Google Drive if configured
   if(LS.g('pb_gdrive_client_id','')){setTimeout(gDriveInit,1000);}
   // Init Google Calendar if configured
-  if(LS.g('pb_gdrive_client_id','')&&LS.g('pb_cal_id','')){setTimeout(gCalInit,1200);}
+  if(LS.g('pb_cal_sa_creds',null)&&LS.g('pb_cal_id','')){setTimeout(gCalInit,1200);}
   // Apply saved language after DOM ready
   setTimeout(()=>applyLang(LS.g('pb_lang','sk')),0);
   setTimeout(updInvBadge,200);

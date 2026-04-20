@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>ProPaintball — Registrácia</title>
-<meta name="description" content="Zaregistruj sa a získaj prehľad o tvojich hrách, štatistiky a exkluzívne ponuky.">
+<meta name="description" content="Digitálna registrácia hráčov ProPaintball Bratislava. Zmluva o výpožičke, BOZP a GDPR.">
 <meta name="theme-color" content="#0a0e1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
 <style>
@@ -21,54 +21,83 @@
   --rs:10px;--r:14px;
 }
 body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.container{width:100%;max-width:440px;}
+.container{width:100%;max-width:460px;}
 .logo{text-align:center;margin-bottom:24px;position:relative;}
 .logo-icon{font-size:56px;display:block;margin-bottom:8px;}
 .logo h1{font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.02em;}
 .logo p{font-size:12px;color:var(--t3);margin-top:4px;}
-.lang-bar{position:absolute;top:0;right:0;display:flex;gap:4px;}
+.lang-bar{position:absolute;top:0;right:0;display:flex;gap:4px;flex-wrap:wrap;max-width:140px;justify-content:flex-end;}
 .lang-btn{background:none;border:1px solid var(--b1);border-radius:6px;padding:3px 6px;font-size:18px;cursor:pointer;opacity:.5;transition:all .2s;line-height:1;}
 .lang-btn:hover{opacity:.8;border-color:var(--b2);}
 .lang-btn.act{opacity:1;border-color:var(--red);background:var(--rbg);}
 .card{background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:16px;}
 .card-title{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--b1);}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
 .field label .opt{font-weight:400;text-transform:none;color:var(--t3);font-size:9px;}
+.field label .req{color:var(--red);margin-left:2px;}
 .field input{width:100%;padding:12px 14px;border:1px solid var(--b2);border-radius:var(--rs);background:var(--bg2);color:var(--t1);font-size:15px;outline:none;transition:border-color .2s;}
 .field input:focus{border-color:var(--red);}
 .field input::placeholder{color:var(--t3);}
-.consent{display:flex;align-items:flex-start;gap:10px;padding:14px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--b1);margin-bottom:16px;cursor:pointer;}
-.consent input[type=checkbox]{width:20px;height:20px;accent-color:var(--red);flex-shrink:0;margin-top:2px;cursor:pointer;}
+.field.err input{border-color:var(--red);}
+.field .err-msg{font-size:10px;color:var(--red);margin-top:3px;display:none;}
+.field.err .err-msg{display:block;}
+
+/* Legal checkboxes */
+.legal-section{margin-bottom:14px;}
+.legal-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.consent{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--b1);margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.consent:hover{border-color:var(--b2);}
+.consent.required-err{border-color:var(--rbd);background:var(--rbg);}
+.consent input[type=checkbox]{width:20px;height:20px;accent-color:var(--red);flex-shrink:0;margin-top:1px;cursor:pointer;}
 .consent-text{font-size:11px;color:var(--t2);line-height:1.6;}
-.consent-text strong{color:var(--t1);}
+.consent-text strong{color:var(--t1);display:block;margin-bottom:2px;font-size:11.5px;}
+.consent-text a{color:var(--red);text-decoration:none;font-weight:600;}
+.consent-text a:hover{text-decoration:underline;}
+.err-consents{font-size:11px;color:var(--red);margin-bottom:10px;display:none;padding:8px 12px;background:var(--rbg);border-radius:var(--rs);border:1px solid var(--rbd);}
+.err-consents.show{display:block;}
+
+/* Minor notice + optional consents */
+.minor-notice{display:none;margin-bottom:12px;padding:10px 14px;background:var(--abg);border:1px solid var(--abd);border-radius:var(--rs);font-size:11px;color:var(--amb);line-height:1.6;}
+.minor-notice strong{display:block;margin-bottom:4px;font-size:12px;}
+.opt-section{margin-top:4px;}
+.consent.opt-consent{border-style:dashed;opacity:.82;}
+.consent.opt-consent:hover{opacity:1;border-style:solid;}
+
 .btn{width:100%;padding:14px;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.04em;}
 .btn-primary{background:var(--red);color:#fff;}
 .btn-primary:hover{background:#d42f3d;transform:translateY(-1px);}
 .btn-primary:active{transform:translateY(0);}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;color:var(--t2);border:1px solid var(--b2);}
+.btn-outline:hover{border-color:var(--b2);color:var(--t1);}
+
 .benefits{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
 .benefit{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--b1);}
 .benefit-icon{font-size:20px;flex-shrink:0;}
 .benefit-text{font-size:10px;color:var(--t2);line-height:1.4;}
 .benefit-text strong{color:var(--t1);display:block;font-size:11px;}
+
+/* Toast */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--b2);color:var(--t1);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:1000;white-space:nowrap;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.err{border-color:var(--rbd);color:var(--red);}
+
+/* Success screen */
 .success{display:none;text-align:center;padding:20px 0;}
 .success-icon{font-size:72px;animation:popIn .5s ease;}
-.success h2{font-size:20px;font-weight:800;color:var(--grn);margin:16px 0 8px;}
-.success p{font-size:13px;color:var(--t2);line-height:1.6;max-width:300px;margin:0 auto;}
+.success h2{font-size:22px;font-weight:800;color:var(--grn);margin:16px 0 8px;}
+.success p{font-size:13px;color:var(--t2);line-height:1.6;max-width:320px;margin:0 auto;}
 .success .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;}
-.success .stat{background:var(--bg2);border-radius:var(--rs);padding:12px;text-align:center;}
-.success .stat .val{font-size:24px;font-weight:800;color:var(--t1);}
-.success .stat .lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.success .stat{background:var(--bg2);border-radius:var(--rs);padding:12px;text-align:center;border:1px solid var(--b1);}
+.success .stat .val{font-size:18px;font-weight:800;color:var(--t1);word-break:break-all;}
+.success .stat .lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+.email-note{margin-top:16px;padding:10px 14px;background:var(--gbg);border:1px solid var(--gbd);border-radius:var(--rs);font-size:11px;color:var(--grn);line-height:1.5;}
+
 @keyframes popIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
 .footer{text-align:center;margin-top:20px;font-size:9px;color:var(--t3);line-height:1.8;}
 .footer a{color:var(--t2);text-decoration:none;}
-.field.err input{border-color:var(--red);}
-.field .err-msg{font-size:10px;color:var(--red);margin-top:3px;display:none;}
-.field.err .err-msg{display:block;}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:360px){
@@ -79,49 +108,139 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
 </head>
 <body>
 <div class="container">
+
   <!-- REGISTRATION FORM -->
   <div id="reg-form">
     <div class="logo">
       <span class="logo-icon">🎯</span>
       <h1>ProPaintball Bratislava</h1>
-      <p data-i="subtitle">Zaregistruj sa a sleduj svoje hry</p>
+      <p data-i="subtitle">Digitálna registrácia — zmluva o výpožičke & BOZP</p>
       <div class="lang-bar">
         <button class="lang-btn act" onclick="setLang('sk')" title="Slovensky">🇸🇰</button>
         <button class="lang-btn" onclick="setLang('en')" title="English">🇬🇧</button>
         <button class="lang-btn" onclick="setLang('de')" title="Deutsch">🇩🇪</button>
+        <button class="lang-btn" onclick="setLang('cs')" title="Česky">🇨🇿</button>
         <button class="lang-btn" onclick="setLang('tr')" title="Türkçe">🇹🇷</button>
         <button class="lang-btn" onclick="setLang('fr')" title="Français">🇫🇷</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">📋 <span data-i="card_title">Registrácia</span></div>
+      <div class="card-title">📋 <span data-i="card_title">Registrácia hráča</span></div>
 
-      <div class="field" id="f-name">
-        <label data-i="lbl_name">Krstné meno alebo Nick</label>
-        <input type="text" id="r-name" data-ph="ph_name" placeholder="Maťo" autocomplete="given-name" maxlength="30"/>
-        <div class="err-msg" data-i="err_name">Zadaj meno alebo nick</div>
+      <!-- Personal data section -->
+      <div class="section-label" data-i="sect_personal">Osobné údaje</div>
+
+      <div class="field" id="f-nick">
+        <label><span data-i="lbl_nick">Prezývka / Nick</span><span class="req">*</span></label>
+        <input type="text" id="r-nick" data-ph="ph_nick" placeholder="Vojak_SK" autocomplete="nickname" maxlength="30"/>
+        <div class="err-msg" data-i="err_nick">Zadaj prezývku</div>
       </div>
 
       <div class="field" id="f-email">
-        <label data-i="lbl_email">Email</label>
+        <label><span data-i="lbl_email">Email</span><span class="req">*</span></label>
         <input type="email" id="r-email" data-ph="ph_email" placeholder="jan@email.com" autocomplete="email"/>
         <div class="err-msg" id="email-err" data-i="err_email">Zadaj platný email</div>
       </div>
 
+      <div class="field" id="f-fullname">
+        <label><span data-i="lbl_fullname">Meno a Priezvisko</span> <span class="opt" data-i="opt">— nepovinné</span></label>
+        <input type="text" id="r-fullname" data-ph="ph_fullname" placeholder="Ján Novák" autocomplete="name" maxlength="60"/>
+      </div>
+
       <div class="field" id="f-phone">
-        <label><span data-i="lbl_phone">Telefón</span> <span class="opt" data-i="opt">— voliteľné</span></label>
+        <label><span data-i="lbl_phone">Telefón</span> <span class="opt" data-i="opt">— nepovinné</span></label>
         <input type="tel" id="r-phone" data-ph="ph_phone" placeholder="+421 9XX XXX XXX" autocomplete="tel"/>
       </div>
 
-      <label class="consent" id="consent-label">
-        <input type="checkbox" id="r-consent"/>
-        <div class="consent-text">
-          <strong data-i="consent_title">Súhlasím so spracovaním kontaktných údajov</strong>
-          <span data-i="consent_body">(nick/meno, email) za účelom zasielania ponúk, štatistík z mojich hier a noviniek. Súhlas môžem kedykoľvek odvolať emailom.</span>
-          <br><span style="color:var(--t3);font-size:9px;">TRESAERIS GROUP s.r.o., IČO: 50925989</span>
-        </div>
-      </label>
+      <div class="field" id="f-dob">
+        <label><span data-i="lbl_dob">Dátum narodenia</span> <span class="opt" data-i="opt">— nepovinné</span></label>
+        <input type="date" id="r-dob" autocomplete="bday"/>
+        <div class="err-msg" id="dob-err" data-i="err_dob_young">Minimálny vek je 5 rokov</div>
+      </div>
+
+      <!-- Minor notice (shown dynamically) -->
+      <div class="minor-notice" id="minor-notice">
+        <strong data-i="minor_title">⚠️ Registrácia maloletého hráča</strong>
+        <span data-i="minor_body">Hráč je mladší ako 18 rokov. Registráciu vykonáva zákonný zástupca (rodič/poručník) vo svojom mene. Zaškrtnutím súhlasov potvrdzujete, že ste zákonný zástupca tohto hráča a preberáte za neho plnú zodpovednosť.</span>
+      </div>
+
+      <!-- Legal section -->
+      <div class="section-label" data-i="sect_legal">Povinné súhlasy</div>
+
+      <div class="legal-section">
+        <!-- Checkbox 1: VOP + materiálna zodpovednosť -->
+        <label class="consent" id="c-vop-label">
+          <input type="checkbox" id="r-vop"/>
+          <div class="consent-text">
+            <strong data-i="c1_title">VOP a materiálna zodpovednosť</strong>
+            <span id="c1-body-sk">Súhlasím so <a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">Všeobecnými obchodnými podmienkami (VOP V5)</a> a preberám plnú materiálnu zodpovednosť za škody spôsobené mnou alebo osobami v mojej skupine (vrátane maloletých detí od 5 rokov).</span>
+            <span id="c1-body-en" style="display:none;">I agree to the <a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">General Terms and Conditions (GTC V5)</a> and accept full material liability for damages caused by me or persons in my group (including minors from age 5).</span>
+            <span id="c1-body-de" style="display:none;">Ich stimme den <a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">Allgemeinen Geschäftsbedingungen (AGB V5)</a> zu und übernehme die volle materielle Haftung für Schäden durch mich oder meine Gruppe (einschließlich Minderjähriger ab 5 Jahren).</span>
+            <span id="c1-body-cs" style="display:none;">Souhlasím s <a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">Všeobecnými obchodními podmínkami (VOP V5)</a> a přebírám plnou materiální odpovědnost za škody způsobené mnou nebo osobami v mé skupině (včetně nezletilých dětí od 5 let).</span>
+            <span id="c1-body-tr" style="display:none;"><a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">Genel Hüküm ve Koşulları (GTC V5)</a> kabul ediyor ve grubum tarafından (5 yaşından itibaren küçükler dahil) verilen zararlar için tam maddi sorumluluk üstleniyorum.</span>
+            <span id="c1-body-fr" style="display:none;">J'accepte les <a href="vop-v5.pdf" target="_blank" onclick="event.stopPropagation()">Conditions Générales de Vente (CGV V5)</a> et assume l'entière responsabilité matérielle pour les dommages causés par moi ou mon groupe (y compris les mineurs à partir de 5 ans).</span>
+          </div>
+        </label>
+
+        <!-- Checkbox 2: BOZP + Prevádzkový poriadok -->
+        <label class="consent" id="c-bozp-label">
+          <input type="checkbox" id="r-bozp"/>
+          <div class="consent-text">
+            <strong data-i="c2_title">Bezpečnostné pravidlá a prevádzkový poriadok</strong>
+            <span data-i="c2_body">Potvrdzujem, že som bol oboznámený s Bezpečnostnými pravidlami (BOZP) a Prevádzkovým poriadkom areálu a zaväzujem sa ich dodržiavať (najmä zákaz snímania masky v hernej zóne).</span>
+          </div>
+        </label>
+
+        <!-- Checkbox 3: GDPR -->
+        <label class="consent" id="c-gdpr-label">
+          <input type="checkbox" id="r-gdpr"/>
+          <div class="consent-text">
+            <strong data-i="c3_title">Ochrana osobných údajov (GDPR)</strong>
+            <span id="c3-body-sk">Súhlasím so spracovaním osobných údajov v súlade so <a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Zásadami ochrany súkromia (GDPR 2026)</a> a monitorovaním areálu kamerovým systémom bez záznamu zvuku.</span>
+            <span id="c3-body-en" style="display:none;">I agree to the processing of personal data in accordance with the <a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Privacy Policy (GDPR 2026)</a> and to the monitoring of the arena with a camera system without audio recording.</span>
+            <span id="c3-body-de" style="display:none;">Ich stimme der Verarbeitung personenbezogener Daten gemäß der <a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Datenschutzrichtlinie (DSGVO 2026)</a> und der Videoüberwachung des Geländes ohne Tonaufnahme zu.</span>
+            <span id="c3-body-cs" style="display:none;">Souhlasím se zpracováním osobních údajů v souladu se <a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Zásadami ochrany soukromí (GDPR 2026)</a> a monitorováním areálu kamerovým systémem bez záznamu zvuku.</span>
+            <span id="c3-body-tr" style="display:none;"><a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Gizlilik Politikası (GDPR 2026)</a> kapsamında kişisel verilerin işlenmesini ve ses kaydı olmaksızın kamera sistemi ile tesisin izlenmesini kabul ediyorum.</span>
+            <span id="c3-body-fr" style="display:none;">J'accepte le traitement des données personnelles conformément à la <a href="gdpr-2026.pdf" target="_blank" onclick="event.stopPropagation()">Politique de Confidentialité (RGPD 2026)</a> et à la surveillance du terrain par caméras sans enregistrement audio.</span>
+            <br><span style="color:var(--t3);font-size:9px;">TRESAERIS GROUP s.r.o., IČO: 50925989</span>
+          </div>
+        </label>
+
+        <div class="err-consents" id="err-consents" data-i="err_consents">Prosím, potvrď všetky povinné súhlasy.</div>
+      </div>
+
+      <!-- Optional consents (GDPR: marketing + photo must be separate & voluntary) -->
+      <div class="section-label opt-section" data-i="sect_optional">Nepovinné súhlasy</div>
+      <div class="legal-section">
+        <!-- Checkbox 4: Photo/video consent — OPTIONAL, Art. 6(1)(a) GDPR -->
+        <label class="consent opt-consent" id="c-photo-label">
+          <input type="checkbox" id="r-photo"/>
+          <div class="consent-text">
+            <strong data-i="c4_title">Foto a video súhlas <span class="opt" data-i="opt_lbl">— nepovinné</span></strong>
+            <span id="c4-body-sk">Súhlasím s fotografovaním a videozáznamom počas aktivity a použitím materiálov na marketingové účely (sociálne siete, web ProPaintball). Súhlas môžem kedykoľvek písomne odvolať na info@propaintball.sk.</span>
+            <span id="c4-body-en" style="display:none;">I consent to being photographed and filmed during the activity and to the use of such materials for marketing purposes (social media, ProPaintball website). I may withdraw this consent at any time in writing.</span>
+            <span id="c4-body-de" style="display:none;">Ich stimme der Foto- und Videoaufnahme während der Aktivität und der Nutzung für Marketingzwecke zu. Widerruf jederzeit schriftlich möglich.</span>
+            <span id="c4-body-cs" style="display:none;">Souhlasím s fotografováním a videonahrávkami během aktivity a použitím pro marketingové účely. Souhlas mohu kdykoli písemně odvolat.</span>
+            <span id="c4-body-tr" style="display:none;">Aktivite sırasında fotoğraflanmayı ve film çekilmeyi ve bu materyallerin pazarlama amaçlı kullanılmasını kabul ediyorum. Onayımı her zaman yazılı olarak geri alabilirim.</span>
+            <span id="c4-body-fr" style="display:none;">J'accepte d'être photographié(e) et filmé(e) pendant l'activité et l'utilisation des médias à des fins marketing. Je peux retirer ce consentement à tout moment par écrit.</span>
+          </div>
+        </label>
+
+        <!-- Checkbox 5: Marketing consent — OPTIONAL, Art. 6(1)(a) GDPR -->
+        <label class="consent opt-consent" id="c-mkt-label">
+          <input type="checkbox" id="r-mkt"/>
+          <div class="consent-text">
+            <strong data-i="c5_title">Marketingové oznámenia <span class="opt" data-i="opt_lbl">— nepovinné</span></strong>
+            <span data-i="c5_body">Súhlasím so zasielaním noviniek, zliav a špeciálnych ponúk emailom. Odhlásenie je kedykoľvek možné kliknutím na odkaz v emaili.</span>
+            <span id="c5-body-en" style="display:none;">I agree to receive news, discounts and offers by email. I can unsubscribe at any time via the link in the email.</span>
+            <span id="c5-body-de" style="display:none;">Ich stimme dem Empfang von Neuigkeiten, Rabatten und Angeboten per E-Mail zu. Abmeldung jederzeit über den Link in der E-Mail möglich.</span>
+            <span id="c5-body-cs" style="display:none;">Souhlasím se zasíláním novinek, slev a nabídek emailem. Odhlášení kdykoli možné kliknutím na odkaz v emailu.</span>
+            <span id="c5-body-tr" style="display:none;">E-posta ile haber, indirim ve teklifler almayı kabul ediyorum. E-postadaki bağlantıyla istediğim zaman abonelikten çıkabilirim.</span>
+            <span id="c5-body-fr" style="display:none;">J'accepte de recevoir des actualités, remises et offres par e-mail. Désabonnement possible à tout moment via le lien dans l'e-mail.</span>
+          </div>
+        </label>
+      </div>
 
       <button class="btn btn-primary" id="submit-btn" onclick="submitReg()" disabled>
         <span data-i="submit">Zaregistrovať sa</span>
@@ -152,19 +271,26 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
   <div id="reg-success" class="success">
     <div class="success-icon">🎯</div>
     <h2 data-i="success_title">Registrácia úspešná!</h2>
-    <p data-i="success_msg">Ďakujeme za registráciu. Na ďalšej hre stačí povedať svoj nick alebo email a budeme ťa mať v systéme.</p>
+    <p data-i="success_msg">Ďakujeme! Na ďalšej hre stačí povedať svoj nick alebo email a budeme ťa mať v systéme.</p>
     <div class="stat-grid">
       <div class="stat">
         <div class="val" id="s-name">—</div>
         <div class="lbl" data-i="player">Hráč</div>
       </div>
       <div class="stat">
-        <div class="val" id="s-email">—</div>
+        <div class="val" id="s-nick">—</div>
+        <div class="lbl" data-i="nick_lbl">Nick</div>
+      </div>
+      <div class="stat" style="grid-column:1/-1;">
+        <div class="val" id="s-email" style="font-size:13px;">—</div>
         <div class="lbl">Email</div>
       </div>
     </div>
+    <div id="email-note" class="email-note" style="display:none;">
+      <span data-i="success_email">📬 Na tvoj email sme odoslali potvrdenie registrácie.</span>
+    </div>
     <div style="margin-top:20px;">
-      <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;" data-i="new_reg">Nová registrácia</button>
+      <button class="btn btn-primary" onclick="resetForm()" style="max-width:220px;margin:0 auto;display:block;" data-i="new_reg">Nová registrácia</button>
     </div>
   </div>
 
@@ -174,89 +300,185 @@ body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSyst
     <h2 data-i="exists_title">Už si registrovaný!</h2>
     <p id="exists-msg" data-i="exists_msg">Tento email je už v systéme. Na ďalšej hre stačí povedať svoj nick.</p>
     <div style="margin-top:20px;">
-      <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">OK</button>
+      <button class="btn btn-primary" onclick="resetForm()" style="max-width:180px;margin:0 auto;display:block;" data-i="new_reg">Nová registrácia</button>
     </div>
   </div>
 
   <div class="footer">
-    ProPaintball Bratislava · TRESAERIS GROUP s.r.o.<br>
+    <strong style="color:var(--t2);font-size:10px;">TRESAERIS GROUP s.r.o.</strong><br>
+    Hronská 5148/6, 821 07 Bratislava – m. č. Podunajské Biskupice<br>
+    IČO: 50&nbsp;925&nbsp;989 · DIČ: 2120531996 · IČ DPH: SK2120531996<br>
+    Obchodný register Mestského súdu Bratislava III, oddiel Sro, vl. č. 120245/B<br>
     <a href="https://propaintball.sk" target="_blank">propaintball.sk</a>
+    · <a href="mailto:info@propaintball.sk">info@propaintball.sk</a>
+    · <a href="tel:+421903199993">+421 903 199 993</a><br>
+    <a href="vop-v5.pdf" target="_blank" data-i="footer_vop">VOP V5</a>
+    · <a href="gdpr-2026.pdf" target="_blank" data-i="footer_gdpr">GDPR 2026</a>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ══ EmailJS config (optional — fill in to enable email confirmations) ══
+// Sign up free at emailjs.com, create a service + template, paste IDs here.
+// Template variables available: {{to_email}}, {{to_name}}, {{nick}}, {{reg_date}}
+const EMAILJS_PUBLIC_KEY  = '';   // e.g. 'user_aBcDeFgHiJkL'
+const EMAILJS_SERVICE_ID  = '';   // e.g. 'service_propaintball'
+const EMAILJS_TEMPLATE_ID = '';   // e.g. 'template_confirm'
+
 // ══ I18N ══
 const I18N={
   sk:{
-    subtitle:'Zaregistruj sa a sleduj svoje hry',
-    card_title:'Registrácia',
-    lbl_name:'Krstné meno alebo Nick',ph_name:'Maťo',err_name:'Zadaj meno alebo nick',
+    subtitle:'Digitálna registrácia — zmluva o výpožičke & BOZP',
+    card_title:'Registrácia hráča',
+    sect_personal:'Osobné údaje',
+    sect_legal:'Povinné súhlasy',
+    lbl_fullname:'Meno a Priezvisko',ph_fullname:'Ján Novák',err_fullname:'Zadaj meno a priezvisko',
     lbl_email:'Email',ph_email:'jan@email.com',err_email:'Zadaj platný email',
-    lbl_phone:'Telefón',ph_phone:'+421 9XX XXX XXX',opt:'— voliteľné',
-    consent_title:'Súhlasím so spracovaním kontaktných údajov',
-    consent_body:'(nick/meno, email) za účelom zasielania ponúk, štatistík z mojich hier a noviniek. Súhlas môžem kedykoľvek odvolať emailom.',
+    lbl_phone:'Telefón',ph_phone:'+421 9XX XXX XXX',err_phone:'Zadaj telefónne číslo',
+    lbl_nick:'Prezývka / Nick',ph_nick:'Vojak_SK',err_nick:'Zadaj prezývku',opt:'— nepovinné',
+    c1_title:'VOP a materiálna zodpovednosť',
+    c2_title:'Bezpečnostné pravidlá a prevádzkový poriadok',
+    c2_body:'Potvrdzujem, že som bol oboznámený s Bezpečnostnými pravidlami (BOZP) a Prevádzkovým poriadkom areálu a zaväzujem sa ich dodržiavať (najmä zákaz snímania masky v hernej zóne).',
+    c3_title:'Ochrana osobných údajov (GDPR)',
+    err_consents:'Prosím, potvrď všetky povinné súhlasy.',
     submit:'Zaregistrovať sa',submitting:'Registrujem...',
     b1_t:'Štatistiky',b1_d:'Koľko si vystrelil guličiek',
     b2_t:'Ponuky',b2_d:'Exkluzívne zľavy emailom',
     b3_t:'VIP status',b3_d:'Vracajúci hráči = bonus',
     b4_t:'Výsledky',b4_d:'Report z hry na email',
     success_title:'Registrácia úspešná!',
-    success_msg:'Ďakujeme za registráciu. Na ďalšej hre stačí povedať svoj nick alebo email a budeme ťa mať v systéme.',
-    player:'Hráč',new_reg:'Nová registrácia',
+    success_msg:'Ďakujeme! Na ďalšej hre stačí povedať svoj nick alebo email a budeme ťa mať v systéme.',
+    success_email:'📬 Na tvoj email sme odoslali potvrdenie registrácie.',
+    player:'Hráč',nick_lbl:'Nick',new_reg:'Nová registrácia',
     exists_title:'Už si registrovaný!',exists_msg:'Tento email je už v systéme. Na ďalšej hre stačí povedať svoj nick.',
+    lbl_dob:'Dátum narodenia',err_dob:'Zadaj dátum narodenia (min. vek 5 rokov)',err_dob_young:'Minimálny vek je 5 rokov',
+    minor_title:'⚠️ Registrácia maloletého hráča',
+    minor_body:'Hráč je mladší ako 18 rokov. Registráciu vykonáva zákonný zástupca (rodič/poručník) vo svojom mene. Zaškrtnutím súhlasov potvrdzujete, že ste zákonný zástupca tohto hráča a preberáte zaň plnú zodpovednosť.',
+    sect_optional:'Nepovinné súhlasy',opt_lbl:'— nepovinné',
+    c4_title:'Foto a video súhlas',c5_title:'Marketingové oznámenia',
+    c5_body:'Súhlasím so zasielaním noviniek, zliav a špeciálnych ponúk emailom. Odhlásenie je kedykoľvek možné kliknutím na odkaz v emaili.',
     toast_ok:'Registrácia úspešná!',toast_err:'Chyba pri registrácii. Skús znova.',
-    err_dup:'Tento email je už registrovaný'
+    err_dup:'Tento email je už registrovaný',
+    footer_vop:'VOP V5',footer_gdpr:'GDPR 2026'
   },
   en:{
-    subtitle:'Register and track your games',
-    card_title:'Registration',
-    lbl_name:'First name or Nickname',ph_name:'John',err_name:'Enter a name or nickname',
+    subtitle:'Digital registration — loan agreement & safety rules',
+    card_title:'Player Registration',
+    sect_personal:'Personal Details',
+    sect_legal:'Required Consents',
+    lbl_fullname:'Full Name',ph_fullname:'John Smith',err_fullname:'Enter your full name',
     lbl_email:'Email',ph_email:'john@email.com',err_email:'Enter a valid email',
-    lbl_phone:'Phone',ph_phone:'+421 9XX XXX XXX',opt:'— optional',
-    consent_title:'I agree to the processing of contact data',
-    consent_body:'(nickname, email) for sending offers, game statistics and news. I can withdraw consent at any time by email.',
+    lbl_phone:'Phone',ph_phone:'+421 9XX XXX XXX',err_phone:'Enter phone number',
+    lbl_nick:'Nickname',ph_nick:'Soldier_EN',err_nick:'Enter a nickname',opt:'— optional',
+    c1_title:'Terms & Conditions and liability',
+    c2_title:'Safety Rules and Operating Regulations',
+    c2_body:"I confirm that I have been informed about the Safety Rules (BOZP) and the Arena's Operating Regulations and commit to follow them (especially the prohibition of removing the mask in the game zone).",
+    c3_title:'Privacy Policy (GDPR)',
+    err_consents:'Please confirm all required consents.',
     submit:'Register',submitting:'Registering...',
     b1_t:'Statistics',b1_d:'How many balls you shot',
     b2_t:'Offers',b2_d:'Exclusive discounts by email',
     b3_t:'VIP status',b3_d:'Returning players = bonus',
     b4_t:'Results',b4_d:'Game report to your email',
     success_title:'Registration successful!',
-    success_msg:'Thank you! Next time just say your nickname or email and we\'ll have you in the system.',
-    player:'Player',new_reg:'New registration',
+    success_msg:"Thank you! Next time just say your nickname or email and we'll have you in the system.",
+    success_email:'📬 A confirmation has been sent to your email.',
+    player:'Player',nick_lbl:'Nick',new_reg:'New registration',
     exists_title:'Already registered!',exists_msg:'This email is already in the system. Just say your nickname next time.',
+    lbl_dob:'Date of Birth',err_dob:'Enter date of birth (min. age 5)',err_dob_young:'Minimum age is 5 years',
+    minor_title:'⚠️ Minor Player Registration',
+    minor_body:'This player is under 18. Registration is performed by the legal guardian (parent/guardian) in their own name. By checking the consents below you confirm you are the legal guardian of this player.',
+    sect_optional:'Optional Consents',opt_lbl:'— optional',
+    c4_title:'Photo & Video Consent',c5_title:'Marketing Communications',
+    c5_body:'I agree to receive news, discounts and special offers by email. Unsubscribe at any time via the link in the email.',
     toast_ok:'Registration successful!',toast_err:'Registration error. Try again.',
-    err_dup:'This email is already registered'
+    err_dup:'This email is already registered',
+    footer_vop:'GTC V5',footer_gdpr:'GDPR 2026'
   },
   de:{
-    subtitle:'Registriere dich und verfolge deine Spiele',
-    card_title:'Registrierung',
-    lbl_name:'Vorname oder Nickname',ph_name:'Max',err_name:'Gib einen Namen oder Nickname ein',
+    subtitle:'Digitale Registrierung — Leihvertrag & Sicherheitsregeln',
+    card_title:'Spieler-Registrierung',
+    sect_personal:'Persönliche Daten',
+    sect_legal:'Pflichteinwilligungen',
+    lbl_fullname:'Vor- und Nachname',ph_fullname:'Max Mustermann',err_fullname:'Gib Vor- und Nachnamen ein',
     lbl_email:'E-Mail',ph_email:'max@email.com',err_email:'Gib eine gültige E-Mail ein',
-    lbl_phone:'Telefon',ph_phone:'+49 XXX XXXXXXX',opt:'— optional',
-    consent_title:'Ich stimme der Verarbeitung von Kontaktdaten zu',
-    consent_body:'(Nickname, E-Mail) zum Versand von Angeboten, Spielstatistiken und Neuigkeiten. Einwilligung kann jederzeit per E-Mail widerrufen werden.',
+    lbl_phone:'Telefon',ph_phone:'+49 XXX XXXXXXX',err_phone:'Telefonnummer eingeben',
+    lbl_nick:'Spitzname / Nick',ph_nick:'Soldat_DE',err_nick:'Spitznamen eingeben',opt:'— optional',
+    c1_title:'AGB und Haftung',
+    c2_title:'Sicherheitsregeln und Betriebsordnung',
+    c2_body:'Ich bestätige, dass ich über die Sicherheitsregeln (BOZP) und die Betriebsordnung des Geländes informiert wurde und mich verpflichte, diese einzuhalten (insbesondere das Verbot, die Maske in der Spielzone abzunehmen).',
+    c3_title:'Datenschutz (DSGVO)',
+    err_consents:'Bitte alle erforderlichen Einwilligungen bestätigen.',
     submit:'Registrieren',submitting:'Registriere...',
     b1_t:'Statistiken',b1_d:'Wie viele Kugeln du geschossen hast',
     b2_t:'Angebote',b2_d:'Exklusive Rabatte per E-Mail',
     b3_t:'VIP-Status',b3_d:'Wiederkehrende Spieler = Bonus',
     b4_t:'Ergebnisse',b4_d:'Spielbericht per E-Mail',
     success_title:'Registrierung erfolgreich!',
-    success_msg:'Danke! Nächstes Mal sag einfach deinen Nickname oder E-Mail und wir haben dich im System.',
-    player:'Spieler',new_reg:'Neue Registrierung',
-    exists_title:'Bereits registriert!',exists_msg:'Diese E-Mail ist bereits im System. Sag beim nächsten Mal einfach deinen Nickname.',
-    toast_ok:'Registrierung erfolgreich!',toast_err:'Fehler bei der Registrierung. Versuche es erneut.',
-    err_dup:'Diese E-Mail ist bereits registriert'
+    success_msg:'Danke! Nächstes Mal sag einfach deinen Nickname oder E-Mail.',
+    success_email:'📬 Eine Bestätigung wurde an deine E-Mail gesendet.',
+    player:'Spieler',nick_lbl:'Nick',new_reg:'Neue Registrierung',
+    exists_title:'Bereits registriert!',exists_msg:'Diese E-Mail ist bereits im System. Sag beim nächsten Mal deinen Nickname.',
+    lbl_dob:'Geburtsdatum',err_dob:'Geburtsdatum eingeben (Mindestalter 5 Jahre)',err_dob_young:'Mindestalter ist 5 Jahre',
+    minor_title:'⚠️ Registrierung eines minderjährigen Spielers',
+    minor_body:'Der Spieler ist unter 18 Jahre. Die Registrierung erfolgt durch den gesetzlichen Vertreter (Elternteil/Vormund) in eigenem Namen. Durch das Ankreuzen bestätigen Sie, der gesetzliche Vertreter dieses Spielers zu sein.',
+    sect_optional:'Optionale Einwilligungen',opt_lbl:'— optional',
+    c4_title:'Foto- und Videoeinwilligung',c5_title:'Marketing-Mitteilungen',
+    c5_body:'Ich stimme dem Empfang von Neuigkeiten, Rabatten und Angeboten per E-Mail zu. Abmeldung jederzeit über den Link in der E-Mail.',
+    toast_ok:'Registrierung erfolgreich!',toast_err:'Fehler. Erneut versuchen.',
+    err_dup:'Diese E-Mail ist bereits registriert',
+    footer_vop:'AGB V5',footer_gdpr:'DSGVO 2026'
+  },
+  cs:{
+    subtitle:'Digitální registrace — smlouva o výpůjčce & BOZP',
+    card_title:'Registrace hráče',
+    sect_personal:'Osobní údaje',
+    sect_legal:'Povinné souhlasy',
+    lbl_fullname:'Jméno a Příjmení',ph_fullname:'Jan Novák',err_fullname:'Zadej jméno a příjmení',
+    lbl_email:'Email',ph_email:'jan@email.com',err_email:'Zadej platný email',
+    lbl_phone:'Telefon',ph_phone:'+420 XXX XXX XXX',err_phone:'Zadej telefonní číslo',
+    lbl_nick:'Přezdívka / Nick',ph_nick:'Vojak_CZ',err_nick:'Zadej přezdívku',opt:'— nepovinné',
+    c1_title:'VOP a materiální odpovědnost',
+    c2_title:'Bezpečnostní pravidla a provozní řád',
+    c2_body:'Potvrzuji, že jsem byl seznámen s Bezpečnostními pravidly (BOZP) a Provozním řádem areálu a zavazuji se je dodržovat (zejména zákaz sundávání masky v herní zóně).',
+    c3_title:'Ochrana osobních údajů (GDPR)',
+    err_consents:'Prosím, potvrď všechny povinné souhlasy.',
+    submit:'Registrovat se',submitting:'Registruji...',
+    b1_t:'Statistiky',b1_d:'Kolik jsi vystřelil kuliček',
+    b2_t:'Nabídky',b2_d:'Exkluzivní slevy emailem',
+    b3_t:'VIP status',b3_d:'Vracející se hráči = bonus',
+    b4_t:'Výsledky',b4_d:'Report ze hry na email',
+    success_title:'Registrace úspěšná!',
+    success_msg:'Děkujeme! Na příštím zápase stačí říct svůj nick nebo email.',
+    success_email:'📬 Na tvůj email jsme odeslali potvrzení registrace.',
+    player:'Hráč',nick_lbl:'Nick',new_reg:'Nová registrace',
+    exists_title:'Již registrován!',exists_msg:'Tento email je již v systému. Příště stačí říct svůj nick.',
+    lbl_dob:'Datum narození',err_dob:'Zadej datum narození (min. věk 5 let)',err_dob_young:'Minimální věk je 5 let',
+    minor_title:'⚠️ Registrace nezletilého hráče',
+    minor_body:'Hráč je mladší 18 let. Registraci provádí zákonný zástupce (rodič/opatrovník) svým jménem. Zaškrtnutím souhlasů potvrzujete, že jste zákonný zástupce tohoto hráče.',
+    sect_optional:'Nepovinné souhlasy',opt_lbl:'— nepovinné',
+    c4_title:'Souhlas s foto a videem',c5_title:'Marketingová sdělení',
+    c5_body:'Souhlasím se zasíláním novinek, slev a nabídek emailem. Odhlášení kdykoli možné kliknutím na odkaz v emailu.',
+    toast_ok:'Registrace úspěšná!',toast_err:'Chyba při registraci. Zkus znovu.',
+    err_dup:'Tento email je již registrován',
+    footer_vop:'VOP V5',footer_gdpr:'GDPR 2026'
   },
   tr:{
-    subtitle:'Kayıt ol ve oyunlarını takip et',
-    card_title:'Kayıt',
-    lbl_name:'Ad veya Takma ad',ph_name:'Mehmet',err_name:'Ad veya takma ad girin',
-    lbl_email:'E-posta',ph_email:'mehmet@email.com',err_email:'Geçerli bir e-posta girin',
-    lbl_phone:'Telefon',ph_phone:'+90 XXX XXX XXXX',opt:'— isteğe bağlı',
-    consent_title:'Kişisel verilerin işlenmesini kabul ediyorum',
-    consent_body:'(takma ad, e-posta) teklif, oyun istatistikleri ve haber göndermek amacıyla. Onay her zaman e-posta ile geri alınabilir.',
+    subtitle:'Dijital kayıt — ödünç sözleşmesi & güvenlik kuralları',
+    card_title:'Oyuncu Kaydı',
+    sect_personal:'Kişisel Bilgiler',
+    sect_legal:'Zorunlu Onaylar',
+    lbl_fullname:'Ad ve Soyad',ph_fullname:'Ahmet Yılmaz',err_fullname:'Ad ve soyadınızı girin',
+    lbl_email:'E-posta',ph_email:'ahmet@email.com',err_email:'Geçerli bir e-posta girin',
+    lbl_phone:'Telefon',ph_phone:'+90 XXX XXX XXXX',err_phone:'Telefon numarası girin',
+    lbl_nick:'Takma ad / Nick',ph_nick:'Asker_TR',err_nick:'Takma ad girin',opt:'— isteğe bağlı',
+    c1_title:'Kullanım Şartları ve Sorumluluk',
+    c2_title:'Güvenlik Kuralları ve İşletme Yönetmeliği',
+    c2_body:"Güvenlik Kuralları (BOZP) ve Tesisin İşletme Yönetmeliği hakkında bilgilendirildiğimi onaylıyor ve bunlara uymayı (özellikle oyun alanında maske çıkarma yasağı) taahhüt ediyorum.",
+    c3_title:'Gizlilik Politikası (GDPR)',
+    err_consents:'Lütfen tüm gerekli onayları verin.',
     submit:'Kayıt ol',submitting:'Kaydediliyor...',
     b1_t:'İstatistikler',b1_d:'Kaç mermi attığını gör',
     b2_t:'Teklifler',b2_d:'E-posta ile özel indirimler',
@@ -264,64 +486,100 @@ const I18N={
     b4_t:'Sonuçlar',b4_d:'Oyun raporu e-postanıza',
     success_title:'Kayıt başarılı!',
     success_msg:'Teşekkürler! Bir dahaki sefere sadece takma adınızı veya e-postanızı söyleyin.',
-    player:'Oyuncu',new_reg:'Yeni kayıt',
+    success_email:'📬 E-postanıza bir onay gönderildi.',
+    player:'Oyuncu',nick_lbl:'Nick',new_reg:'Yeni kayıt',
     exists_title:'Zaten kayıtlısınız!',exists_msg:'Bu e-posta zaten sistemde. Bir dahaki sefere takma adınızı söyleyin.',
+    lbl_dob:'Doğum Tarihi',err_dob:'Doğum tarihi girin (min. yaş 5)',err_dob_young:"Minimum yaş 5'tir",
+    minor_title:'⚠️ Küçük Oyuncu Kaydı',
+    minor_body:'Oyuncu 18 yaşın altında. Kayıt, yasal vasi (ebeveyn/veli) tarafından kendi adına yapılır. Onayları işaretleyerek bu oyuncunun yasal vasisi olduğunuzu onaylıyorsunuz.',
+    sect_optional:'İsteğe Bağlı Onaylar',opt_lbl:'— isteğe bağlı',
+    c4_title:'Fotoğraf ve Video İzni',c5_title:'Pazarlama İletişimi',
+    c5_body:"E-posta ile haber, indirim ve teklifler almayı kabul ediyorum. E-postadaki bağlantıyla istediğim zaman abonelikten çıkabilirim.",
     toast_ok:'Kayıt başarılı!',toast_err:'Kayıt hatası. Tekrar deneyin.',
-    err_dup:'Bu e-posta zaten kayıtlı'
+    err_dup:'Bu e-posta zaten kayıtlı',
+    footer_vop:'GTC V5',footer_gdpr:'GDPR 2026'
   },
   fr:{
-    subtitle:'Inscris-toi et suis tes parties',
-    card_title:'Inscription',
-    lbl_name:'Prénom ou Pseudo',ph_name:'Pierre',err_name:'Entrez un nom ou pseudo',
-    lbl_email:'E-mail',ph_email:'pierre@email.com',err_email:'Entrez un e-mail valide',
-    lbl_phone:'Téléphone',ph_phone:'+33 X XX XX XX XX',opt:'— facultatif',
-    consent_title:'J\'accepte le traitement des données de contact',
-    consent_body:'(pseudo, e-mail) pour l\'envoi d\'offres, de statistiques de jeu et de nouvelles. Le consentement peut être retiré à tout moment par e-mail.',
-    submit:'S\'inscrire',submitting:'Inscription...',
+    subtitle:'Inscription digitale — contrat de prêt & règles de sécurité',
+    card_title:"Inscription du joueur",
+    sect_personal:'Informations personnelles',
+    sect_legal:'Consentements obligatoires',
+    lbl_fullname:'Nom et Prénom',ph_fullname:'Jean Dupont',err_fullname:'Entrez votre nom et prénom',
+    lbl_email:'E-mail',ph_email:'jean@email.com',err_email:"Entrez un e-mail valide",
+    lbl_phone:'Téléphone',ph_phone:'+33 X XX XX XX XX',err_phone:'Entrez un numéro de téléphone',
+    lbl_nick:'Surnom / Pseudo',ph_nick:'Soldat_FR',err_nick:'Entrez un surnom',opt:'— facultatif',
+    c1_title:'CGV et responsabilité matérielle',
+    c2_title:'Règles de sécurité et règlement intérieur',
+    c2_body:"Je confirme avoir été informé des Règles de Sécurité (BOZP) et du Règlement Intérieur du terrain et m'engage à les respecter (notamment l'interdiction d'enlever le masque dans la zone de jeu).",
+    c3_title:'Protection des données (RGPD)',
+    err_consents:'Veuillez confirmer tous les consentements requis.',
+    submit:"S'inscrire",submitting:'Inscription...',
     b1_t:'Statistiques',b1_d:'Combien de billes tu as tirées',
     b2_t:'Offres',b2_d:'Réductions exclusives par e-mail',
     b3_t:'Statut VIP',b3_d:'Joueurs réguliers = bonus',
     b4_t:'Résultats',b4_d:'Rapport de partie par e-mail',
     success_title:'Inscription réussie !',
-    success_msg:'Merci ! La prochaine fois, dis juste ton pseudo ou e-mail et on t\'aura dans le système.',
-    player:'Joueur',new_reg:'Nouvelle inscription',
+    success_msg:"Merci ! La prochaine fois, dis juste ton pseudo ou e-mail et on t'aura dans le système.",
+    success_email:'📬 Une confirmation a été envoyée à votre e-mail.',
+    player:'Joueur',nick_lbl:'Pseudo',new_reg:'Nouvelle inscription',
     exists_title:'Déjà inscrit !',exists_msg:'Cet e-mail est déjà dans le système. Dis juste ton pseudo la prochaine fois.',
-    toast_ok:'Inscription réussie !',toast_err:'Erreur d\'inscription. Réessaye.',
-    err_dup:'Cet e-mail est déjà inscrit'
+    lbl_dob:'Date de naissance',err_dob:'Entrez la date de naissance (âge min. 5 ans)',err_dob_young:"L'âge minimum est de 5 ans",
+    minor_title:"⚠️ Inscription d'un joueur mineur",
+    minor_body:"Le joueur a moins de 18 ans. L'inscription est effectuée par le représentant légal (parent/tuteur) en son propre nom. En cochant les consentements vous confirmez être le représentant légal de ce joueur.",
+    sect_optional:'Consentements facultatifs',opt_lbl:'— facultatif',
+    c4_title:'Consentement photo et vidéo',c5_title:'Communications marketing',
+    c5_body:"J'accepte de recevoir des actualités, remises et offres par e-mail. Désabonnement possible à tout moment via le lien dans l'e-mail.",
+    toast_ok:'Inscription réussie !',toast_err:"Erreur d'inscription. Réessaye.",
+    err_dup:'Cet e-mail est déjà inscrit',
+    footer_vop:'CGV V5',footer_gdpr:'RGPD 2026'
   }
 };
 
 let curLang='sk';
+
 function setLang(lang){
   curLang=lang;
   const t=I18N[lang]||I18N.sk;
-  // Update text content
+  // Update text nodes
   document.querySelectorAll('[data-i]').forEach(el=>{
     const key=el.getAttribute('data-i');
-    if(t[key])el.textContent=t[key];
+    if(t[key]!==undefined)el.textContent=t[key];
   });
   // Update placeholders
   document.querySelectorAll('[data-ph]').forEach(el=>{
     const key=el.getAttribute('data-ph');
     if(t[key])el.placeholder=t[key];
   });
-  // Update flag buttons
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('act'));
-  const flags={sk:'🇸🇰',en:'🇬🇧',de:'🇩🇪',tr:'🇹🇷',fr:'🇫🇷'};
-  document.querySelectorAll('.lang-btn').forEach(b=>{if(b.textContent.trim()===flags[lang])b.classList.add('act');});
-  // Store preference
+  // Update lang-specific consent bodies (spans with links or multi-lang spans)
+  const langs=['sk','en','de','cs','tr','fr'];
+  langs.forEach(l=>{
+    const c1=document.getElementById('c1-body-'+l);
+    const c3=document.getElementById('c3-body-'+l);
+    const c4=document.getElementById('c4-body-'+l);
+    if(c1)c1.style.display=(l===lang)?'':'none';
+    if(c3)c3.style.display=(l===lang)?'':'none';
+    if(c4)c4.style.display=(l===lang)?'':'none';
+  });
+  // Update lang buttons
+  const flags={sk:'🇸🇰',en:'🇬🇧',de:'🇩🇪',cs:'🇨🇿',tr:'🇹🇷',fr:'🇫🇷'};
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('act', b.textContent.trim()===flags[lang]);
+  });
+  document.documentElement.lang=lang;
   try{localStorage.setItem('pb_reg_lang',lang);}catch(e){}
 }
 
 // ══ SUPABASE CONFIG ══
-let sbUrl='',sbKey='';
+// Public (anon) key — pre ukladanie registrácií zákazníkov
+const SB_PUB_URL='https://zpwzkmipexviyjikhxdc.supabase.co';
+const SB_PUB_KEY='sb_publishable_TuLz5ETI9MpzE9YZz-vhsA_JLr9Sxqi';
 
+// Legacy cashier Supabase (voliteľný — pre pb_data tabuľku)
+let sbUrl='',sbKey='';
 (function(){
   const params=new URLSearchParams(window.location.search);
   const s=params.get('s'),k=params.get('k');
-  if(s&&k){
-    try{sbUrl=atob(s);sbKey=atob(k);}catch(e){}
-  }
+  if(s&&k){try{sbUrl=atob(s);sbKey=atob(k);}catch(e){}}
   if(!sbUrl){try{sbUrl=localStorage.getItem('pb_sbu')||'';}catch(e){}}
   if(!sbKey){try{sbKey=localStorage.getItem('pb_sbk')||'';}catch(e){}}
   if(sbUrl)try{localStorage.setItem('pb_reg_sbu',sbUrl);}catch(e){}
@@ -329,6 +587,22 @@ let sbUrl='',sbKey='';
   if(!sbUrl)try{sbUrl=localStorage.getItem('pb_reg_sbu')||'';}catch(e){}
   if(!sbKey)try{sbKey=localStorage.getItem('pb_reg_sbk')||'';}catch(e){}
 })();
+
+// ── Supabase REST helper (public key) ──────────────────────────────────
+async function sbPubFetch(path,opts={}){
+  const res=await fetch(SB_PUB_URL+'/rest/v1'+path,{
+    ...opts,
+    headers:{'apikey':SB_PUB_KEY,'Authorization':'Bearer '+SB_PUB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||res.statusText);}
+  return res.json().catch(()=>null);
+}
+async function sbPubRpc(fn,params){
+  return sbPubFetch('/rpc/'+fn,{method:'POST',body:JSON.stringify(params)});
+}
+
+// ── URL param: return URL po registrácii (z event-signup stránky) ──────
+const _returnUrl=(()=>{try{const p=new URLSearchParams(window.location.search);const r=p.get('return');return r?decodeURIComponent(r):null;}catch(e){return null;}})();
 
 // ══ UTILITIES ══
 function $(id){return document.getElementById(id);}
@@ -342,31 +616,67 @@ function toast(msg,err){
   tT=setTimeout(()=>t.classList.remove('on'),3500);
 }
 function isValidEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
-function T(key){return (I18N[curLang]||I18N.sk)[key]||key;}
+function T(key){return (I18N[curLang]||I18N.sk)[key]||'';}
 
-// ══ FORM VALIDATION ══
-const nameEl=$('r-name'),emailEl=$('r-email'),consentEl=$('r-consent'),submitBtn=$('submit-btn');
+// ══ FORM ELEMENTS ══
+const fullnameEl=$('r-fullname'),emailEl=$('r-email'),phoneEl=$('r-phone');
+const nickEl=$('r-nick'),dobEl=$('r-dob');
+const vopEl=$('r-vop'),bozpEl=$('r-bozp'),gdprEl=$('r-gdpr');
+const photoEl=$('r-photo'),mktEl=$('r-mkt');
+const submitBtn=$('submit-btn');
 
+// ══ AGE HELPER ══
+function getAge(dob){
+  const today=new Date(),birth=new Date(dob);
+  let age=today.getFullYear()-birth.getFullYear();
+  const m=today.getMonth()-birth.getMonth();
+  if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;
+  return age;
+}
+
+// ══ VALIDATION ══
 function validate(){
-  const name=nameEl.value.trim();
+  const nick=nickEl.value.trim();
   const email=emailEl.value.trim();
-  const consent=consentEl.checked;
+  const dob=dobEl.value;
+  const allLegal=vopEl.checked&&bozpEl.checked&&gdprEl.checked;
 
   let valid=true;
-  if(name.length<2){$('f-name').classList.add('err');valid=false;}
-  else{$('f-name').classList.remove('err');}
+
+  if(nick.length<1){$('f-nick').classList.add('err');valid=false;}
+  else{$('f-nick').classList.remove('err');}
+
   if(!isValidEmail(email)){$('f-email').classList.add('err');valid=false;}
   else if(!$('f-email').classList.contains('dup')){$('f-email').classList.remove('err');}
   else{valid=false;}
 
-  submitBtn.disabled=!valid||!consent;
-  return valid&&consent;
+  // DOB optional — validate only if filled in
+  if(dob){
+    const age=getAge(dob);
+    if(age>=5&&age<=120){
+      $('f-dob').classList.remove('err');
+      $('minor-notice').style.display=age<18?'block':'none';
+    }else{
+      $('f-dob').classList.add('err');
+      valid=false;
+    }
+  }else{
+    $('f-dob').classList.remove('err');
+    $('minor-notice').style.display='none';
+  }
+
+  submitBtn.disabled=!valid||!allLegal;
+  return valid&&allLegal;
 }
 
-nameEl.addEventListener('input',validate);
-emailEl.addEventListener('input',validate);
-consentEl.addEventListener('change',validate);
+nickEl.addEventListener('input',validate);
+emailEl.addEventListener('input',()=>{$('f-email').classList.remove('dup');validate();});
+dobEl.addEventListener('change',validate);
+vopEl.addEventListener('change',()=>{validate();$('err-consents').classList.remove('show');});
+bozpEl.addEventListener('change',()=>{validate();$('err-consents').classList.remove('show');});
+gdprEl.addEventListener('change',()=>{validate();$('err-consents').classList.remove('show');});
 
+// Duplicate email check on blur
 emailEl.addEventListener('blur',async function(){
   const email=emailEl.value.trim();
   if(isValidEmail(email)){
@@ -381,15 +691,12 @@ emailEl.addEventListener('blur',async function(){
     }
   }
 });
-emailEl.addEventListener('input',function(){
-  $('f-email').classList.remove('dup');
-});
 
 // ══ CHECK EXISTING ══
 async function checkExisting(email){
   try{
     const local=JSON.parse(localStorage.getItem('pb_customers')||'[]');
-    if(local.find(c=>c.email.toLowerCase()===email.toLowerCase()))return true;
+    if(local.find(c=>(c.email||'').toLowerCase()===email.toLowerCase()))return true;
   }catch(e){}
   if(sbUrl&&sbKey){
     try{
@@ -398,48 +705,92 @@ async function checkExisting(email){
       });
       if(r.ok){
         const rows=await r.json();
-        return rows.some(row=>row.payload&&row.payload.email&&row.payload.email.toLowerCase()===email.toLowerCase());
+        return rows.some(row=>row.payload&&(row.payload.email||'').toLowerCase()===email.toLowerCase());
       }
     }catch(e){console.error('[Check]',e);}
   }
   return false;
 }
 
+// ══ EMAIL CONFIRMATION via EmailJS ══
+async function sendConfirmationEmail(customer){
+  if(!EMAILJS_PUBLIC_KEY||!EMAILJS_SERVICE_ID||!EMAILJS_TEMPLATE_ID)return false;
+  try{
+    if(!window.emailjs){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+        s.onload=res;s.onerror=rej;
+        document.head.appendChild(s);
+      });
+      window.emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
+    }
+    await window.emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      to_email: customer.email,
+      to_name:  customer.nick||customer.fullname,
+      nick:     customer.nick,
+      reg_date: new Date().toLocaleDateString(curLang==='sk'?'sk-SK':curLang,{day:'2-digit',month:'2-digit',year:'numeric'})
+    });
+    return true;
+  }catch(e){
+    console.warn('[EmailJS]',e);
+    return false;
+  }
+}
+
 // ══ SUBMIT ══
 async function submitReg(){
+  // Show consent error if checkboxes missing
+  if(!vopEl.checked||!bozpEl.checked||!gdprEl.checked){
+    $('err-consents').classList.add('show');
+    [$('c-vop-label'),$('c-bozp-label'),$('c-gdpr-label')].forEach((el,i)=>{
+      const boxes=[vopEl,bozpEl,gdprEl];
+      el.classList.toggle('required-err',!boxes[i].checked);
+    });
+    return;
+  }
   if(!validate())return;
 
-  const name=nameEl.value.trim();
+  const fullname=fullnameEl.value.trim();
   const email=emailEl.value.trim().toLowerCase();
-  const phone=$('r-phone').value.trim();
-  const consent=consentEl.checked;
+  const phone=phoneEl.value.trim();
+  const nick=nickEl.value.trim();
+  const dob=dobEl.value;
+  const isMinor=dob?getAge(dob)<18:false;
 
   submitBtn.disabled=true;
   submitBtn.innerHTML='<span class="spinner"></span>'+T('submitting');
 
-  // ✅ Block duplicate registration
+  // Duplicate guard
   const dup=await checkExisting(email);
   if(dup){
     $('email-err').textContent=T('err_dup');
-    $('f-email').classList.add('err');
+    $('f-email').classList.add('err','dup');
     submitBtn.disabled=false;
     submitBtn.innerHTML=T('submit');
     toast(T('err_dup'),true);
     return;
   }
 
+  const now=new Date().toISOString();
   const customer={
     id:'cust_'+Date.now(),
-    name:name,
-    email:email,
-    phone:phone,
-    registeredAt:new Date().toISOString(),
-    consent:consent,
-    lang:curLang
+    name: nick||fullname,   // shown in cashier as player name
+    fullname,
+    nick,
+    email,
+    phone,
+    dob,
+    isMinor,
+    registeredAt: now,
+    consentedAt: now,
+    consents:{vop:true,bozp:true,gdpr:true,photo:photoEl.checked,marketing:mktEl.checked},
+    lang: curLang
   };
 
   let saved=false;
 
+  // Save to Supabase
   if(sbUrl&&sbKey){
     try{
       const r=await fetch(`${sbUrl}/rest/v1/pb_data`,{
@@ -454,8 +805,8 @@ async function submitReg(){
           id:customer.id,
           payload:customer,
           backup_type:'customer',
-          backup_label:'Registrácia: '+name,
-          updated_at:new Date().toISOString()
+          backup_label:'Registrácia: '+fullname,
+          updated_at:now
         })
       });
       if(r.ok||r.status===201){saved=true;}
@@ -463,20 +814,45 @@ async function submitReg(){
     }catch(e){console.error('[Supabase]',e);}
   }
 
+  // Save to localStorage as fallback
   try{
     const local=JSON.parse(localStorage.getItem('pb_customers')||'[]');
-    const existing=local.findIndex(c=>c.email.toLowerCase()===email);
-    if(existing>=0){local[existing]={...local[existing],...customer};}
-    else{local.push(customer);}
+    const idx=local.findIndex(c=>(c.email||'').toLowerCase()===email);
+    if(idx>=0){local[idx]={...local[idx],...customer};}else{local.push(customer);}
     localStorage.setItem('pb_customers',JSON.stringify(local));
     saved=true;
   }catch(e){console.error('[LocalStorage]',e);}
 
+  // ── Uložiť do pb_customers (nová Supabase tabuľka pre zákazníkov) ──
+  const pbConsents={vop:true,bozp:true,gdpr:true,photo:photoEl.checked,marketing:mktEl.checked,consentedAt:now};
+  try{
+    await sbPubRpc('reactivate_or_create_customer',{
+      p_fullname:fullname,p_nick:nick||fullname.split(' ')[0],p_email:email,
+      p_phone:phone,p_lang:curLang,p_consents:pbConsents
+    });
+    saved=true;
+  }catch(e){console.warn('[pb_customers]',e);}
+
   if(saved){
+    // Send email confirmation (non-blocking)
+    const emailSent=await sendConfirmationEmail(customer);
+
+    // Show success screen
     $('reg-form').style.display='none';
     $('reg-success').style.display='block';
-    $('s-name').textContent=name;
+    $('s-name').textContent=fullname;
+    $('s-nick').textContent=nick||'—';
     $('s-email').textContent=email;
+    if(emailSent){$('email-note').style.display='block';}
+
+    // Ak prišiel z event-signup stránky, ponúkni návrat
+    if(_returnUrl){
+      const returnBtn=document.createElement('a');
+      returnBtn.href=_returnUrl;
+      returnBtn.style.cssText='display:block;margin-top:14px;padding:12px;background:var(--bbg);border:1px solid var(--bbd);border-radius:var(--rs);color:var(--blu);font-weight:700;font-size:14px;text-align:center;text-decoration:none;';
+      returnBtn.textContent='← Späť na prihlásenie k akcii';
+      $('reg-success').appendChild(returnBtn);
+    }
     toast(T('toast_ok'));
   }else{
     submitBtn.disabled=false;
@@ -485,7 +861,25 @@ async function submitReg(){
   }
 }
 
-// ══ KEYBOARD SUPPORT ══
+// ══ RESET ══
+function resetForm(){
+  fullnameEl.value='';emailEl.value='';phoneEl.value='';nickEl.value='';dobEl.value='';
+  vopEl.checked=false;bozpEl.checked=false;gdprEl.checked=false;
+  photoEl.checked=false;mktEl.checked=false;
+  ['f-nick','f-email','f-dob'].forEach(id=>$(id)&&$(id).classList.remove('err','dup'));
+  [$('c-vop-label'),$('c-bozp-label'),$('c-gdpr-label')].forEach(el=>el&&el.classList.remove('required-err'));
+  $('err-consents').classList.remove('show');
+  $('minor-notice').style.display='none';
+  $('email-note').style.display='none';
+  submitBtn.disabled=true;
+  submitBtn.innerHTML=T('submit');
+  $('reg-success').style.display='none';
+  $('reg-exists').style.display='none';
+  $('reg-form').style.display='block';
+  setTimeout(()=>fullnameEl.focus(),100);
+}
+
+// ══ KEYBOARD ══
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&!submitBtn.disabled)submitReg();
 });
@@ -493,13 +887,15 @@ document.addEventListener('keydown',function(e){
 // ══ INIT ══
 (function(){
   if(!sbUrl)console.warn('[ProPaintball] Supabase nie je nakonfigurovaný.');
-  // Restore language preference
+  // Prevent future dates in DOB field
+  dobEl.max=new Date().toISOString().split('T')[0];
+  // Restore language
   try{const saved=localStorage.getItem('pb_reg_lang');if(saved&&I18N[saved])setLang(saved);}catch(e){}
-  // Check URL lang param
   const params=new URLSearchParams(window.location.search);
   const urlLang=params.get('lang');
   if(urlLang&&I18N[urlLang])setLang(urlLang);
-  setTimeout(()=>nameEl.focus(),300);
+  else{setLang(curLang);}  // ensure consent body spans are in sync
+  setTimeout(()=>fullnameEl.focus(),300);
 })();
 </script>
 </body>

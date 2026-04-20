@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ProPaintball — Prihlásenie na akciu</title>
+<meta name="description" content="Prihláste sa na paintball akciu v ProPaintball Bratislava. Rýchle prihlásenie cez nick alebo email.">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0e1a;--bg2:#111627;--bg3:#181f30;--card:#131929;
+  --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --t1:#eef0f8;--t2:#7c82a0;--t3:#464d66;
+  --red:#e63946;--rbg:rgba(230,57,70,.11);--rbd:rgba(230,57,70,.28);
+  --grn:#22c55e;--gbg:rgba(34,197,94,.10);--gbd:rgba(34,197,94,.28);
+  --blu:#3b82f6;--bbg:rgba(59,130,246,.10);--bbd:rgba(59,130,246,.28);
+  --amb:#f59e0b;--abg:rgba(245,158,11,.10);--abd:rgba(245,158,11,.28);
+  --rs:10px;--r:14px;
+}
+body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px;}
+.container{width:100%;max-width:460px;padding-bottom:40px;}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:24px;position:relative;}
+.logo-icon{font-size:52px;display:block;margin-bottom:8px;}
+.logo h1{font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.02em;}
+.logo p{font-size:12px;color:var(--t3);margin-top:4px;}
+.lang-bar{position:absolute;top:0;right:0;display:flex;gap:4px;}
+.lang-btn{background:none;border:1px solid var(--b1);border-radius:6px;padding:3px 6px;font-size:16px;cursor:pointer;opacity:.5;transition:all .2s;line-height:1;}
+.lang-btn:hover{opacity:.8;border-color:var(--b2);}
+.lang-btn.act{opacity:1;border-color:var(--blu);background:var(--bbg);}
+
+/* Event card */
+.event-card{background:var(--bbg);border:1px solid var(--bbd);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.event-card-icon{font-size:28px;flex-shrink:0;}
+.event-card-info{}
+.event-card-arena{font-size:13px;font-weight:700;color:var(--blu);margin-bottom:2px;}
+.event-card-detail{font-size:12px;color:var(--t2);}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:16px;}
+.card-title{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:20px;}
+
+/* Field */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.field input{width:100%;padding:14px 16px;border:1px solid var(--b2);border-radius:var(--rs);background:var(--bg2);color:var(--t1);font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.field input:focus{border-color:var(--blu);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.field input::placeholder{color:var(--t3);}
+.field.err input{border-color:var(--red);}
+.err-hint{font-size:11px;color:var(--red);margin-top:5px;display:none;}
+.field.err .err-hint{display:block;}
+
+/* Honeypot — visually hidden but accessible */
+.hp-field{position:absolute;left:-9999px;opacity:0;pointer-events:none;tab-index:-1;aria-hidden:true;}
+
+/* Buttons */
+.btn{width:100%;padding:15px;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.02em;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary{background:var(--blu);color:#fff;}
+.btn-primary:hover:not(:disabled){background:#2563eb;transform:translateY(-1px);}
+.btn-primary:active:not(:disabled){transform:translateY(0);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-success{background:var(--grn);color:#fff;}
+.btn-success:hover:not(:disabled){background:#16a34a;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--t2);border:1px solid var(--b2);}
+.btn-outline:hover{border-color:var(--b2);color:var(--t1);}
+.btn-gap{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+
+/* Register link */
+.reg-link{text-align:center;margin-top:14px;font-size:13px;color:var(--t2);}
+.reg-link a{color:var(--blu);text-decoration:none;font-weight:600;}
+.reg-link a:hover{text-decoration:underline;}
+
+/* Confirm card */
+.confirm-player{display:flex;align-items:center;gap:14px;padding:16px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rs);margin-bottom:20px;}
+.player-avatar{width:48px;height:48px;background:var(--bbg);border:1px solid var(--bbd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.player-info{}
+.player-nick{font-size:17px;font-weight:800;color:var(--t1);}
+.player-fullname{font-size:13px;color:var(--t2);margin-top:2px;}
+
+/* Pick list */
+.pick-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.pick-item{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rs);cursor:pointer;transition:all .2s;}
+.pick-item:hover{border-color:var(--bbd);background:var(--bbg);}
+.pick-item-nick{font-size:15px;font-weight:700;color:var(--t1);}
+.pick-item-fullname{font-size:12px;color:var(--t2);margin-top:1px;}
+.pick-item-icon{font-size:20px;flex-shrink:0;}
+
+/* Not found */
+.not-found{text-align:center;padding:20px 0;}
+.not-found .nf-icon{font-size:48px;margin-bottom:12px;}
+.not-found p{font-size:14px;color:var(--t2);margin-bottom:20px;}
+
+/* Success / Already screens */
+.result-screen{text-align:center;padding:8px 0 4px;}
+.result-icon{font-size:64px;margin-bottom:12px;display:block;animation:popIn .5s ease;}
+.result-screen h2{font-size:22px;font-weight:800;margin-bottom:8px;}
+.result-screen p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:20px;}
+.result-screen h2.green{color:var(--grn);}
+.result-screen h2.amber{color:var(--amb);}
+
+/* Attendees */
+.attendees-label{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.attendees-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.attendee-chip{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg2);border:1px solid var(--b1);border-radius:99px;font-size:13px;font-weight:600;color:var(--t1);}
+.attendee-chip .chip-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);flex-shrink:0;}
+.attendee-chip.self{border-color:var(--bbd);background:var(--bbg);color:var(--blu);}
+
+/* Error screen (no-event) */
+.error-screen{text-align:center;padding:24px 0;}
+.error-screen .err-icon{font-size:56px;margin-bottom:16px;display:block;}
+.error-screen h2{font-size:20px;font-weight:800;color:var(--red);margin-bottom:8px;}
+.error-screen p{font-size:13px;color:var(--t2);line-height:1.7;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e2640;border:1px solid var(--b2);color:var(--t1);padding:11px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;white-space:nowrap;max-width:calc(100vw - 40px);text-align:center;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{border-color:var(--rbd);color:var(--red);background:var(--rbg);}
+.toast.ok{border-color:var(--gbd);color:var(--grn);background:var(--gbg);}
+
+/* Spinner */
+.spinner{display:inline-block;width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+.spinner.dark{border-color:rgba(59,130,246,.3);border-top-color:var(--blu);}
+
+/* Loading overlay */
+.loading-box{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px;color:var(--t2);font-size:14px;}
+
+/* Screens (hidden by default) */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* Footer */
+.footer{text-align:center;margin-top:24px;font-size:10px;color:var(--t3);line-height:2;}
+.footer a{color:var(--t3);text-decoration:none;}
+.footer a:hover{color:var(--t2);}
+
+/* Animations */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+@media(max-width:400px){
+  .card{padding:18px;}
+  .attendee-chip{font-size:12px;padding:6px 10px;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Logo -->
+  <div class="logo">
+    <span class="logo-icon">🎯</span>
+    <h1>ProPaintball</h1>
+    <p data-i="subtitle">Prihlásenie na akciu</p>
+    <div class="lang-bar">
+      <button class="lang-btn act" onclick="setLang('sk')" title="Slovensky">🇸🇰</button>
+      <button class="lang-btn" onclick="setLang('en')" title="English">🇬🇧</button>
+    </div>
+  </div>
+
+  <!-- Event card (shown when event params present) -->
+  <div class="event-card" id="event-card" style="display:none;">
+    <div class="event-card-icon">📅</div>
+    <div class="event-card-info">
+      <div class="event-card-arena" id="ec-arena"></div>
+      <div class="event-card-detail" id="ec-detail"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: no-event -->
+  <div class="screen active" id="screen-no-event">
+    <div class="card">
+      <div class="error-screen">
+        <span class="err-icon">🔗</span>
+        <h2 data-i="noev_title">Neplatný odkaz</h2>
+        <p data-i="noev_body">Tento odkaz neobsahuje platný identifikátor akcie. Odkaz na prihlásenie dostaneš od organizátora alebo v potvrdzovacom emaily.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: input -->
+  <div class="screen" id="screen-input">
+    <div class="card">
+      <div class="card-title" data-i="input_title">Prihlásiť sa na akciu</div>
+
+      <!-- Honeypot — bots fill this -->
+      <div class="hp-field" aria-hidden="true">
+        <input type="text" id="hp-name" name="name" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="field" id="f-identity">
+        <label data-i="lbl_identity">Nick alebo email</label>
+        <input type="text"
+               id="inp-identity"
+               data-ph-sk="jano123 alebo jan@email.com"
+               data-ph-en="jano123 or jan@email.com"
+               placeholder="jano123 alebo jan@email.com"
+               autocomplete="username"
+               autocorrect="off"
+               autocapitalize="none"
+               spellcheck="false"
+               maxlength="100"
+               inputmode="email">
+        <div class="err-hint" data-i="err_identity">Zadaj nick alebo emailovú adresu</div>
+      </div>
+
+      <div class="btn-gap">
+        <button class="btn btn-primary" id="btn-lookup" onclick="doLookup()">
+          <span data-i="btn_lookup">Prihlásiť sa →</span>
+        </button>
+      </div>
+    </div>
+    <div class="reg-link">
+      <span data-i="no_account">Nemáš konto?</span>
+      <a id="reg-link-a" href="#" data-i="go_register">Zaregistruj sa →</a>
+    </div>
+  </div>
+
+  <!-- SCREEN: confirm (single result) -->
+  <div class="screen" id="screen-confirm">
+    <div class="card">
+      <div class="card-title" data-i="confirm_title">Potvrdiť prihlásenie</div>
+      <div class="confirm-player" id="confirm-player">
+        <div class="player-avatar">👤</div>
+        <div class="player-info">
+          <div class="player-nick" id="confirm-nick"></div>
+          <div class="player-fullname" id="confirm-fullname"></div>
+        </div>
+      </div>
+      <div class="btn-gap">
+        <button class="btn btn-success" id="btn-confirm" onclick="doSignup()">
+          <span data-i="btn_confirm">✓ Áno, prihlásiť sa</span>
+        </button>
+        <button class="btn btn-outline" onclick="goBack()" data-i="btn_back">← Späť</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: pick (multiple results) -->
+  <div class="screen" id="screen-pick">
+    <div class="card">
+      <div class="card-title" data-i="pick_title">Vyber svoje konto</div>
+      <div class="pick-list" id="pick-list"></div>
+      <button class="btn btn-outline" onclick="goBack()" data-i="btn_back">← Späť</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: not-found -->
+  <div class="screen" id="screen-notfound">
+    <div class="card">
+      <div class="not-found">
+        <div class="nf-icon">🔍</div>
+        <p data-i="notfound_body">Konto s týmto nickom alebo emailom nebolo nájdené.</p>
+        <div class="btn-gap">
+          <a id="register-btn-a" href="#" class="btn btn-primary" style="text-decoration:none;" data-i="btn_register">Zaregistrovať sa</a>
+          <button class="btn btn-outline" onclick="goBack()" data-i="btn_back">← Späť</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: success -->
+  <div class="screen" id="screen-success">
+    <div class="card">
+      <div class="result-screen">
+        <span class="result-icon">✅</span>
+        <h2 class="green" data-i="success_title">Prihlásenie potvrdené!</h2>
+        <p data-i="success_body">Si na zozname. Tešíme sa na teba!</p>
+      </div>
+      <div class="attendees-label" id="success-attendees-label">Prihlásení hráči</div>
+      <div class="attendees-grid" id="success-attendees"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: already -->
+  <div class="screen" id="screen-already">
+    <div class="card">
+      <div class="result-screen">
+        <span class="result-icon">⚡</span>
+        <h2 class="amber" data-i="already_title">Už si prihlásený!</h2>
+        <p data-i="already_body">Toto konto je už na zozname tejto akcie.</p>
+      </div>
+      <div class="attendees-label" id="already-attendees-label">Prihlásení hráči</div>
+      <div class="attendees-grid" id="already-attendees"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    © <a href="https://propaintball.sk" target="_blank">TRESAERIS GROUP s.r.o.</a> · IČO: 50925989
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const SB_URL  = 'https://zpwzkmipexviyjikhxdc.supabase.co';
+const SB_KEY  = 'sb_publishable_TuLz5ETI9MpzE9YZz-vhsA_JLr9Sxqi';
+const REG_URL = 'https://propaintball.github.io/registration/';
+
+// ─── I18N ─────────────────────────────────────────────────────────────────────
+const T = {
+  sk: {
+    subtitle:          'Prihlásenie na akciu',
+    noev_title:        'Neplatný odkaz',
+    noev_body:         'Tento odkaz neobsahuje platný identifikátor akcie. Odkaz na prihlásenie dostaneš od organizátora alebo v potvrdzovacom emaily.',
+    input_title:       'Prihlásiť sa na akciu',
+    lbl_identity:      'Nick alebo email',
+    err_identity:      'Zadaj nick alebo emailovú adresu',
+    btn_lookup:        'Prihlásiť sa →',
+    no_account:        'Nemáš konto?',
+    go_register:       'Zaregistruj sa →',
+    confirm_title:     'Potvrdiť prihlásenie',
+    btn_confirm:       '✓ Áno, prihlásiť sa',
+    btn_back:          '← Späť',
+    pick_title:        'Vyber svoje konto',
+    notfound_body:     'Konto s týmto nickom alebo emailom nebolo nájdené.',
+    btn_register:      'Zaregistrovať sa',
+    success_title:     'Prihlásenie potvrdené!',
+    success_body:      'Si na zozname. Tešíme sa na teba!',
+    already_title:     'Už si prihlásený!',
+    already_body:      'Toto konto je už na zozname tejto akcie.',
+    attendees_count:   n => `Prihlásení hráči (${n}):`,
+    err_network:       'Chyba siete. Skontroluj internetové pripojenie.',
+    err_generic:       'Nastala chyba. Skúste to znovu.',
+    loading:           'Hľadáme…',
+    signing_up:        'Prihlasujeme…',
+    players:           n => `${n} hráčov`,
+  },
+  en: {
+    subtitle:          'Event Sign-up',
+    noev_title:        'Invalid link',
+    noev_body:         'This link does not contain a valid event identifier. Get the sign-up link from the organiser or from your confirmation email.',
+    input_title:       'Sign up for event',
+    lbl_identity:      'Nick or email',
+    err_identity:      'Enter your nick or email address',
+    btn_lookup:        'Sign up →',
+    no_account:        "Don't have an account?",
+    go_register:       'Register →',
+    confirm_title:     'Confirm sign-up',
+    btn_confirm:       '✓ Yes, sign me up',
+    btn_back:          '← Back',
+    pick_title:        'Select your account',
+    notfound_body:     'No account found with this nick or email.',
+    btn_register:      'Register now',
+    success_title:     'Sign-up confirmed!',
+    success_body:      "You're on the list. See you there!",
+    already_title:     "You're already signed up!",
+    already_body:      'This account is already on the list for this event.',
+    attendees_count:   n => `Signed-up players (${n}):`,
+    err_network:       'Network error. Check your internet connection.',
+    err_generic:       'Something went wrong. Please try again.',
+    loading:           'Searching…',
+    signing_up:        'Signing up…',
+    players:           n => `${n} players`,
+  }
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let lang       = 'sk';
+let eventId    = null;
+let eventDate  = null;
+let eventTime  = null;
+let eventArena = null;
+let eventAct   = null;
+let eventN     = null;
+let eventLabel = null;
+let selectedCustomer = null; // {id, nick, fullname}
+let currentScreen    = 'no-event';
+let toastTimer       = null;
+
+// ─── SUPABASE HELPERS ─────────────────────────────────────────────────────────
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SB_URL + '/rest/v1' + path, {
+    ...opts,
+    headers: {
+      'apikey':         SB_KEY,
+      'Authorization':  'Bearer ' + SB_KEY,
+      'Content-Type':   'application/json',
+      'Prefer':         'return=representation',
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || res.statusText);
+  }
+  return res.json().catch(() => null);
+}
+
+async function sbRpc(fn, params) {
+  return sbFetch('/rpc/' + fn, { method: 'POST', body: JSON.stringify(params) });
+}
+
+// ─── SCREEN MANAGEMENT ────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + name);
+  if (el) { el.classList.add('active'); currentScreen = name; }
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type = '', duration = 3200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast on' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, duration);
+}
+
+// ─── I18N ─────────────────────────────────────────────────────────────────────
+function t(key) {
+  return (T[lang] || T.sk)[key] || (T.sk)[key] || key;
+}
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('act', b.getAttribute('onclick').includes("'" + l + "'"));
+  });
+  applyTranslations();
+  updateEventCard();
+}
+
+function applyTranslations() {
+  const tr = T[lang] || T.sk;
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const key = el.getAttribute('data-i');
+    if (key && typeof tr[key] === 'string') el.textContent = tr[key];
+  });
+  // Placeholders
+  document.querySelectorAll('[data-ph-' + lang + ']').forEach(el => {
+    el.placeholder = el.getAttribute('data-ph-' + lang);
+  });
+  // Register links
+  updateRegLinks();
+}
+
+function updateRegLinks() {
+  const ret  = encodeURIComponent(window.location.href);
+  const href = REG_URL + '?return=' + ret;
+  ['reg-link-a', 'register-btn-a'].forEach(id => {
+    const a = document.getElementById(id);
+    if (a) a.href = href;
+  });
+}
+
+// ─── URL PARAMS ───────────────────────────────────────────────────────────────
+function parseParams() {
+  const p   = new URLSearchParams(window.location.search);
+  eventId    = p.get('event') || null;
+  eventDate  = p.get('d')     || null;
+  eventTime  = p.get('t')     || null;
+  eventArena = p.get('arena') || null;
+  eventAct   = p.get('act')   || null;
+  eventN     = p.get('n')     || null;
+  eventLabel = p.get('label') || null;
+}
+
+function formatEventDate(d) {
+  // d = YYYYMMDD
+  if (!d || d.length !== 8) return d || '';
+  const y = d.slice(0, 4), m = d.slice(4, 6), day = d.slice(6, 8);
+  return `${parseInt(day, 10)}.${parseInt(m, 10)}.${y}`;
+}
+
+function updateEventCard() {
+  if (!eventId) return;
+  const card   = document.getElementById('event-card');
+  const arenaEl = document.getElementById('ec-arena');
+  const detailEl = document.getElementById('ec-detail');
+  card.style.display = 'flex';
+
+  const arenaLabel = eventArena && eventAct
+    ? `${eventArena} · ${eventAct}`
+    : (eventArena || eventAct || eventLabel || '—');
+  arenaEl.textContent = arenaLabel;
+
+  const parts = [];
+  if (eventDate) parts.push(formatEventDate(eventDate));
+  if (eventTime) parts.push(eventTime);
+  if (eventN)    parts.push(t('players')(eventN));
+  detailEl.textContent = parts.join(' · ');
+}
+
+// ─── BUTTON LOADING STATE ─────────────────────────────────────────────────────
+function setBtnLoading(id, loading, labelKey) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.innerHTML = '<span class="spinner"></span>';
+  } else {
+    const span = document.createElement('span');
+    span.setAttribute('data-i', labelKey);
+    span.textContent = t(labelKey);
+    btn.innerHTML = '';
+    btn.appendChild(span);
+  }
+}
+
+// ─── LOOKUP ───────────────────────────────────────────────────────────────────
+async function doLookup() {
+  // Honeypot check
+  const hp = document.getElementById('hp-name');
+  if (hp && hp.value.trim()) {
+    // Silently reject bot — fake delay + pretend success-ish
+    await new Promise(r => setTimeout(r, 800));
+    return;
+  }
+
+  const raw = document.getElementById('inp-identity').value.trim();
+  const fEl  = document.getElementById('f-identity');
+  fEl.classList.remove('err');
+
+  if (!raw) {
+    fEl.classList.add('err');
+    document.getElementById('inp-identity').focus();
+    return;
+  }
+
+  const isEmail = raw.includes('@');
+  const params  = isEmail
+    ? { p_nick: null, p_email: raw }
+    : { p_nick: raw, p_email: null };
+
+  setBtnLoading('btn-lookup', true, 'btn_lookup');
+
+  try {
+    const results = await sbRpc('lookup_customer_by_nick_or_email', params);
+    const list    = Array.isArray(results) ? results : [];
+
+    if (list.length === 0) {
+      showScreen('notfound');
+      return;
+    }
+
+    if (list.length === 1) {
+      selectedCustomer = list[0];
+      showConfirm(list[0]);
+      return;
+    }
+
+    // Multiple matches — show pick list
+    showPick(list);
+
+  } catch (err) {
+    const msg = navigator.onLine === false
+      ? t('err_network')
+      : t('err_generic');
+    toast(msg, 'err');
+  } finally {
+    setBtnLoading('btn-lookup', false, 'btn_lookup');
+  }
+}
+
+function showConfirm(customer) {
+  document.getElementById('confirm-nick').textContent     = customer.nick || '—';
+  document.getElementById('confirm-fullname').textContent = customer.fullname || '';
+  showScreen('confirm');
+}
+
+function showPick(list) {
+  const container = document.getElementById('pick-list');
+  container.innerHTML = '';
+  list.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'pick-item';
+    item.innerHTML = `
+      <div class="pick-item-icon">👤</div>
+      <div>
+        <div class="pick-item-nick">${esc(c.nick || '—')}</div>
+        <div class="pick-item-fullname">${esc(c.fullname || '')}</div>
+      </div>`;
+    item.addEventListener('click', () => {
+      selectedCustomer = c;
+      showConfirm(c);
+    });
+    container.appendChild(item);
+  });
+  showScreen('pick');
+}
+
+// ─── SIGN UP ──────────────────────────────────────────────────────────────────
+async function doSignup() {
+  if (!selectedCustomer || !eventId) return;
+
+  setBtnLoading('btn-confirm', true, 'btn_confirm');
+
+  try {
+    // Check if already signed up
+    const existing = await sbFetch(
+      `/pb_event_signups?event_id=eq.${encodeURIComponent(eventId)}&customer_id=eq.${encodeURIComponent(selectedCustomer.id)}&select=id`,
+      { method: 'GET' }
+    );
+
+    if (Array.isArray(existing) && existing.length > 0) {
+      await loadAndShowResult('already', selectedCustomer.id);
+      return;
+    }
+
+    // Insert sign-up
+    await sbFetch('/pb_event_signups', {
+      method: 'POST',
+      body: JSON.stringify({
+        event_id:    eventId,
+        event_date:  eventDate  || null,
+        event_time:  eventTime  || null,
+        event_arena: eventArena || null,
+        event_label: eventLabel || null,
+        customer_id: selectedCustomer.id,
+        status:      'signed_up'
+      })
+    });
+
+    await loadAndShowResult('success', selectedCustomer.id);
+
+  } catch (err) {
+    const msg = navigator.onLine === false
+      ? t('err_network')
+      : t('err_generic');
+    toast(msg, 'err');
+  } finally {
+    setBtnLoading('btn-confirm', false, 'btn_confirm');
+  }
+}
+
+// ─── ATTENDEE LIST ────────────────────────────────────────────────────────────
+async function loadAndShowResult(screen, selfId) {
+  try {
+    const rows = await sbFetch(
+      `/pb_event_signups?event_id=eq.${encodeURIComponent(eventId)}&status=neq.no_show&select=id,status,customer_id,pb_customers(nick)&order=signed_up_at.asc`,
+      { method: 'GET' }
+    );
+
+    const attendees = Array.isArray(rows) ? rows : [];
+    renderAttendees(screen, attendees, selfId);
+  } catch (_) {
+    // Even if we fail to load attendees, show the screen
+    renderAttendees(screen, [], selfId);
+  }
+
+  showScreen(screen);
+}
+
+function renderAttendees(screen, attendees, selfId) {
+  const labelId   = screen + '-attendees-label';
+  const gridId    = screen + '-attendees';
+  const labelEl   = document.getElementById(labelId);
+  const gridEl    = document.getElementById(gridId);
+
+  if (labelEl) {
+    labelEl.textContent = t('attendees_count')(attendees.length);
+  }
+
+  if (!gridEl) return;
+  gridEl.innerHTML = '';
+
+  attendees.forEach(row => {
+    const nick = row.pb_customers?.nick || '—';
+    const chip = document.createElement('div');
+    const isSelf = String(row.customer_id) === String(selfId);
+    chip.className = 'attendee-chip' + (isSelf ? ' self' : '');
+    chip.innerHTML = `<span class="chip-dot"></span>${esc(nick)}`;
+    gridEl.appendChild(chip);
+  });
+}
+
+// ─── BACK ─────────────────────────────────────────────────────────────────────
+function goBack() {
+  selectedCustomer = null;
+  showScreen('input');
+}
+
+// ─── ESCAPE HTML ──────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ─── KEYBOARD: Enter to submit ────────────────────────────────────────────────
+document.getElementById('inp-identity').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLookup();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init() {
+  parseParams();
+  applyTranslations();
+
+  if (!eventId) {
+    showScreen('no-event');
+    return;
+  }
+
+  updateEventCard();
+  updateRegLinks();
+  showScreen('input');
+
+  // Auto-focus input after a short delay (avoids iOS keyboard jump)
+  setTimeout(() => {
+    const inp = document.getElementById('inp-identity');
+    if (inp && window.innerWidth > 600) inp.focus();
+  }, 300);
+})();
+</script>
+</body>
+</html>

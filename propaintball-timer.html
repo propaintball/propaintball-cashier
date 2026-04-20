@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ProPaintball — Game Timer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#B73A2E;--brand2:#d44438;--brand3:#8B2520;
+  --bg:#06080d;--bg2:#0c1018;--bg3:#141a24;--card:#0f141e;
+  --t1:#ffffff;--t2:#8892a4;--t3:#3d4a5e;
+  --amb:#f59e0b;--grn:#22c55e;--red:#e63946;--ora:#f97316;--blu:#3b82f6;
+  --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.12);
+  --rs:10px;--r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);color:var(--t1);
+  font-family:'Rajdhani',Arial,sans-serif;
+  display:flex;flex-direction:column;
+  height:100vh;user-select:none;overflow:hidden;
+}
+
+/* ══ SETUP ══════════════════════════════════════════════════════ */
+#setup{
+  position:fixed;inset:0;overflow-y:auto;
+  background:linear-gradient(180deg,#080c14 0%,#06080d 100%);
+  z-index:200;display:flex;flex-direction:column;align-items:center;
+}
+.setup-hero{
+  width:100%;display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 24px;position:relative;
+  background:linear-gradient(180deg,rgba(183,58,46,.08) 0%,transparent 100%);
+}
+.setup-hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 70% at 50% 40%,rgba(183,58,46,.15) 0%,transparent 70%);
+}
+/* ── Large Hero Badge ── */
+.hero-badge{
+  width:172px;height:200px;position:relative;z-index:1;
+  filter:drop-shadow(0 12px 40px rgba(183,58,46,.55))
+         drop-shadow(0 0 80px rgba(183,58,46,.25))
+         drop-shadow(0 2px 6px rgba(0,0,0,.6));
+}
+.hero-names{position:relative;z-index:1;text-align:center;margin-top:16px;}
+.hero-pro{
+  font-family:'Orbitron',monospace;font-size:42px;font-weight:900;
+  color:var(--brand);letter-spacing:.14em;line-height:1;
+  text-shadow:0 0 40px rgba(183,58,46,.6),0 2px 0 rgba(0,0,0,.5);
+}
+.hero-pb{
+  font-family:'Orbitron',monospace;font-size:22px;font-weight:700;
+  color:#fff;letter-spacing:.4em;margin-top:4px;
+  text-shadow:0 0 24px rgba(255,255,255,.25);
+}
+.hero-sub{
+  font-size:11px;font-weight:700;color:var(--t3);
+  letter-spacing:.22em;text-transform:uppercase;margin-top:8px;
+}
+.setup-card{
+  background:var(--card);border:1px solid var(--b2);border-radius:20px;
+  padding:22px;width:100%;max-width:530px;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);
+  margin:0 16px 32px;
+}
+.srow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.sf{margin-bottom:10px;}
+.sf label{display:block;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;}
+.sf input,.sf select{
+  width:100%;padding:11px 14px;
+  background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rs);
+  color:var(--t1);font-size:16px;outline:none;transition:border-color .2s;
+  -webkit-appearance:none;font-family:'Rajdhani',Arial,sans-serif;
+}
+.sf input[type="text"].time-inp{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;text-align:center;letter-spacing:.06em;}
+.sf input:focus,.sf select:focus{border-color:var(--brand);}
+.sf select{font-size:14px;font-weight:600;}
+.quick-btns{display:flex;gap:6px;margin-top:6px;}
+.qb{
+  flex:1;padding:8px 4px;border:1px solid rgba(245,158,11,.2);border-radius:8px;
+  background:rgba(245,158,11,.06);color:var(--amb);
+  font-family:'Rajdhani',Arial,sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.04em;cursor:pointer;transition:all .15s;text-align:center;
+}
+.qb:hover{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);}
+.qb:active{transform:scale(.93);}
+.team-grid{display:grid;grid-template-columns:1fr 36px 1fr;gap:8px;align-items:end;}
+.team-sep{font-size:14px;font-weight:700;color:var(--t3);text-align:center;padding-bottom:12px;}
+.yt-status{font-size:11px;margin-top:5px;min-height:16px;font-weight:600;}
+.btn-go{
+  width:100%;padding:16px;margin-top:16px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  border:none;border-radius:12px;color:#fff;
+  font-family:'Rajdhani',Arial,sans-serif;font-size:19px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 20px rgba(183,58,46,.4);
+}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(183,58,46,.55);}
+.btn-go:active{transform:translateY(0);}
+.kbd-setup{font-size:11px;color:var(--t3);text-align:center;margin-top:12px;line-height:1.9;}
+
+/* ══ GAME SCREEN ════════════════════════════════════════════════ */
+#game{display:flex;flex-direction:column;height:100vh;
+  background:radial-gradient(ellipse 80% 60% at 50% 20%,#0e1520 0%,var(--bg) 75%);}
+
+/* Header */
+.gh{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px;border-bottom:1px solid var(--b1);flex-shrink:0;
+}
+.gh-logo{display:flex;align-items:center;gap:8px;}
+.gh-badge{width:28px;height:32px;filter:drop-shadow(0 2px 8px rgba(183,58,46,.45));}
+.gh-logo-t .pro{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;color:var(--brand);letter-spacing:.1em;line-height:1;}
+.gh-logo-t .pb{font-family:'Orbitron',monospace;font-size:8px;font-weight:700;color:var(--t3);letter-spacing:.2em;line-height:1;margin-top:1px;}
+.gh-right{display:flex;align-items:center;gap:8px;}
+.round-pill{font-size:12px;font-weight:700;color:var(--t2);background:var(--bg3);padding:4px 12px;border-radius:99px;letter-spacing:.04em;}
+
+/* Status pill */
+.status-pill{padding:4px 14px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:all .3s;}
+.sp-idle{background:var(--bg3);color:var(--t3);}
+.sp-countdown{background:rgba(245,158,11,.13);color:var(--amb);border:1px solid rgba(245,158,11,.25);}
+.sp-siren{background:rgba(230,57,70,.18);color:var(--red);border:1px solid rgba(230,57,70,.3);animation:sPulse .35s ease-in-out infinite alternate;}
+.sp-playing{background:rgba(34,197,94,.13);color:var(--grn);border:1px solid rgba(34,197,94,.25);}
+.sp-paused{background:rgba(245,158,11,.13);color:var(--amb);border:1px solid rgba(245,158,11,.25);animation:sBlink .9s ease-in-out infinite;}
+.sp-break{background:rgba(59,130,246,.13);color:#60a5fa;border:1px solid rgba(59,130,246,.25);}
+.sp-end{background:rgba(230,57,70,.18);color:var(--red);border:1px solid rgba(230,57,70,.3);}
+.sp-warn60{background:rgba(249,115,22,.13);color:var(--ora);border:1px solid rgba(249,115,22,.25);}
+
+/* Main game area */
+.gm{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 16px;overflow:hidden;position:relative;}
+
+/* Background watermark logo */
+.bg-logo-wrap{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-52%);
+  pointer-events:none;z-index:0;
+  width:min(65vw,65vh);
+  opacity:.055;
+}
+.bg-logo-wrap svg{width:100%;height:auto;display:block;}
+.gm>*{position:relative;z-index:1;}
+
+/* Timer label — 500% bigger */
+.timer-lbl{
+  font-size:clamp(22px,5.5vw,64px);font-weight:900;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.12em;transition:color .3s;
+  line-height:1;
+}
+.timer-lbl.lbl-countdown{color:var(--amb);}
+.timer-lbl.lbl-playing{color:var(--grn);}
+.timer-lbl.lbl-warn60{color:var(--ora);}
+.timer-lbl.lbl-warn{color:var(--red);}
+.timer-lbl.lbl-break{color:#60a5fa;}
+.timer-lbl.lbl-end{color:var(--red);}
+
+/* Main timer — 150% bigger */
+.timer{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(88px,24vw,280px);
+  font-weight:900;letter-spacing:.04em;line-height:1;
+  color:var(--t1);text-align:center;
+  text-shadow:0 0 60px rgba(255,255,255,.08);
+  transition:color .25s,text-shadow .25s;
+}
+/* Shared color token classes — also used on ds-timer in display window */
+.t-countdown{color:var(--amb)!important;text-shadow:0 0 60px rgba(245,158,11,.3)!important;}
+.t-warn{color:var(--red)!important;text-shadow:0 0 70px rgba(230,57,70,.5)!important;animation:sBlink .45s ease-in-out infinite!important;}
+.t-playing{color:var(--grn)!important;text-shadow:0 0 55px rgba(34,197,94,.25)!important;}
+.t-warn60{color:var(--ora)!important;text-shadow:0 0 65px rgba(249,115,22,.4)!important;animation:slowBlink 1.5s ease-in-out infinite!important;}
+.t-break{color:#60a5fa!important;text-shadow:0 0 50px rgba(96,165,250,.25)!important;}
+.t-end{color:var(--red)!important;text-shadow:0 0 80px rgba(230,57,70,.5)!important;}
+
+/* Scoreboard — 150% bigger */
+.scoreboard{
+  display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--b1);border-radius:20px;
+  padding:12px 20px;width:100%;max-width:700px;
+}
+.sct{text-align:center;}
+/* Team names — 400% bigger */
+.sct-name{font-size:clamp(18px,3.8vw,46px);font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.sct-val{font-family:'Orbitron',monospace;font-size:clamp(50px,11vw,106px);font-weight:900;color:var(--t1);line-height:1;margin-bottom:6px;}
+.sct-btns{display:flex;gap:8px;justify-content:center;}
+.sbt{width:46px;height:46px;border:1px solid var(--b1);border-radius:10px;background:var(--bg3);color:var(--t2);font-size:22px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.sbt:hover{background:var(--bg2);color:var(--t1);border-color:var(--brand);}
+.sbt:active{transform:scale(.85);}
+.sc-sep{font-family:'Orbitron',monospace;font-size:clamp(38px,8.5vw,80px);font-weight:900;color:var(--t3);text-align:center;line-height:1;padding-bottom:30px;}
+/* Disable preset buttons during active play */
+.presets-disabled .cb.preset{opacity:.3;pointer-events:none;}
+
+/* ══ CONTROLS BAR ══════════════════════════════════════════════ */
+.gc{flex-shrink:0;border-top:1px solid var(--b1);background:rgba(6,8,13,.85);backdrop-filter:blur(8px);}
+.gc-hint{font-size:10px;color:var(--t3);text-align:center;padding:5px 0 0;letter-spacing:.04em;}
+.gc-row1{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px 6px;flex-wrap:wrap;}
+.gc-row2{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 14px 10px;border-top:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
+
+.cb{
+  display:flex;align-items:center;gap:5px;
+  padding:9px 16px;border:1px solid var(--b1);border-radius:10px;
+  background:var(--bg3);color:var(--t2);
+  font-family:'Rajdhani',Arial,sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.cb:hover{border-color:var(--b2);color:var(--t1);background:var(--bg2);}
+.cb:active{transform:scale(.94);}
+.cb.primary{background:var(--grn);color:#000;border-color:transparent;font-size:14px;}
+.cb.primary:hover{background:#16a34a;}
+.cb.warn{background:rgba(249,115,22,.12);color:var(--ora);border-color:rgba(249,115,22,.25);}
+.cb.warn:hover{background:rgba(249,115,22,.22);border-color:var(--ora);}
+.cb.danger{background:rgba(230,57,70,.12);color:var(--red);border-color:rgba(230,57,70,.25);}
+.cb.danger:hover{background:rgba(230,57,70,.25);border-color:var(--red);}
+.cb.preset{padding:8px 11px;font-size:12px;background:rgba(245,158,11,.07);color:var(--amb);border-color:rgba(245,158,11,.2);}
+.cb.preset:hover{background:rgba(245,158,11,.17);}
+.cb.sm{padding:7px 12px;font-size:12px;}
+
+/* ══ GAME OVER OVERLAY ═════════════════════════════════════════ */
+#go-overlay{
+  position:fixed;inset:0;z-index:500;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:#0a0000;
+}
+#go-overlay.visible{display:flex;animation:goBgPulse 0.7s ease-in-out infinite alternate;}
+@keyframes goBgPulse{0%{background:#050000;}100%{background:#180000;}}
+
+.go-flash{
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--red);opacity:0;
+  animation:goFlash .7s ease-in-out infinite alternate;
+}
+@keyframes goFlash{0%{opacity:0;}100%{opacity:.08;}}
+
+.go-icon{font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(230,57,70,.7));}
+.go-text{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(52px,14vw,140px);font-weight:900;
+  color:var(--red);letter-spacing:.05em;text-align:center;line-height:1;
+  text-shadow:0 0 80px rgba(230,57,70,.9),0 0 160px rgba(230,57,70,.4);
+  animation:goTextBlink .7s ease-in-out infinite alternate;
+}
+@keyframes goTextBlink{0%{opacity:1;letter-spacing:.05em;}100%{opacity:.15;letter-spacing:.06em;}}
+.go-end-sub{
+  font-family:'Orbitron',monospace;font-size:clamp(14px,3.5vw,28px);font-weight:700;
+  color:rgba(255,255,255,.4);letter-spacing:.2em;margin-top:10px;text-align:center;
+}
+.go-score{
+  display:flex;align-items:center;gap:24px;
+  margin:28px 0 20px;padding:18px 36px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;position:relative;z-index:1;
+}
+.go-team{text-align:center;}
+.go-tname{font-size:13px;font-weight:700;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.go-tval{font-family:'Orbitron',monospace;font-size:clamp(52px,12vw,100px);font-weight:900;color:#fff;line-height:1;}
+.go-tsep{font-family:'Orbitron',monospace;font-size:clamp(28px,6vw,52px);color:var(--t3);align-self:flex-end;padding-bottom:8px;}
+.go-btn{
+  padding:15px 48px;margin-top:4px;
+  background:var(--brand);border:none;border-radius:14px;
+  color:#fff;font-family:'Rajdhani',Arial,sans-serif;
+  font-size:18px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 6px 24px rgba(183,58,46,.5);position:relative;z-index:1;
+}
+.go-btn:hover{background:var(--brand2);transform:translateY(-2px);}
+
+/* ══ SIREN FLASH ═══════════════════════════════════════════════ */
+#sov{position:fixed;inset:0;z-index:100;pointer-events:none;background:transparent;display:none;}
+#sov.active{display:block;animation:sirenAnim .35s ease-in-out infinite alternate;}
+
+/* ══ DISPLAY WINDOW SCREEN ════════════════════════════════════ */
+#display-screen{
+  display:none;flex-direction:column;width:100vw;height:100vh;
+  background:radial-gradient(ellipse 80% 55% at 50% 20%,#0e1520 0%,var(--bg) 80%);
+  align-items:center;justify-content:center;gap:6px;
+}
+body.display-mode #display-screen{display:flex;}
+body.display-mode #setup,body.display-mode #game,body.display-mode #go-overlay{display:none!important;}
+
+.ds-header{display:flex;flex-direction:column;align-items:center;margin-bottom:8px;}
+.ds-badge{width:72px;height:84px;filter:drop-shadow(0 4px 20px rgba(183,58,46,.55));}
+.ds-pro{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--brand);letter-spacing:.12em;margin-top:6px;}
+.ds-pb{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.35em;margin-top:2px;}
+.ds-status{padding:5px 18px;border-radius:99px;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:6px;}
+.ds-lbl{font-family:'Orbitron',monospace;font-size:clamp(14px,2.5vw,24px);font-weight:700;color:var(--t3);letter-spacing:.25em;text-transform:uppercase;}
+.ds-timer{font-family:'Orbitron',monospace;font-size:clamp(100px,22vw,280px);font-weight:900;letter-spacing:.04em;line-height:1;color:var(--t1);text-align:center;text-shadow:0 0 80px rgba(255,255,255,.08);transition:color .25s,text-shadow .25s;}
+/* Volume slider */
+.vol-row{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.vol-row input[type="range"]{flex:1;accent-color:var(--brand);height:4px;}
+.vol-val{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--amb);min-width:38px;text-align:right;}
+.ds-round{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--t3);letter-spacing:.1em;display:none;}
+.ds-score{display:flex;align-items:center;gap:20px;margin-top:10px;padding:12px 36px;background:var(--card);border:1px solid var(--b1);border-radius:20px;}
+.ds-team{text-align:center;}
+.ds-tname{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.ds-tval{font-family:'Orbitron',monospace;font-size:clamp(44px,9vw,90px);font-weight:900;color:var(--t1);}
+.ds-tsep{font-family:'Orbitron',monospace;font-size:clamp(30px,6vw,56px);color:var(--t3);align-self:flex-end;padding-bottom:6px;}
+
+/* ══ ANIMATIONS ════════════════════════════════════════════════ */
+@keyframes sBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
+@keyframes slowBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes sPulse{from{opacity:.7;}to{opacity:1;}}
+@keyframes sirenAnim{0%{background:rgba(183,58,46,0);}100%{background:rgba(183,58,46,.22);}}
+</style>
+</head>
+<body>
+
+<!-- YouTube hidden player container -->
+<div style="position:fixed;left:-2px;top:-2px;width:1px;height:1px;overflow:hidden;pointer-events:none;z-index:-1;">
+  <div id="yt-player"></div>
+</div>
+
+<!-- Siren flash overlay -->
+<div id="sov"></div>
+
+<!-- ══ GAME OVER OVERLAY ══════════════════════════════════════ -->
+<div id="go-overlay">
+  <div class="go-flash"></div>
+  <div class="go-icon">🎯</div>
+  <div class="go-text">GAME OVER</div>
+  <div class="go-end-sub">END OF GAME</div>
+  <div class="go-score">
+    <div class="go-team">
+      <div class="go-tname" id="go-t1">Team A</div>
+      <div class="go-tval" id="go-sc1">0</div>
+    </div>
+    <div class="go-tsep">:</div>
+    <div class="go-team">
+      <div class="go-tname" id="go-t2">Team B</div>
+      <div class="go-tval" id="go-sc2">0</div>
+    </div>
+  </div>
+  <button class="go-btn" onclick="newGame()">🔄 NEW GAME</button>
+</div>
+
+<!-- ══ DISPLAY WINDOW SCREEN ════════════════════════════════= -->
+<div id="display-screen">
+  <div class="ds-header">
+    <svg class="ds-badge" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="dsg" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#d44438"/><stop offset="100%" stop-color="#7a1f1a"/></radialGradient>
+        <radialGradient id="dsh" cx="50%" cy="20%" r="55%"><stop offset="0%" stop-color="rgba(255,255,255,.18)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+      </defs>
+      <path d="M50 4 L96 22 V66 C96 91 73 110 50 116 C27 110 4 91 4 66 V22 Z" fill="rgba(0,0,0,0.35)" transform="translate(1.5,2.5)"/>
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="url(#dsg)"/>
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="url(#dsh)"/>
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+      <path d="M50 9 L90 26 V65 C90 88 70 106 50 112 C30 106 10 88 10 65 V26 Z" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <circle cx="50" cy="54" r="25" fill="rgba(0,0,0,.18)" stroke="rgba(255,255,255,.18)" stroke-width="1.2"/>
+      <polygon points="50,31 55.9,48.5 74.5,48.5 59.8,59.3 65.6,76.8 50,66 34.4,76.8 40.2,59.3 25.5,48.5 44.1,48.5" fill="white" opacity="0.95"/>
+      <path d="M16,83 L50,97 L84,83" stroke="white" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" fill="none"/>
+      <path d="M20,91 L50,105 L80,91" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" fill="none"/>
+    </svg>
+    <div class="ds-pro">PRO</div>
+    <div class="ds-pb">PAINTBALL</div>
+    <div class="ds-status status-pill sp-idle" id="ds-spill">READY</div>
+  </div>
+  <div class="ds-lbl" id="ds-lbl">GAME TIMER</div>
+  <div class="ds-timer t-playing" id="ds-timer">00:00</div>
+  <div class="ds-round" id="ds-round"></div>
+  <div class="ds-score">
+    <div class="ds-team"><div class="ds-tname" id="ds-t1">Team A</div><div class="ds-tval" id="ds-sc1">0</div></div>
+    <div class="ds-tsep">:</div>
+    <div class="ds-team"><div class="ds-tname" id="ds-t2">Team B</div><div class="ds-tval" id="ds-sc2">0</div></div>
+  </div>
+</div>
+
+<!-- ══ SETUP ═════════════════════════════════════════════════ -->
+<div id="setup">
+  <div class="setup-hero">
+    <!-- Large ProPaintball Badge -->
+    <svg class="hero-badge" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="shg" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#d44438"/><stop offset="100%" stop-color="#7a1f1a"/></radialGradient>
+        <radialGradient id="shh" cx="50%" cy="15%" r="60%"><stop offset="0%" stop-color="rgba(255,255,255,.2)"/><stop offset="70%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+      </defs>
+      <!-- Drop shadow -->
+      <path d="M50 4 L96 22 V66 C96 91 73 110 50 116 C27 110 4 91 4 66 V22 Z" fill="rgba(0,0,0,0.4)" transform="translate(2,3)"/>
+      <!-- Main body -->
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="url(#shg)"/>
+      <!-- Highlight -->
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="url(#shh)"/>
+      <!-- Outer border -->
+      <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="1.5"/>
+      <!-- Inner border -->
+      <path d="M50 9 L90 26 V65 C90 88 70 106 50 112 C30 106 10 88 10 65 V26 Z" fill="none" stroke="rgba(255,255,255,.11)" stroke-width="1"/>
+      <!-- Circle ring -->
+      <circle cx="50" cy="54" r="25" fill="rgba(0,0,0,.2)" stroke="rgba(255,255,255,.2)" stroke-width="1.3"/>
+      <!-- Star -->
+      <polygon points="50,31 55.9,48.5 74.5,48.5 59.8,59.3 65.6,76.8 50,66 34.4,76.8 40.2,59.3 25.5,48.5 44.1,48.5" fill="white" opacity="0.96"/>
+      <!-- Chevrons -->
+      <path d="M16,83 L50,97 L84,83" stroke="white" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" fill="none"/>
+      <path d="M20,91 L50,105 L80,91" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.62" fill="none"/>
+    </svg>
+    <div class="hero-names">
+      <div class="hero-pro">PRO</div>
+      <div class="hero-pb">PAINTBALL</div>
+      <div class="hero-sub">⏱ GAME TIMER</div>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <div class="srow">
+      <div class="sf">
+        <label>⏳ Countdown to Start</label>
+        <input id="i-cd" class="time-inp" type="text" value="02:00" placeholder="MM:SS" maxlength="5" inputmode="decimal">
+        <div class="quick-btns">
+          <button class="qb" onclick="setInput('i-cd',15)">15s</button>
+          <button class="qb" onclick="setInput('i-cd',60)">1:00</button>
+          <button class="qb" onclick="setInput('i-cd',120)">2:00</button>
+        </div>
+      </div>
+      <div class="sf">
+        <label>🎮 Game Time</label>
+        <input id="i-gt" class="time-inp" type="text" value="10:00" placeholder="MM:SS" maxlength="5" inputmode="decimal">
+        <div class="quick-btns">
+          <button class="qb" onclick="setInput('i-gt',600)">10:00</button>
+          <button class="qb" onclick="setInput('i-gt',900)">15:00</button>
+          <button class="qb" onclick="setInput('i-gt',1200)">20:00</button>
+        </div>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="sf">
+        <label>🔄 Timer Mode</label>
+        <select id="i-mode">
+          <option value="down">↓ Countdown (10:00→0:00)</option>
+          <option value="up">↑ Count Up (0:00→10:00)</option>
+        </select>
+      </div>
+      <div class="sf">
+        <label>🏆 Rounds</label>
+        <select id="i-rounds">
+          <option value="1">1 round</option>
+          <option value="2">2 rounds</option>
+          <option value="3">3 rounds</option>
+          <option value="5">5 rounds</option>
+        </select>
+      </div>
+    </div>
+    <div class="sf">
+      <label>👥 Team Names</label>
+      <div class="team-grid">
+        <input id="i-t1" type="text" value="Team A" maxlength="14" placeholder="Team A">
+        <div class="team-sep">VS</div>
+        <input id="i-t2" type="text" value="Team B" maxlength="14" placeholder="Team B">
+      </div>
+    </div>
+    <div class="sf">
+      <label>🎵 YouTube Music (optional — plays during game)</label>
+      <input id="i-yt" type="text" placeholder="Paste YouTube link or video ID…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="yt-status" id="yt-status"></div>
+    </div>
+    <div class="sf">
+      <label>🔊 Sound Volume</label>
+      <div class="vol-row">
+        <input type="range" id="i-vol" min="0" max="100" value="80">
+        <span class="vol-val" id="vol-pct">80%</span>
+      </div>
+    </div>
+    <button class="btn-go" onclick="startGame()">▶ START TIMER</button>
+    <div class="kbd-setup">
+      SPACE = start/pause &nbsp;·&nbsp; R = reset &nbsp;·&nbsp; F = open display window<br>
+      1 / 2 = +score Team A/B &nbsp;·&nbsp; Q / W = −score Team A/B
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAME ═══════════════════════════════════════════════════ -->
+<div id="game" style="display:none;">
+
+  <!-- Header -->
+  <div class="gh">
+    <div class="gh-logo">
+      <svg class="gh-badge" viewBox="0 0 100 116" fill="none">
+        <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="#B73A2E"/>
+        <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+        <polygon points="50,31 55.9,48.5 74.5,48.5 59.8,59.3 65.6,76.8 50,66 34.4,76.8 40.2,59.3 25.5,48.5 44.1,48.5" fill="white" opacity="0.93"/>
+        <path d="M16,83 L50,97 L84,83" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.87" fill="none"/>
+        <path d="M20,91 L50,105 L80,91" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.58" fill="none"/>
+      </svg>
+      <div class="gh-logo-t"><div class="pro">PRO</div><div class="pb">PAINTBALL</div></div>
+    </div>
+    <div class="gh-right">
+      <span class="round-pill" id="round-pill" style="display:none;">Round 1/3</span>
+      <span class="status-pill sp-idle" id="spill">READY</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="gm">
+    <!-- Background watermark -->
+    <div class="bg-logo-wrap" aria-hidden="true">
+      <svg viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="white"/>
+        <path d="M50 9 L90 26 V65 C90 88 70 106 50 112 C30 106 10 88 10 65 V26 Z" fill="none" stroke="black" stroke-width="1"/>
+        <circle cx="50" cy="54" r="25" fill="none" stroke="black" stroke-width="1.2"/>
+        <polygon points="50,31 55.9,48.5 74.5,48.5 59.8,59.3 65.6,76.8 50,66 34.4,76.8 40.2,59.3 25.5,48.5 44.1,48.5" fill="black" opacity="0.7"/>
+        <path d="M16,83 L50,97 L84,83" stroke="black" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" fill="none"/>
+        <path d="M20,91 L50,105 L80,91" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.4" fill="none"/>
+      </svg>
+    </div>
+    <div class="timer-lbl" id="tlbl">COUNTDOWN TO START</div>
+    <div class="timer" id="timer">02:00</div>
+    <div class="scoreboard">
+      <div class="sct">
+        <div class="sct-name" id="stn1">Team A</div>
+        <div class="sct-val" id="scv1">0</div>
+        <div class="sct-btns">
+          <button class="sbt" onclick="addScore(0,1)">+</button>
+          <button class="sbt" onclick="addScore(0,-1)">−</button>
+        </div>
+      </div>
+      <div class="sc-sep">:</div>
+      <div class="sct">
+        <div class="sct-name" id="stn2">Team B</div>
+        <div class="sct-val" id="scv2">0</div>
+        <div class="sct-btns">
+          <button class="sbt" onclick="addScore(1,1)">+</button>
+          <button class="sbt" onclick="addScore(1,-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls bar — two rows -->
+  <div class="gc">
+    <div class="gc-hint">SPACE = play/pause &nbsp;·&nbsp; R = reset &nbsp;·&nbsp; 1/2 = +goal &nbsp;·&nbsp; Q/W = −goal &nbsp;·&nbsp; F = display window</div>
+    <!-- Row 1: primary controls -->
+    <div class="gc-row1">
+      <button class="cb primary" id="bplay" onclick="togglePlay()">▶ START</button>
+      <button class="cb" onclick="doReset()">⟳ RESET</button>
+      <button class="cb danger" onclick="endGame()">⏹ END GAME</button>
+    </div>
+    <!-- Row 2: countdown presets + secondary -->
+    <div class="gc-row2">
+      <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">Countdown:</span>
+      <button class="cb preset" onclick="setCountdown(15)">15s</button>
+      <button class="cb preset" onclick="setCountdown(60)">60s</button>
+      <button class="cb preset" onclick="setCountdown(120)">2:00</button>
+      <button class="cb sm" style="margin-left:4px;" onclick="openSetup()">⚙ Setup</button>
+      <button class="cb sm" onclick="openDisplayWindow()" title="Open display window (F)">⛶ Display</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── DISPLAY MODE ──────────────────────────────────────── */
+const IS_DISPLAY = new URLSearchParams(location.search).get('display') === '1';
+if (IS_DISPLAY) document.body.classList.add('display-mode');
+
+/* ─── CONFIG ─────────────────────────────────────────────── */
+let CFG = {
+  cdSec: 120,   // default 2 min countdown
+  gtSec: 600,   // default 10 min game
+  mode: 'down',
+  rounds: 1,
+  t1: 'Team A',
+  t2: 'Team B',
+  ytId: null,
+  volume: 0.8,  // 0–1
+};
+
+/* ─── STATE ──────────────────────────────────────────────── */
+// idle | countdown | siren-start | playing | paused | siren-end | break | end
+let state = 'idle';
+let pausedFrom = null;
+let timeLeft = 0;
+let score = [0, 0];
+let round = 1;
+let iv = null;
+let audioCtx = null;
+let _bc = null;
+let ytPlayer = null;
+let ytApiReady = false;
+let displayWin = null;
+
+/* ─── AUDIO ──────────────────────────────────────────────── */
+function ac() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Voice countdown — "3… 2… 1… GO!"
+function voiceCount(n) {
+  if (!window.speechSynthesis) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(n === 0 ? 'GO!' : String(n));
+    u.rate = 1.1; u.pitch = 1.15; u.volume = 1;
+    window.speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+// Uniform countdown tick — consistent pitch each second
+function countdownBeep(isLast3) {
+  const ctx = ac(); if (!ctx) return;
+  const vol = CFG.volume;
+  try {
+    const freq = isLast3 ? 1320 : 660;
+    const dur = isLast3 ? 0.09 : 0.065;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol * (isLast3 ? 0.68 : 0.48), t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur + 0.01);
+  } catch(e) {}
+}
+
+// Radiation / civil-defense alarm — wailing up-down sweep
+function playRadiationAlarm() {
+  const ctx = ac(); if (!ctx) return;
+  try {
+    const dur = 3.6;
+    const t = ctx.currentTime;
+    const lo = 330, hi = 1050, step = 0.32; // fast sweeps
+
+    // Two oscillators: main + slight detune for richness
+    [[0, 0.62 * CFG.volume], [10, 0.22 * CFG.volume]].forEach(([det, vol]) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth';
+      o.detune.value = det;
+      let i = 0;
+      while (i * step < dur) {
+        const s = t + i * step;
+        const up = i % 2 === 0;
+        o.frequency.setValueAtTime(up ? lo : hi, s);
+        o.frequency.linearRampToValueAtTime(up ? hi : lo, s + step);
+        i++;
+      }
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.04);
+      g.gain.linearRampToValueAtTime(vol * 0.88, t + dur - 0.4);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur + 0.1);
+    });
+  } catch(e) {}
+}
+
+// End-of-game descending siren
+function playEndSiren() {
+  const ctx = ac(); if (!ctx) return;
+  try {
+    const dur = 3.2;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sawtooth';
+    // Descending wail
+    o.frequency.setValueAtTime(860, t);
+    o.frequency.linearRampToValueAtTime(540, t + 0.55);
+    o.frequency.linearRampToValueAtTime(700, t + 0.95);
+    o.frequency.linearRampToValueAtTime(370, t + 1.6);
+    o.frequency.linearRampToValueAtTime(480, t + 1.95);
+    o.frequency.linearRampToValueAtTime(230, t + 2.7);
+    o.frequency.linearRampToValueAtTime(180, t + 3.2);
+    g.gain.setValueAtTime(CFG.volume * 0.7, t);
+    g.gain.linearRampToValueAtTime(CFG.volume * 0.6, t + dur - 0.5);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur + 0.05);
+  } catch(e) {}
+}
+
+// Warning beep during last 30s of game
+function warningBeep() {
+  const ctx = ac(); if (!ctx) return;
+  try {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = 520;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(CFG.volume * 0.38, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.start(t); o.stop(t + 0.2);
+  } catch(e) {}
+}
+
+/* ─── YOUTUBE ─────────────────────────────────────────────── */
+function ytIdFromUrl(url) {
+  if (!url || !url.trim()) return null;
+  const u = url.trim();
+  const patterns = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /embed\/([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+  for (const p of patterns) {
+    const m = u.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function loadYTApi() {
+  if (window.YT || document.querySelector('script[src*="youtube.com/iframe_api"]')) return;
+  const s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+}
+
+window.onYouTubeIframeAPIReady = function() {
+  ytApiReady = true;
+  if (CFG.ytId) initYTPlayer(CFG.ytId);
+};
+
+function initYTPlayer(videoId) {
+  if (!videoId) return;
+  if (!window.YT || !window.YT.Player) { loadYTApi(); return; }
+  try {
+    ytPlayer = new window.YT.Player('yt-player', {
+      height: '1', width: '1',
+      videoId: videoId,
+      playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1 },
+      events: { onReady: () => {} }
+    });
+  } catch(e) { console.warn('[YT]', e); }
+}
+
+function ytPlay() {
+  if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+    try { ytPlayer.unMute(); ytPlayer.setVolume(85); ytPlayer.playVideo(); } catch(e) {}
+  }
+}
+function ytStop() {
+  if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+    try { ytPlayer.stopVideo(); } catch(e) {}
+  }
+}
+function ytPause() {
+  if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+    try { ytPlayer.pauseVideo(); } catch(e) {}
+  }
+}
+
+// YouTube URL input live validation
+(function() {
+  const el = document.getElementById('i-yt');
+  const st = document.getElementById('yt-status');
+  if (!el || !st) return;
+  function check() {
+    const id = ytIdFromUrl(el.value);
+    if (id) {
+      st.textContent = '✅ Ready — Video: ' + id;
+      st.style.color = 'var(--grn)';
+      CFG.ytId = id;
+      loadYTApi();
+    } else if (el.value.trim()) {
+      st.textContent = '❌ Invalid YouTube URL';
+      st.style.color = 'var(--red)';
+      CFG.ytId = null;
+    } else {
+      st.textContent = '';
+      CFG.ytId = null;
+    }
+  }
+  el.addEventListener('blur', check);
+  el.addEventListener('paste', () => setTimeout(check, 50));
+})();
+
+/* ─── TIME HELPERS ───────────────────────────────────────── */
+function parseMM(str) {
+  if (!str) return 0;
+  const p = str.trim().split(':');
+  if (p.length === 2) return Math.max(0, parseInt(p[0] || 0) * 60 + parseInt(p[1] || 0));
+  const n = parseInt(str);
+  return isNaN(n) ? 0 : Math.max(0, n);
+}
+function fmtT(sec) {
+  const s = Math.max(0, Math.ceil(sec));
+  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+function setInput(id, sec) {
+  const el = document.getElementById(id);
+  if (el) el.value = fmtT(sec);
+}
+
+/* ─── DOM ────────────────────────────────────────────────── */
+function $(id) { return document.getElementById(id); }
+
+/* ─── DISPLAY SYNC ───────────────────────────────────────── */
+function getBc() {
+  if (!_bc) {
+    try { _bc = new BroadcastChannel('pb-timer'); } catch(e) {}
+  }
+  return _bc;
+}
+function syncDisplay() {
+  const data = {
+    state, timeLeft,
+    score: [...score],
+    round,
+    cfg: { rounds: CFG.rounds, mode: CFG.mode, gtSec: CFG.gtSec, t1: CFG.t1, t2: CFG.t2 }
+  };
+  try { localStorage.setItem('pb_timer_sync', JSON.stringify(data)); } catch(e) {}
+  const bc = getBc();
+  if (bc) { try { bc.postMessage(data); } catch(e) {} }
+}
+
+function renderDisplay(data) {
+  if (!data) return;
+  const { state: st, timeLeft: tl, score: sc, round: r, cfg } = data;
+
+  const timerEl = $('ds-timer');
+  if (timerEl) {
+    timerEl.textContent = fmtT(tl);
+    // Colors
+    const cls = (()=>{
+      if (st === 'countdown') return 't-countdown';
+      if (st === 'playing') {
+        if (cfg.mode === 'down' && tl <= 10) return 't-warn';
+        if (cfg.mode === 'down' && tl <= 60) return 't-warn60';
+        return 't-playing';
+      }
+      if (st === 'break') return 't-break';
+      if (st === 'end' || st === 'siren-end') return 't-end';
+      return '';
+    })();
+    // Include 'timer' so shared .t-* color classes apply (they target .timer.t-* OR just .t-*)
+    timerEl.className = 'ds-timer timer' + (cls ? ' ' + cls : '');
+  }
+
+  const lblMap = {
+    idle: 'READY', countdown: 'COUNTDOWN TO START', 'siren-start': '🚨 START!',
+    playing: 'GAME TIME', paused: 'PAUSED', break: 'BREAK',
+    'siren-end': 'END OF ROUND', end: 'GAME OVER'
+  };
+  const lblEl = $('ds-lbl');
+  if (lblEl) {
+    lblEl.textContent = lblMap[st] || '';
+    // Color the label just like main ui
+    const lbCls = (()=>{
+      if (st === 'countdown') return 'lbl-countdown';
+      if (st === 'playing') {
+        if (cfg && cfg.mode === 'down' && tl <= 10) return 'lbl-warn';
+        if (cfg && cfg.mode === 'down' && tl <= 60) return 'lbl-warn60';
+        return 'lbl-playing';
+      }
+      if (st === 'break') return 'lbl-break';
+      if (st === 'end' || st === 'siren-end') return 'lbl-end';
+      return '';
+    })();
+    lblEl.className = 'ds-lbl timer-lbl' + (lbCls ? ' ' + lbCls : '');
+  }
+
+  if ($('ds-sc1')) $('ds-sc1').textContent = sc[0];
+  if ($('ds-sc2')) $('ds-sc2').textContent = sc[1];
+  if ($('ds-t1') && cfg) $('ds-t1').textContent = cfg.t1 || 'Team A';
+  if ($('ds-t2') && cfg) $('ds-t2').textContent = cfg.t2 || 'Team B';
+
+  const rndEl = $('ds-round');
+  if (rndEl && cfg && cfg.rounds > 1) {
+    rndEl.style.display = 'block';
+    rndEl.textContent = 'ROUND ' + r + ' / ' + cfg.rounds;
+  } else if (rndEl) { rndEl.style.display = 'none'; }
+
+  const spillEl = $('ds-spill');
+  if (spillEl) {
+    const map = {
+      idle: ['sp-idle','READY'], countdown: ['sp-countdown','COUNTDOWN'],
+      'siren-start': ['sp-siren','🚨 START!'], playing: ['sp-playing','▶ PLAYING'],
+      paused: ['sp-paused','⏸ PAUSED'], break: ['sp-break','BREAK'],
+      'siren-end': ['sp-siren','🏁 END OF ROUND'], end: ['sp-end','🏁 GAME OVER'],
+    };
+    const [cls, txt] = map[st] || ['sp-idle', '—'];
+    spillEl.className = 'ds-status status-pill ' + cls;
+    spillEl.textContent = txt;
+  }
+}
+
+// Display mode: listen for sync data
+if (IS_DISPLAY) {
+  window.addEventListener('storage', e => {
+    if (e.key === 'pb_timer_sync' && e.newValue) {
+      try { renderDisplay(JSON.parse(e.newValue)); } catch(e2) {}
+    }
+  });
+  try {
+    const bc = new BroadcastChannel('pb-timer');
+    bc.onmessage = e => renderDisplay(e.data);
+  } catch(e) {}
+  // Initial render from localStorage
+  setInterval(() => {
+    try {
+      const raw = localStorage.getItem('pb_timer_sync');
+      if (raw) renderDisplay(JSON.parse(raw));
+    } catch(e) {}
+  }, 600);
+}
+
+/* ─── UI ─────────────────────────────────────────────────── */
+function setTimerColor(cls) {
+  $('timer').className = 'timer' + (cls ? ' ' + cls : '');
+}
+
+function ui() {
+  if (IS_DISPLAY) return;
+
+  $('timer').textContent = fmtT(timeLeft);
+
+  // Timer color
+  if (state === 'countdown') {
+    setTimerColor(timeLeft <= 3 ? 't-warn' : 't-countdown');
+  } else if (state === 'playing') {
+    if (CFG.mode === 'down' && timeLeft <= 10) setTimerColor('t-warn');
+    else if (CFG.mode === 'down' && timeLeft <= 60) setTimerColor('t-warn60');
+    else setTimerColor('t-playing');
+  } else if (state === 'siren-start' || state === 'siren-end') {
+    setTimerColor('t-end');
+  } else if (state === 'break') {
+    setTimerColor('t-break');
+  } else if (state === 'end') {
+    setTimerColor('t-end');
+  } else {
+    setTimerColor('');
+  }
+
+  // Timer label
+  const lblEl = $('tlbl');
+  if (lblEl) {
+    const lbCls = (()=>{
+      if (state === 'countdown') return 'lbl-countdown';
+      if (state === 'playing') {
+        if (CFG.mode === 'down' && timeLeft <= 10) return 'lbl-warn';
+        if (CFG.mode === 'down' && timeLeft <= 60) return 'lbl-warn60';
+        return 'lbl-playing';
+      }
+      if (state === 'break') return 'lbl-break';
+      if (state === 'end') return 'lbl-end';
+      return '';
+    })();
+    const lblMap = {
+      idle: 'COUNTDOWN TO START', countdown: 'COUNTDOWN TO START',
+      'siren-start': '🚨 START!', playing: 'GAME TIME', paused: 'PAUSED',
+      break: 'BREAK', 'siren-end': 'END OF ROUND', end: 'GAME OVER'
+    };
+    lblEl.className = 'timer-lbl' + (lbCls ? ' ' + lbCls : '');
+    lblEl.textContent = lblMap[state] || '';
+  }
+
+  // Status pill
+  const spill = $('spill');
+  if (spill) {
+    const map = {
+      idle: ['sp-idle','READY'], countdown: ['sp-countdown','COUNTDOWN'],
+      'siren-start': ['sp-siren','🚨 START!'], playing: ['sp-playing','▶ PLAYING'],
+      paused: ['sp-paused','⏸ PAUSED'], break: ['sp-break','BREAK'],
+      'siren-end': ['sp-siren','🏁 END OF ROUND'], end: ['sp-end','🏁 GAME OVER'],
+    };
+    const [cls, txt] = map[state] || ['sp-idle', '—'];
+    spill.className = 'status-pill ' + cls;
+    spill.textContent = txt;
+  }
+
+  // Round pill
+  const rp = $('round-pill');
+  if (rp) {
+    if (CFG.rounds > 1) { rp.style.display = 'block'; rp.textContent = 'Round ' + round + '/' + CFG.rounds; }
+    else rp.style.display = 'none';
+  }
+
+  // Play button
+  const bp = $('bplay');
+  if (bp) {
+    if (state === 'idle' || state === 'paused') {
+      bp.textContent = '▶ START'; bp.className = 'cb primary';
+    } else if (state === 'countdown' || state === 'playing') {
+      bp.textContent = '⏸ PAUSE'; bp.className = 'cb warn';
+    } else if (state === 'break') {
+      bp.textContent = '⏸ PAUSE'; bp.className = 'cb';
+    } else if (state === 'end') {
+      bp.textContent = '🔄 NEW GAME'; bp.className = 'cb primary';
+    } else {
+      bp.textContent = '⏸'; bp.className = 'cb';
+    }
+  }
+
+  // Score
+  const scv1 = $('scv1'), scv2 = $('scv2');
+  if (scv1) scv1.textContent = score[0];
+  if (scv2) scv2.textContent = score[1];
+
+  // Disable countdown preset buttons during active game play
+  const gcRow2 = document.querySelector('.gc-row2');
+  if (gcRow2) {
+    const playing = ['playing', 'siren-start', 'siren-end', 'break'].includes(state);
+    gcRow2.classList.toggle('presets-disabled', playing);
+  }
+
+  syncDisplay();
+}
+
+function sirenFx(on) {
+  const el = $('sov');
+  if (!el) return;
+  if (on) { el.classList.add('active'); el.style.display = 'block'; }
+  else { el.classList.remove('active'); el.style.display = 'none'; }
+}
+
+/* ─── SETUP / RESET ──────────────────────────────────────── */
+function startGame() {
+  ac(); // AudioContext must start on user gesture
+  CFG.cdSec = parseMM($('i-cd').value) || 120;
+  CFG.gtSec = parseMM($('i-gt').value) || 600;
+  CFG.mode = $('i-mode').value;
+  CFG.rounds = parseInt($('i-rounds').value) || 1;
+  CFG.t1 = $('i-t1').value || 'Team A';
+  CFG.t2 = $('i-t2').value || 'Team B';
+  CFG.volume = (parseInt($('i-vol')?.value) || 80) / 100;
+
+  // YouTube setup
+  const ytUrl = $('i-yt').value.trim();
+  CFG.ytId = ytIdFromUrl(ytUrl);
+  if (CFG.ytId) {
+    if (ytApiReady) initYTPlayer(CFG.ytId);
+    else loadYTApi(); // will init via onYouTubeIframeAPIReady
+  }
+
+  $('stn1').textContent = CFG.t1;
+  $('stn2').textContent = CFG.t2;
+  score = [0, 0]; round = 1;
+
+  $('setup').style.display = 'none';
+  $('game').style.display = 'flex';
+  $('go-overlay').classList.remove('visible');
+
+  doReset();
+  // Auto-start immediately — no need to click twice
+  if (CFG.cdSec > 0) runIv();
+  else goSirenStart();
+}
+
+function openSetup() {
+  clearInterval(iv); iv = null;
+  sirenFx(false);
+  ytStop();
+  state = 'idle';
+  $('setup').style.display = 'flex';
+  $('game').style.display = 'none';
+  $('go-overlay').classList.remove('visible');
+}
+
+function doReset() {
+  clearInterval(iv); iv = null;
+  sirenFx(false);
+  ytStop();
+  pausedFrom = null;
+  if (CFG.cdSec > 0) {
+    state = 'countdown';
+    timeLeft = CFG.cdSec;
+  } else {
+    state = 'playing';
+    timeLeft = CFG.mode === 'down' ? CFG.gtSec : 0;
+  }
+  ui();
+}
+
+/* ─── PLAY / PAUSE ───────────────────────────────────────── */
+function togglePlay() {
+  ac();
+  if (state === 'end') { round = 1; score = [0, 0]; doReset(); return; }
+  if (state === 'idle') {
+    if (CFG.cdSec > 0) { state = 'countdown'; timeLeft = CFG.cdSec; }
+    else { goSirenStart(); return; }
+    ui(); runIv(); return;
+  }
+  if (state === 'paused') {
+    state = pausedFrom || 'playing';
+    pausedFrom = null;
+    if (state === 'playing') ytPlay();
+    ui(); runIv(); return;
+  }
+  if (state === 'countdown' || state === 'playing' || state === 'break') {
+    if (state === 'playing') ytPause();
+    pausedFrom = state;
+    state = 'paused';
+    clearInterval(iv); iv = null;
+    ui(); return;
+  }
+}
+
+function runIv() {
+  clearInterval(iv);
+  iv = setInterval(tick, 1000);
+}
+
+/* ─── TICK ───────────────────────────────────────────────── */
+function tick() {
+  if (state === 'countdown') {
+    timeLeft--;
+    // Uniform beep: same tone each second, slightly higher for last 3
+    if (timeLeft <= 10 && timeLeft > 0) countdownBeep(timeLeft <= 3);
+    // Voice countdown for last 3 seconds
+    if (timeLeft <= 3 && timeLeft >= 1) voiceCount(timeLeft);
+    ui();
+    if (timeLeft <= 0) { voiceCount(0); clearInterval(iv); iv = null; goSirenStart(); }
+
+  } else if (state === 'playing') {
+    if (CFG.mode === 'down') {
+      timeLeft--;
+      if (timeLeft <= 0) { timeLeft = 0; ui(); goSirenEnd(); return; }
+      if (timeLeft <= 30 && timeLeft % 10 === 0) warningBeep();
+    } else {
+      timeLeft++;
+      if (timeLeft >= CFG.gtSec) { timeLeft = CFG.gtSec; ui(); goSirenEnd(); return; }
+    }
+    ui();
+
+  } else if (state === 'break') {
+    timeLeft--;
+    if (timeLeft <= 5 && timeLeft > 0) countdownBeep(false);
+    ui();
+    if (timeLeft <= 0) { clearInterval(iv); iv = null; goSirenStart(); }
+  }
+}
+
+/* ─── SIREN TRANSITIONS ──────────────────────────────────── */
+function goSirenStart() {
+  clearInterval(iv); iv = null;
+  state = 'siren-start'; timeLeft = 3;
+  sirenFx(true);
+  playRadiationAlarm();
+  ui();
+  setTimeout(() => {
+    sirenFx(false);
+    state = 'playing';
+    timeLeft = CFG.mode === 'down' ? CFG.gtSec : 0;
+    ytPlay(); // start YouTube music when game begins
+    ui(); runIv();
+  }, 3500);
+}
+
+function goSirenEnd() {
+  clearInterval(iv); iv = null;
+  ytStop();
+  state = 'siren-end'; timeLeft = 0;
+  sirenFx(true);
+  playEndSiren();
+  ui();
+  setTimeout(() => {
+    sirenFx(false);
+    if (round < CFG.rounds) {
+      round++;
+      state = 'break';
+      timeLeft = 30;
+      ui(); runIv();
+    } else {
+      state = 'end'; ui();
+      // Show GAME OVER overlay
+      showGameOver();
+    }
+  }, 3200);
+}
+
+/* ─── GAME OVER ──────────────────────────────────────────── */
+function showGameOver() {
+  $('go-sc1').textContent = score[0];
+  $('go-sc2').textContent = score[1];
+  $('go-t1').textContent = CFG.t1;
+  $('go-t2').textContent = CFG.t2;
+  $('go-overlay').classList.add('visible');
+}
+
+function endGame() {
+  clearInterval(iv); iv = null;
+  sirenFx(false);
+  ytStop();
+  state = 'end';
+  ui();
+  syncDisplay();
+  // Short dramatic pause then overlay
+  setTimeout(showGameOver, 100);
+}
+
+function newGame() {
+  $('go-overlay').classList.remove('visible');
+  round = 1; score = [0, 0];
+  doReset();
+}
+
+/* ─── SCORE ──────────────────────────────────────────────── */
+function addScore(team, delta) {
+  score[team] = Math.max(0, score[team] + delta);
+  const ctx = ac(); if (!ctx) return;
+  try {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.value = delta > 0 ? 700 : 380;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0.35, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    o.start(t); o.stop(t + 0.12);
+  } catch(e) {}
+  const s1 = $('scv1'), s2 = $('scv2');
+  if (s1) s1.textContent = score[0];
+  if (s2) s2.textContent = score[1];
+  syncDisplay();
+}
+
+/* ─── COUNTDOWN PRESETS (in-game) ───────────────────────── */
+// Only active during countdown/idle/paused-from-countdown — NOT during game play
+function setCountdown(sec) {
+  const playingStates = ['playing', 'siren-start', 'siren-end', 'break'];
+  if (playingStates.includes(state)) return; // ignore during active game
+  ac();
+  CFG.cdSec = sec;
+  setInput('i-cd', sec);
+  clearInterval(iv); iv = null;
+  state = 'countdown';
+  timeLeft = sec;
+  ui();
+  runIv();
+}
+
+/* ─── DISPLAY WINDOW ─────────────────────────────────────── */
+function openDisplayWindow() {
+  if (displayWin && !displayWin.closed) { displayWin.focus(); return; }
+  const base = location.href.split('?')[0];
+  displayWin = window.open(base + '?display=1', 'PBTimerDisplay',
+    'width=1280,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes');
+}
+
+/* ─── KEYBOARD ───────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    if ($('go-overlay').classList.contains('visible')) { newGame(); return; }
+    if ($('setup').style.display !== 'none') { startGame(); return; }
+    togglePlay();
+  } else if (e.key === 'r' || e.key === 'R') {
+    e.preventDefault();
+    if ($('go-overlay').classList.contains('visible')) { newGame(); return; }
+    if ($('setup').style.display === 'none') doReset();
+  } else if (e.key === 'f' || e.key === 'F') {
+    if ($('setup').style.display === 'none') openDisplayWindow();
+  } else if (e.key === '1') { addScore(0, 1); }
+  else if (e.key === '2') { addScore(1, 1); }
+  else if (e.key === 'q' || e.key === 'Q') { addScore(0, -1); }
+  else if (e.key === 'w' || e.key === 'W') { addScore(1, -1); }
+  else if (e.key === 'Escape') {
+    if ($('go-overlay').classList.contains('visible')) newGame();
+  }
+});
+
+/* ─── VOLUME SLIDER ──────────────────────────────────────── */
+(function() {
+  const sl = document.getElementById('i-vol');
+  const lbl = document.getElementById('vol-pct');
+  if (!sl || !lbl) return;
+  sl.addEventListener('input', function() {
+    CFG.volume = parseInt(this.value) / 100;
+    lbl.textContent = this.value + '%';
+  });
+})();
+
+/* ─── TIME INPUT AUTO-FORMAT ─────────────────────────────── */
+['i-cd', 'i-gt'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '');
+    if (v.length > 4) v = v.slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, -2) + ':' + v.slice(-2);
+    this.value = v;
+  });
+  el.addEventListener('blur', function() {
+    const sec = parseMM(this.value);
+    this.value = fmtT(sec);
+  });
+});
+
+/* ─── INIT ───────────────────────────────────────────────── */
+(function init() {
+  if (IS_DISPLAY) {
+    // Try to get initial state immediately
+    try {
+      const raw = localStorage.getItem('pb_timer_sync');
+      if (raw) renderDisplay(JSON.parse(raw));
+    } catch(e) {}
+    return;
+  }
+  // Set default display values
+  const t = $('timer');
+  if (t) t.textContent = fmtT(CFG.cdSec);
+})();
+</script>
+</body>
+</html>
