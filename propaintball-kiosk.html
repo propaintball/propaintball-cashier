@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ProPaintball — Registrácia & Prihlásenie</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#B73A2E;--brand2:#d44438;
+  --bg:#06080d;--card:#0f141e;
+  --t1:#ffffff;--t2:#8892a4;--t3:#3d4a5e;
+  --grn:#22c55e;--amb:#f59e0b;
+  --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.13);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Rajdhani',Arial,sans-serif;overflow:hidden;}
+
+body{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px 20px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(183,58,46,.13) 0%,transparent 65%),var(--bg);
+}
+
+/* ── Logo ── */
+.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:40px;}
+.logo-badge{
+  width:90px;height:105px;
+  filter:drop-shadow(0 8px 32px rgba(183,58,46,.6)) drop-shadow(0 0 60px rgba(183,58,46,.2));
+}
+.logo-pro{
+  font-family:'Orbitron',monospace;font-size:32px;font-weight:900;
+  color:var(--brand);letter-spacing:.18em;margin-top:12px;
+  text-shadow:0 0 30px rgba(183,58,46,.5);
+}
+.logo-pb{
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  color:#fff;letter-spacing:.5em;margin-top:3px;
+}
+
+/* ── Event info bar ── */
+.event-bar{
+  background:var(--card);border:.5px solid rgba(245,158,11,.3);border-radius:12px;
+  padding:10px 20px;margin-bottom:36px;text-align:center;
+  display:none;max-width:480px;width:100%;
+}
+.event-bar.show{display:block;}
+.event-bar-label{font-size:11px;font-weight:700;color:var(--amb);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.event-bar-name{font-size:18px;font-weight:700;color:var(--t1);}
+
+/* ── Buttons ── */
+.btns{display:flex;flex-direction:column;gap:16px;width:100%;max-width:420px;}
+
+.kbtn{
+  display:flex;align-items:center;gap:20px;
+  padding:26px 28px;border-radius:18px;border:none;cursor:pointer;
+  font-family:'Rajdhani',Arial,sans-serif;font-weight:700;text-align:left;
+  transition:all .18s;text-decoration:none;
+  -webkit-user-select:none;user-select:none;
+}
+.kbtn:active{transform:scale(.96);}
+
+.kbtn-reg{
+  background:linear-gradient(135deg,rgba(183,58,46,.18),rgba(183,58,46,.08));
+  border:.5px solid rgba(183,58,46,.45);
+  box-shadow:0 4px 30px rgba(183,58,46,.15);
+}
+.kbtn-reg:hover{background:linear-gradient(135deg,rgba(183,58,46,.28),rgba(183,58,46,.14));border-color:rgba(183,58,46,.7);}
+
+.kbtn-signup{
+  background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.07));
+  border:.5px solid rgba(34,197,94,.4);
+  box-shadow:0 4px 30px rgba(34,197,94,.12);
+}
+.kbtn-signup:hover{background:linear-gradient(135deg,rgba(34,197,94,.25),rgba(34,197,94,.12));border-color:rgba(34,197,94,.65);}
+.kbtn-signup.disabled{opacity:.35;pointer-events:none;}
+
+.kbtn-icon{font-size:44px;flex-shrink:0;line-height:1;}
+.kbtn-text{}
+.kbtn-title{font-size:22px;font-weight:700;color:var(--t1);line-height:1;margin-bottom:4px;}
+.kbtn-sub{font-size:13px;font-weight:600;color:var(--t2);line-height:1.3;}
+
+/* ── No-event notice ── */
+.no-event{
+  display:none;text-align:center;font-size:13px;color:var(--t3);
+  margin-top:8px;padding:10px 16px;background:rgba(255,255,255,.03);
+  border-radius:8px;border:.5px solid var(--b1);max-width:420px;width:100%;
+}
+.no-event.show{display:block;}
+
+/* ── Footer ── */
+.kfooter{
+  position:fixed;bottom:0;left:0;right:0;
+  padding:10px 20px;text-align:center;
+  font-size:11px;color:var(--t3);letter-spacing:.06em;
+  background:linear-gradient(transparent,rgba(6,8,13,.9));
+}
+</style>
+</head>
+<body>
+
+<!-- Logo -->
+<div class="logo-wrap">
+  <svg class="logo-badge" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="#B73A2E" opacity=".95"/>
+    <path d="M50 8 L91 25 V65 C91 87 70 106 50 111 C30 106 9 87 9 65 V25 Z" fill="#8B2520" opacity=".6"/>
+    <!-- Star -->
+    <polygon points="50,28 53.5,39 65,39 55.5,46 59,57 50,50 41,57 44.5,46 35,39 46.5,39" fill="white" opacity=".95"/>
+    <!-- Chevrons -->
+    <path d="M32 70 L50 80 L68 70" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
+    <path d="M32 78 L50 88 L68 78" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".4"/>
+  </svg>
+  <div class="logo-pro">PRO</div>
+  <div class="logo-pb">PAINTBALL</div>
+</div>
+
+<!-- Event info (shown when ?event= param present) -->
+<div class="event-bar" id="eventBar">
+  <div class="event-bar-label">Dnešná hra</div>
+  <div class="event-bar-name" id="eventName">—</div>
+</div>
+
+<!-- Buttons -->
+<div class="btns">
+  <a class="kbtn kbtn-reg" id="btnReg" href="propaintball-register.html">
+    <div class="kbtn-icon">🆕</div>
+    <div class="kbtn-text">
+      <div class="kbtn-title">Som tu po prvýkrát</div>
+      <div class="kbtn-sub">Vyplniť registráciu, zmluvu & BOZP</div>
+    </div>
+  </a>
+
+  <a class="kbtn kbtn-signup" id="btnSignup" href="event-signup.html">
+    <div class="kbtn-icon">📋</div>
+    <div class="kbtn-text">
+      <div class="kbtn-title">Prihlásiť sa na hru</div>
+      <div class="kbtn-sub">Registrovaný hráč — prihlás sa na dnešnú akciu</div>
+    </div>
+  </a>
+</div>
+
+<div class="no-event" id="noEvent">
+  Inštruktor ešte nevygeneroval link na prihlásenie.<br>Spýtaj sa pri recepcii.
+</div>
+
+<div class="kfooter">TRESAERIS GROUP s.r.o. &nbsp;·&nbsp; ProPaintball Bratislava</div>
+
+<script>
+(function(){
+  const p = new URLSearchParams(location.search);
+  const eventId = p.get('event') || '';
+  const label   = p.get('label') ? decodeURIComponent(p.get('label')) : '';
+  const d       = p.get('d') || '';
+  const t       = p.get('t') || '';
+  const arena   = p.get('arena') ? decodeURIComponent(p.get('arena')) : '';
+  const act     = p.get('act')   ? decodeURIComponent(p.get('act'))   : '';
+
+  const btnSignup = document.getElementById('btnSignup');
+  const eventBar  = document.getElementById('eventBar');
+  const eventName = document.getElementById('eventName');
+  const noEvent   = document.getElementById('noEvent');
+
+  if (eventId) {
+    // Build signup URL with all params forwarded
+    const signupParams = new URLSearchParams();
+    signupParams.set('event', eventId);
+    if (label) signupParams.set('label', label);
+    if (d)     signupParams.set('d', d);
+    if (t)     signupParams.set('t', t);
+    if (arena) signupParams.set('arena', arena);
+    if (act)   signupParams.set('act', act);
+
+    btnSignup.href = 'event-signup.html?' + signupParams.toString();
+
+    // Show event bar
+    eventBar.classList.add('show');
+    const displayLabel = label || [act, arena, d ? formatDate(d) : '', t].filter(Boolean).join(' · ');
+    eventName.textContent = displayLabel;
+  } else {
+    // No event linked — disable signup button, show notice
+    btnSignup.classList.add('disabled');
+    noEvent.classList.add('show');
+  }
+
+  function formatDate(d) {
+    if (!d || d.length !== 8) return d;
+    return d.slice(6,8) + '.' + d.slice(4,6) + '.' + d.slice(0,4);
+  }
+})();
+</script>
+</body>
+</html>

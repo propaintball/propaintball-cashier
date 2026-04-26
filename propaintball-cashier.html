@@ -2331,6 +2331,8 @@ function startSess(){
   // Hide reservation banner
   const banner=$('start-reservation-banner');if(banner)banner.style.display='none';
   if($('start'))$('start').style.display='none';showApp();
+  // Spusti real-time polling pre nových prihlásených hráčov
+  startSignupPoll();
 }
 function resumeSess(key){curSid=key;save();showApp();}
 function newSessFromApp(){
@@ -3683,6 +3685,7 @@ function confirmCloseSess(){
   // ✅ Clear justClosed flag — session confirmed, records are permanent
   closed.filter(w=>w.sKey===savedKey&&w.justClosed).forEach(w=>delete w.justClosed);
   closeSessKey=null;cm('m-close-sess');save();
+  stopSignupPoll();
   rAppSessBar();rWbs();rBill();updSessBadge();updInvBadge();
   // ✅ Refresh Správca/Analýzy/Moje if currently visible
   if($('p-spravca')?.classList.contains('on'))rSpravca();
@@ -5995,6 +5998,67 @@ async function fetchSignupList(eventId){
   return rows||[];
 }
 
+// ── Real-time signup sync — polling každých 30s pre aktívnu session ──────────
+let _signupPollIv=null;
+
+function startSignupPoll(){
+  stopSignupPoll();
+  const sess=getSess();
+  if(!sess||!sess.calEventId)return;
+  _signupPollIv=setInterval(()=>pollNewSignups(sess.calEventId,sess.key),30000);
+}
+
+function stopSignupPoll(){
+  if(_signupPollIv){clearInterval(_signupPollIv);_signupPollIv=null;}
+}
+
+async function pollNewSignups(eventId,sessKey){
+  if(!eventId||!sessKey)return;
+  // Supabase musí byť dostupný
+  try{
+    const rows=await fetchSignupList(eventId);
+    if(!rows||!rows.length)return;
+    const wbs=wbMap[sessKey]||[];
+    // Zozbieraj existujúce signupIds aj customerId z aktívnych aj uzavretých
+    const knownSignupIds=new Set([
+      ...wbs.map(w=>w.signupId).filter(Boolean),
+      ...closed.filter(w=>w.sKey===sessKey).map(w=>w.signupId).filter(Boolean)
+    ]);
+    const newSignups=rows.filter(r=>r.id&&!knownSignupIds.has(r.id));
+    if(!newSignups.length)return;
+    // Pridaj nových hráčov
+    const now=new Date().toISOString();
+    const sess=sessArr.find(s=>s.key===sessKey);
+    let added=0;
+    newSignups.forEach((su,idx)=>{
+      const c=su.pb_customers||{};
+      const pid='SP'+Date.now()+'_'+(idx+1);
+      const pname=c.nick||c.fullname||('Hráč +1');
+      const pemail=c.email||'';
+      wbMap[sessKey].push({
+        id:pid,name:pname,email:pemail,items:[],
+        sKey:sessKey,sArena:sess?.arena,sInstr:sess?.instructor,sAct:sess?.activity,
+        openedAt:now,bUsed:0,bLoad:0,dG:[],pkgDone:false,
+        customerId:c.id||null,signupId:su.id||null,
+        autoAdded:true  // vizuálna značka
+      });
+      added++;
+    });
+    if(added>0){
+      save();rWbs();rBill();
+      toast('🔔 '+added+' nov'+(added===1?'ý hráč prihlásený':'í hráči prihlásení')+' online');
+      // Označ v Supabase ako checked_in
+      const ids=newSignups.map(s=>s.id).filter(Boolean);
+      if(ids.length){
+        sbPubFetch(`/pb_event_signups?id=in.(${ids.join(',')})`,{
+          method:'PATCH',headers:{'Prefer':'return=minimal'},
+          body:JSON.stringify({status:'checked_in',session_key:sessKey})
+        }).catch(()=>{});
+      }
+    }
+  }catch(e){console.warn('[signupPoll]',e);}
+}
+
 // Vygeneruje link pre zákazníka na event-signup stránku
 function genEventSignupLink(r){
   const startTime=r.start?new Date(r.start):null;
@@ -6008,6 +6072,23 @@ function genEventSignupLink(r){
 function copyEventSignupLink(r){
   const link=genEventSignupLink(r);
   navigator.clipboard?.writeText(link).then(()=>toast('🔗 Link skopírovaný!')).catch(()=>{
+    prompt('Skopíruj link:',link);
+  });
+}
+
+// Vygeneruje kiosk link (prihlásenie aj registrácia na jednej stránke — pre tablet/TV na recepcii)
+function genKioskLink(r){
+  const startTime=r.start?new Date(r.start):null;
+  const d=startTime?startTime.toISOString().split('T')[0].replace(/-/g,''):'';
+  const t=startTime?startTime.toLocaleTimeString('sk',{hour:'2-digit',minute:'2-digit'}).replace(':',''):'';
+  const tStr=t?t.slice(0,2)+':'+t.slice(2):'';
+  const label=encodeURIComponent(`${r.arenaCode||r.arena||''} ${r.activity||''} ${startTime?startTime.toLocaleDateString('sk',{day:'2-digit',month:'2-digit'}):''}${tStr?' '+tStr:''}`);
+  return `https://propaintball.github.io/Propaintball/propaintball-kiosk.html?event=${encodeURIComponent(r.eventId||'')}&d=${d}&t=${encodeURIComponent(tStr)}&arena=${encodeURIComponent(r.arenaCode||r.arena||'')}&act=${encodeURIComponent(r.activity||'')}&label=${label}`;
+}
+
+function copyKioskLink(r){
+  const link=genKioskLink(r);
+  navigator.clipboard?.writeText(link).then(()=>toast('📱 Kiosk link skopírovaný!')).catch(()=>{
     prompt('Skopíruj link:',link);
   });
 }
@@ -6406,7 +6487,8 @@ function rLandingReservations(){
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
         ${rightEl}
-        ${r.eventId?`<button onclick="event.stopPropagation();copyEventSignupLink(_calReservations[${i}])" style="background:none;border:.5px solid var(--b2);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--t3);cursor:pointer;white-space:nowrap;" title="Kopírovať link na prihlásenie">🔗</button>`:''}
+        ${r.eventId?`<button onclick="event.stopPropagation();copyEventSignupLink(_calReservations[${i}])" style="background:none;border:.5px solid var(--b2);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--t3);cursor:pointer;white-space:nowrap;" title="Kopírovať link na prihlásenie (event-signup)">🔗</button>`:''}
+        ${r.eventId?`<button onclick="event.stopPropagation();copyKioskLink(_calReservations[${i}])" style="background:none;border:.5px solid rgba(34,197,94,.35);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--grn);cursor:pointer;white-space:nowrap;" title="Kopírovať kiosk link (tablet/TV na recepcii)">📱</button>`:''}
       </div>
     </div>`;
   }).join('');
