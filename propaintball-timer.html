@@ -1102,10 +1102,8 @@ function tick() {
     timeLeft--;
     // Uniform beep: same tone each second, slightly higher for last 3
     if (timeLeft <= 10 && timeLeft > 0) countdownBeep(timeLeft <= 3);
-    // Voice countdown for last 3 seconds
-    if (timeLeft <= 3 && timeLeft >= 1) voiceCount(timeLeft);
     ui();
-    if (timeLeft <= 0) { voiceCount(0); clearInterval(iv); iv = null; goSirenStart(); }
+    if (timeLeft <= 0) { clearInterval(iv); iv = null; goSirenStart(); }
 
   } else if (state === 'playing') {
     if (CFG.mode === 'down') {
@@ -1129,7 +1127,7 @@ function tick() {
 /* ─── SIREN TRANSITIONS ──────────────────────────────────── */
 function goSirenStart() {
   clearInterval(iv); iv = null;
-  state = 'siren-start'; timeLeft = 3;
+  state = 'siren-start'; timeLeft = 0;
   sirenFx(true);
   playRadiationAlarm();
   ui();
