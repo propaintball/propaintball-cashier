@@ -3852,6 +3852,45 @@ function quickPay(wbId){
   else{toast('Hráč nemá žiadne položky');}
 }
 
+function adminForceCloseSess(sKey){
+  if(!isAdmin()){toast('Len admin môže použiť túto funkciu');return;}
+  const sess=sessArr.find(s=>s.key===sKey);
+  if(!sess){toast('Session nenájdená');return;}
+  const wbs=wbMap[sKey]||[];
+  const openCount=wbs.length;
+  const closedCount=closed.filter(w=>w.sKey===sKey).length;
+  const label=`${sess.arena||'—'} · ${sess.activity||'—'}`;
+
+  // Confirm dialog s popisom
+  const confirmMsg=`Zabudnutá hra — admin uzavretie\n\n` +
+    `Hra: ${label}\n` +
+    `Otvorených hráčov: ${openCount} (ich účty budú vymazané)\n` +
+    `Uzavretých hráčov: ${closedCount} (tržby zostanú v histórii)\n\n` +
+    `Zadaj admin heslo pre potvrdenie:`;
+  const pw=prompt(confirmMsg);
+  if(pw===null)return; // zrušiť
+  if(pw!==admPw){toast('❌ Nesprávne admin heslo');return;}
+
+  // Uzavrieť a vymazať
+  auditLog('admin-force-close',sKey);
+  // Uložiť deposit ak existuje
+  if(sess.deposit){const deps=lDeposits();deps[sKey]=sess.deposit;sDeposits(deps);}
+  // Vymazať aktívnych hráčov (nefakturovaní — zabudnutí)
+  delete wbMap[sKey];
+  // Odstrániť session
+  sessArr=sessArr.filter(s=>s.key!==sKey);
+  if(curSid===sKey){
+    curSid=sessArr.length?sessArr[sessArr.length-1].key:null;
+    selId=null;chkd=new Set();
+  }
+  // Cloud backup
+  if(sbUrl&&sbKey)setTimeout(()=>sbPush(),500);
+  save();rAppSessBar();rWbs();rBill();rOpen();updSessBadge();updInvBadge();
+  toast(`✅ Hra "${label}" uzavretá adminom`);
+  // Ak boli uzavretí hráči — zobraziť report
+  if(closedCount>0)setTimeout(()=>openReport(sKey),400);
+}
+
 function rOpen(){
   const el=$('olist');if(!el)return;
   // ✅ FIX: Get wristbands from ALL active sessions (not just curSid)
@@ -3929,9 +3968,10 @@ function rOpen(){
             </div>`;
           }).join('')}
           <!-- Skupinové akcie pod hráčmi -->
-          <div style="padding:8px 10px;background:var(--bg3);border-top:.5px solid var(--b1);display:flex;gap:7px;flex-wrap:wrap;">
+          <div style="padding:8px 10px;background:var(--bg3);border-top:.5px solid var(--b1);display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
             <button class="btn sm B" onclick="event.stopPropagation();gT('reg')">${t('add-player-open')}</button>
             ${isActive&&grpWbs.length>0?`<button class="btn sm G" onclick="event.stopPropagation();payAll()">${t('pay-all-open')}</button>`:''}
+            ${isAdmin()?`<button class="btn sm" onclick="event.stopPropagation();adminForceCloseSess('${sKey}')" style="margin-left:auto;background:var(--rbg);border-color:var(--rbd);color:var(--red);font-size:10px;" title="Zabudnutá hra — admin uzavretie">🗑 Zabudnutá hra</button>`:''}
           </div>
         </div>
       </div>`;
