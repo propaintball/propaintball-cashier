@@ -2366,6 +2366,8 @@ function rAppSessBar(){
       document.querySelector('.content')?.style.setProperty('padding-bottom',barH+'px');
       document.querySelectorAll('.page').forEach(p=>p.style.paddingBottom=(barH+11)+'px');
       const startEl=$('start');if(startEl)startEl.style.paddingBottom=(barH+16)+'px';
+      // Fix: landing page must also scroll above the bar (login form at bottom was hidden)
+      const landingEl=$('landing');if(landingEl)landingEl.style.paddingBottom=(barH+16)+'px';
       msItems.innerHTML=sessArr.map(s=>{
         const wbs=wbMap[s.key]||[];
         const isCur=s.key===curSid;
@@ -2391,6 +2393,7 @@ function rAppSessBar(){
       document.querySelector('.content')?.style.setProperty('padding-bottom','0');
       document.querySelectorAll('.page').forEach(p=>p.style.paddingBottom='');
       const startEl=$('start');if(startEl)startEl.style.paddingBottom='';
+      const landingEl=$('landing');if(landingEl)landingEl.style.paddingBottom='';
     }
   }
 }
