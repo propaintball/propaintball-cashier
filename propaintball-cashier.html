@@ -5495,15 +5495,19 @@ async function exportXLS(key){
     pS[it.name].rev+=r;
     if(w.payM==='card')pS[it.name].rK+=r;else pS[it.name].rC+=r;
   }));
+  const pArr=Object.values(pS).sort((a,b)=>b.rev-a.rev);
+  const totalProdRev=pArr.reduce((s,p)=>s+p.rev,0);
+  const totalProdQty=pArr.reduce((s,p)=>s+p.qty,0);
   const ws3=XLSX.utils.aoa_to_sheet([
     ['Produkt','Kategória','Predané ks','Tržby (€)','Hotovosť (€)','Karta (€)','Podiel %'],
-    ...Object.values(pS).sort((a,b)=>b.rev-a.rev).map(p=>[
+    ...pArr.map(p=>[
       p.n,p.cat,p.qty,
       parseFloat(p.rev.toFixed(2)),
       parseFloat(p.rC.toFixed(2)),
       parseFloat(p.rK.toFixed(2)),
-      tot>0?parseFloat((p.rev/tot*100).toFixed(1)):0
-    ])
+      totalProdRev>0?parseFloat((p.rev/totalProdRev*100).toFixed(1)):0
+    ]),
+    ['CELKOM','',totalProdQty,parseFloat(totalProdRev.toFixed(2)),'','',100]
   ]);
   ws3['!cols']=[{wch:26},{wch:12},{wch:12},{wch:12},{wch:14},{wch:12},{wch:10}];
   XLSX.utils.book_append_sheet(wbx,ws3,'Produkty');
