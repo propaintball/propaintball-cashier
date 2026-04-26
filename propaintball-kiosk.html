@@ -7,11 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --brand:#B73A2E;--brand2:#d44438;
+  --brand:#B73A2E;
   --bg:#06080d;--card:#0f141e;
   --t1:#ffffff;--t2:#8892a4;--t3:#3d4a5e;
   --grn:#22c55e;--amb:#f59e0b;
   --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.13);
+  --arena-col:#B73A2E;--arena-glow:rgba(183,58,46,.18);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Rajdhani',Arial,sans-serif;overflow:hidden;}
@@ -19,79 +20,57 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Rajdhani
 body{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:100vh;padding:24px 20px;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(183,58,46,.13) 0%,transparent 65%),var(--bg);
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,var(--arena-glow) 0%,transparent 65%),var(--bg);
 }
 
 /* ── Logo ── */
-.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:40px;}
-.logo-badge{
-  width:90px;height:105px;
-  filter:drop-shadow(0 8px 32px rgba(183,58,46,.6)) drop-shadow(0 0 60px rgba(183,58,46,.2));
-}
-.logo-pro{
-  font-family:'Orbitron',monospace;font-size:32px;font-weight:900;
-  color:var(--brand);letter-spacing:.18em;margin-top:12px;
-  text-shadow:0 0 30px rgba(183,58,46,.5);
-}
-.logo-pb{
-  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
-  color:#fff;letter-spacing:.5em;margin-top:3px;
-}
+.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
+.logo-badge{width:72px;height:84px;filter:drop-shadow(0 6px 24px var(--arena-col)) drop-shadow(0 0 40px rgba(183,58,46,.2));}
+.logo-pro{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--brand);letter-spacing:.18em;margin-top:10px;text-shadow:0 0 24px rgba(183,58,46,.5);}
+.logo-pb{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#fff;letter-spacing:.5em;margin-top:2px;}
 
-/* ── Event info bar ── */
-.event-bar{
-  background:var(--card);border:.5px solid rgba(245,158,11,.3);border-radius:12px;
-  padding:10px 20px;margin-bottom:36px;text-align:center;
-  display:none;max-width:480px;width:100%;
+/* ── Arena badge ── */
+.arena-badge{
+  margin-bottom:28px;padding:10px 24px;border-radius:12px;text-align:center;
+  background:var(--card);border:.5px solid rgba(255,255,255,.1);
 }
-.event-bar.show{display:block;}
-.event-bar-label{font-size:11px;font-weight:700;color:var(--amb);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
-.event-bar-name{font-size:18px;font-weight:700;color:var(--t1);}
+.arena-badge-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;}
+.arena-badge-name{font-size:22px;font-weight:700;color:var(--t1);letter-spacing:.04em;}
+.arena-badge-date{font-size:12px;color:var(--t3);margin-top:2px;}
 
 /* ── Buttons ── */
-.btns{display:flex;flex-direction:column;gap:16px;width:100%;max-width:420px;}
+.btns{display:flex;flex-direction:column;gap:14px;width:100%;max-width:400px;}
 
 .kbtn{
-  display:flex;align-items:center;gap:20px;
-  padding:26px 28px;border-radius:18px;border:none;cursor:pointer;
+  display:flex;align-items:center;gap:18px;
+  padding:24px 24px;border-radius:18px;border:none;cursor:pointer;
   font-family:'Rajdhani',Arial,sans-serif;font-weight:700;text-align:left;
-  transition:all .18s;text-decoration:none;
+  transition:transform .15s,background .15s;text-decoration:none;
   -webkit-user-select:none;user-select:none;
 }
-.kbtn:active{transform:scale(.96);}
+.kbtn:active{transform:scale(.95);}
 
 .kbtn-reg{
   background:linear-gradient(135deg,rgba(183,58,46,.18),rgba(183,58,46,.08));
   border:.5px solid rgba(183,58,46,.45);
-  box-shadow:0 4px 30px rgba(183,58,46,.15);
+  box-shadow:0 4px 24px rgba(183,58,46,.15);
 }
-.kbtn-reg:hover{background:linear-gradient(135deg,rgba(183,58,46,.28),rgba(183,58,46,.14));border-color:rgba(183,58,46,.7);}
+.kbtn-reg:hover{background:linear-gradient(135deg,rgba(183,58,46,.26),rgba(183,58,46,.12));}
 
 .kbtn-signup{
   background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.07));
   border:.5px solid rgba(34,197,94,.4);
-  box-shadow:0 4px 30px rgba(34,197,94,.12);
+  box-shadow:0 4px 24px rgba(34,197,94,.12);
 }
-.kbtn-signup:hover{background:linear-gradient(135deg,rgba(34,197,94,.25),rgba(34,197,94,.12));border-color:rgba(34,197,94,.65);}
-.kbtn-signup.disabled{opacity:.35;pointer-events:none;}
+.kbtn-signup:hover{background:linear-gradient(135deg,rgba(34,197,94,.23),rgba(34,197,94,.11));}
 
-.kbtn-icon{font-size:44px;flex-shrink:0;line-height:1;}
-.kbtn-text{}
-.kbtn-title{font-size:22px;font-weight:700;color:var(--t1);line-height:1;margin-bottom:4px;}
-.kbtn-sub{font-size:13px;font-weight:600;color:var(--t2);line-height:1.3;}
-
-/* ── No-event notice ── */
-.no-event{
-  display:none;text-align:center;font-size:13px;color:var(--t3);
-  margin-top:8px;padding:10px 16px;background:rgba(255,255,255,.03);
-  border-radius:8px;border:.5px solid var(--b1);max-width:420px;width:100%;
-}
-.no-event.show{display:block;}
+.kbtn-icon{font-size:40px;flex-shrink:0;line-height:1;}
+.kbtn-title{font-size:20px;font-weight:700;color:var(--t1);line-height:1;margin-bottom:3px;}
+.kbtn-sub{font-size:12px;font-weight:600;color:var(--t2);line-height:1.3;}
 
 /* ── Footer ── */
 .kfooter{
-  position:fixed;bottom:0;left:0;right:0;
-  padding:10px 20px;text-align:center;
+  position:fixed;bottom:0;left:0;right:0;padding:10px 20px;text-align:center;
   font-size:11px;color:var(--t3);letter-spacing:.06em;
   background:linear-gradient(transparent,rgba(6,8,13,.9));
 }
@@ -99,14 +78,11 @@ body{
 </head>
 <body>
 
-<!-- Logo -->
 <div class="logo-wrap">
-  <svg class="logo-badge" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg class="logo-badge" viewBox="0 0 100 116" fill="none">
     <path d="M50 2 L96 21 V65 C96 90 73 110 50 116 C27 110 4 90 4 65 V21 Z" fill="#B73A2E" opacity=".95"/>
     <path d="M50 8 L91 25 V65 C91 87 70 106 50 111 C30 106 9 87 9 65 V25 Z" fill="#8B2520" opacity=".6"/>
-    <!-- Star -->
     <polygon points="50,28 53.5,39 65,39 55.5,46 59,57 50,50 41,57 44.5,46 35,39 46.5,39" fill="white" opacity=".95"/>
-    <!-- Chevrons -->
     <path d="M32 70 L50 80 L68 70" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
     <path d="M32 78 L50 88 L68 78" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".4"/>
   </svg>
@@ -114,13 +90,12 @@ body{
   <div class="logo-pb">PAINTBALL</div>
 </div>
 
-<!-- Event info (shown when ?event= param present) -->
-<div class="event-bar" id="eventBar">
-  <div class="event-bar-label">Dnešná hra</div>
-  <div class="event-bar-name" id="eventName">—</div>
+<div class="arena-badge">
+  <div class="arena-badge-lbl">Areál</div>
+  <div class="arena-badge-name" id="arenaName">ProPaintball</div>
+  <div class="arena-badge-date" id="arenaDate"></div>
 </div>
 
-<!-- Buttons -->
 <div class="btns">
   <a class="kbtn kbtn-reg" id="btnReg" href="propaintball-register.html">
     <div class="kbtn-icon">🆕</div>
@@ -134,13 +109,9 @@ body{
     <div class="kbtn-icon">📋</div>
     <div class="kbtn-text">
       <div class="kbtn-title">Prihlásiť sa na hru</div>
-      <div class="kbtn-sub">Registrovaný hráč — prihlás sa na dnešnú akciu</div>
+      <div class="kbtn-sub" id="signupSub">Registrovaný hráč — prihlás sa na dnešnú akciu</div>
     </div>
   </a>
-</div>
-
-<div class="no-event" id="noEvent">
-  Inštruktor ešte nevygeneroval link na prihlásenie.<br>Spýtaj sa pri recepcii.
 </div>
 
 <div class="kfooter">TRESAERIS GROUP s.r.o. &nbsp;·&nbsp; ProPaintball Bratislava</div>
@@ -148,43 +119,75 @@ body{
 <script>
 (function(){
   const p = new URLSearchParams(location.search);
-  const eventId = p.get('event') || '';
-  const label   = p.get('label') ? decodeURIComponent(p.get('label')) : '';
-  const d       = p.get('d') || '';
-  const t       = p.get('t') || '';
-  const arena   = p.get('arena') ? decodeURIComponent(p.get('arena')) : '';
-  const act     = p.get('act')   ? decodeURIComponent(p.get('act'))   : '';
+  const arenaParam = (p.get('arena') || '').toUpperCase();
 
+  // Arena config
+  const ARENAS = {
+    'RC':  { name: 'Raccoon City', label: 'Raccoon City · Indoor Paintball', act: 'Paintball' },
+    'OUT': { name: 'Outdoor',      label: 'Outdoor · Paintball & Airsoft',   act: 'Paintball' },
+  };
+
+  // Today's date string YYYYMMDD
+  const now   = new Date();
+  const yyyy  = now.getFullYear();
+  const mm    = String(now.getMonth()+1).padStart(2,'0');
+  const dd    = String(now.getDate()).padStart(2,'0');
+  const dateStr = `${yyyy}${mm}${dd}`;                 // e.g. 20260426
+  const dateDisp = `${dd}.${mm}.${yyyy}`;              // e.g. 26.04.2026
+
+  const arenaEl   = document.getElementById('arenaName');
+  const dateEl    = document.getElementById('arenaDate');
   const btnSignup = document.getElementById('btnSignup');
-  const eventBar  = document.getElementById('eventBar');
-  const eventName = document.getElementById('eventName');
-  const noEvent   = document.getElementById('noEvent');
+  const btnReg    = document.getElementById('btnReg');
+  const signupSub = document.getElementById('signupSub');
 
-  if (eventId) {
-    // Build signup URL with all params forwarded
-    const signupParams = new URLSearchParams();
-    signupParams.set('event', eventId);
-    if (label) signupParams.set('label', label);
-    if (d)     signupParams.set('d', d);
-    if (t)     signupParams.set('t', t);
-    if (arena) signupParams.set('arena', arena);
-    if (act)   signupParams.set('act', act);
+  if (arenaParam && ARENAS[arenaParam]) {
+    const cfg = ARENAS[arenaParam];
 
-    btnSignup.href = 'event-signup.html?' + signupParams.toString();
+    // Show arena name
+    arenaEl.textContent = cfg.name;
+    dateEl.textContent  = dateDisp;
 
-    // Show event bar
-    eventBar.classList.add('show');
-    const displayLabel = label || [act, arena, d ? formatDate(d) : '', t].filter(Boolean).join(' · ');
-    eventName.textContent = displayLabel;
+    // Synthetic daily event_id — e.g. RC_20260426
+    const syntheticEventId = arenaParam + '_' + dateStr;
+    const label = encodeURIComponent(cfg.label + ' ' + dateDisp);
+
+    // Build signup URL — always active, no instructor needed
+    const signupUrl = `event-signup.html?event=${syntheticEventId}&arena=${arenaParam}&act=${encodeURIComponent(cfg.act)}&d=${dateStr}&label=${label}`;
+    btnSignup.href = signupUrl;
+    signupSub.textContent = `Registrovaný hráč — ${cfg.name} · ${dateDisp}`;
+
+    // Registration link also pre-selects arena for consistency
+    btnReg.href = `propaintball-register.html`;
+
+  } else if (p.get('event')) {
+    // Legacy mode — event ID passed directly (from calendar button)
+    const eventId = p.get('event');
+    const label   = p.get('label') ? decodeURIComponent(p.get('label')) : '';
+    const d       = p.get('d') || '';
+    const t       = p.get('t') || '';
+    const arena   = p.get('arena') || '';
+    const act     = p.get('act')   || '';
+
+    const sp = new URLSearchParams();
+    sp.set('event', eventId);
+    if (label) sp.set('label', label);
+    if (d)     sp.set('d', d);
+    if (t)     sp.set('t', t);
+    if (arena) sp.set('arena', arena);
+    if (act)   sp.set('act', act);
+    btnSignup.href = 'event-signup.html?' + sp.toString();
+
+    arenaEl.textContent = label || arena || 'ProPaintball';
+    dateEl.textContent  = d ? `${d.slice(6,8)}.${d.slice(4,6)}.${d.slice(0,4)}` + (t ? ' · ' + t : '') : dateDisp;
+
   } else {
-    // No event linked — disable signup button, show notice
-    btnSignup.classList.add('disabled');
-    noEvent.classList.add('show');
-  }
-
-  function formatDate(d) {
-    if (!d || d.length !== 8) return d;
-    return d.slice(6,8) + '.' + d.slice(4,6) + '.' + d.slice(0,4);
+    // No params — generic landing (show both arenas)
+    arenaEl.textContent = 'ProPaintball Bratislava';
+    dateEl.textContent  = dateDisp;
+    // Build generic signup with today's date
+    btnSignup.href = `event-signup.html?event=GENERAL_${dateStr}&d=${dateStr}&label=${encodeURIComponent('ProPaintball · ' + dateDisp)}`;
+    signupSub.textContent = 'Registrovaný hráč — prihlás sa na dnešnú akciu';
   }
 })();
 </script>

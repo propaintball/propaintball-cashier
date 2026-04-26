@@ -6051,8 +6051,20 @@ let _signupPollIv=null;
 function startSignupPoll(){
   stopSignupPoll();
   const sess=getSess();
-  if(!sess||!sess.calEventId)return;
-  _signupPollIv=setInterval(()=>pollNewSignups(sess.calEventId,sess.key),30000);
+  if(!sess)return;
+  // Poll GCal event ID ak existuje, ALEBO syntetické arena_date ID
+  const now=new Date();
+  const d=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+  // Mapuj arena name na kód
+  const arenaCodeMap={'raccoon':'RC','indoor':'RC','rc':'RC','outdoor':'OUT','out':'OUT'};
+  const arenaLow=(sess.arena||'').toLowerCase();
+  const arenaCode=Object.entries(arenaCodeMap).find(([k])=>arenaLow.includes(k))?.[1]||null;
+  const syntheticId=arenaCode?arenaCode+'_'+d:null;
+  const eventIds=[sess.calEventId,syntheticId].filter(Boolean);
+  if(!eventIds.length)return;
+  _signupPollIv=setInterval(()=>{
+    eventIds.forEach(eid=>pollNewSignups(eid,sess.key));
+  },30000);
 }
 
 function stopSignupPoll(){
