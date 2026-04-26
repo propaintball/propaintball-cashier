@@ -3869,7 +3869,7 @@ function adminForceCloseSess(sKey){
     `Zadaj admin heslo pre potvrdenie:`;
   const pw=prompt(confirmMsg);
   if(pw===null)return; // zrušiť
-  if(pw!==admPw){toast('❌ Nesprávne admin heslo');return;}
+  if(!checkPw(pw,admPw)){toast('❌ Nesprávne admin heslo');return;}
 
   // Uzavrieť a vymazať
   auditLog('admin-force-close',sKey);
